@@ -57,7 +57,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Minimap placeholder (empty rectangle)
   - Remove old coin/key/seconds score display from Game scene
 
-- [ ] **1.4 Replace Outro with EndRunScreen**
+- [x] **1.4 Replace Outro with EndRunScreen**
   - Win condition: all 4 rocket systems installed + launch
   - Lose condition: timer hits 0:00 or 0 HP
   - Show stats: time, XP, items collected, combos

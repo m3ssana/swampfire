@@ -24,6 +24,7 @@ export default class Game extends Phaser.Scene {
     this.addCamera();
     this.launchHUD();
     this.loadAudios();
+    this.listenForGameOver();
   }
 
   // ─── Map ───────────────────────────────────────────────────────────────────
@@ -43,6 +44,31 @@ export default class Game extends Phaser.Scene {
     const spawn = this.zone.getSpawnPoint();
     this.trailLayer = this.add.layer();
     this.player = new Player(this, spawn.x, spawn.y, 100);
+  }
+
+  // ─── Game-over routing ─────────────────────────────────────────────────────
+
+  /*
+    Listens for the timerExpired flag set by HUDScene when the clock hits 0:00.
+    Uses the specific "changedata-timerExpired" event so we don't scan every
+    registry mutation. Cleaned up on scene shutdown to prevent ghost listeners.
+  */
+  listenForGameOver() {
+    const onExpired = (parent, value) => {
+      if (value === true) this.endRun("timeout");
+    };
+    this.registry.events.on("changedata-timerExpired", onExpired, this);
+    this.events.once("shutdown", () => {
+      this.registry.events.off("changedata-timerExpired", onExpired, this);
+    });
+  }
+
+  /*
+    Stop the HUD and transition to the end-run screen with the given state.
+  */
+  endRun(state) {
+    this.scene.stop("hud");
+    this.scene.start("outro", { state });
   }
 
   // ─── HUD ───────────────────────────────────────────────────────────────────
@@ -173,7 +199,13 @@ export default class Game extends Phaser.Scene {
     this.player.sprite.visible = false;
     this.cameras.main.shake(100);
     this.cameras.main.fade(250, 0, 0, 0);
-    this.cameras.main.once("camerafadeoutcomplete", () => this.scene.restart());
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      if (hp <= 0) {
+        this.endRun("death");
+      } else {
+        this.scene.restart();
+      }
+    });
   }
 
   /*
@@ -181,14 +213,6 @@ export default class Game extends Phaser.Scene {
     Wired to actual win condition in task 1.4.
   */
   finishScene() {
-    this.scene.stop("hud");
-    this.cameras.main.fade(250, 0, 0, 0);
-    this.cameras.main.once("camerafadeoutcomplete", () => {
-      this.scene.start("outro", {
-        next: "swampfire",
-        name: "ZONE",
-        number: this.number + 1,
-      });
-    });
+    this.endRun("victory");
   }
 }
