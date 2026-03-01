@@ -132,7 +132,7 @@ export default class Splash extends Phaser.Scene {
 
     // Hurricane urgency tagline
     this.add
-      .bitmapText(cx, 430, "default", "HURRICANE MEGIDDO IS COMING.", 18)
+      .bitmapText(cx, 430, "default", "HURRICANE KENDRA IS COMING.", 18)
       .setTint(0xff6633)
       .setOrigin(0.5);
     this.add

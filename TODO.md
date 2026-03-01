@@ -43,7 +43,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Keep SPACE/ENTER to start
 
 - [ ] **1.2 Replace Transition with 10-second micro-intro**
-  - Emergency alert banner: "HURRICANE MEGIDDO -- CAT 6 -- LANDFALL 60 MIN"
+  - Emergency alert banner: "HURRICANE KENDRA -- CAT 6 -- LANDFALL 60 MIN"
   - Hard cut to rocket clearing (can be placeholder rectangle)
   - "FIND. BUILD. LAUNCH." text slam with screen shake
   - Countdown appears, skippable with any key

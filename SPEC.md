@@ -30,7 +30,7 @@ The rocket is 90% complete. It has heat shielding, a hybrid engine frame, and a 
 
 ### 2.2 The Inciting Event
 
-Hurricane Megiddo -- a Category 6+ hypercane -- has formed in the Gulf of Mexico. NOAA models predict direct landfall on Tampa Bay in 60 minutes. The highways are gridlocked. The only way out is up.
+Hurricane Kendra -- a Category 6+ hypercane -- has formed in the Gulf of Mexico. NOAA models predict direct landfall on Tampa Bay in 60 minutes. The highways are gridlocked. The only way out is up.
 
 ### 2.3 Story Delivery -- The 10-Second Intro
 
@@ -690,7 +690,7 @@ Three variants, all designed to be shareable:
 
 **Time's Up:**
 - Hurricane makes landfall. Screen whites out. Massive wind roar, then silence.
-- Text: "Hurricane Megiddo made landfall. Wind speeds exceeded 200 mph. There were no survivors in Pasco County."
+- Text: "Hurricane Kendra made landfall. Wind speeds exceeded 200 mph. There were no survivors in Pasco County."
 - Beat. Then: "Juan's rocket sat [X/5] systems complete in a clearing in Cypress Creek Preserve."
 - List of installed vs. missing systems with visual rocket showing what was and was not finished
 - Stats + RETRY + SHARE
@@ -702,7 +702,7 @@ Three variants, all designed to be shareable:
 - Time remaining when launched
 - Achievements earned this run
 - **Personal best comparison** (if previous run exists)
-- **SHARE button** generates a styled screenshot card: "I escaped Hurricane Megiddo in [TIME] with [SCORE] XP. Can you beat it?"
+- **SHARE button** generates a styled screenshot card: "I escaped Hurricane Kendra in [TIME] with [SCORE] XP. Can you beat it?"
 - PLAY AGAIN button
 
 ---
@@ -962,7 +962,7 @@ Launch succeeds but with damage. Same cutscene BUT:
 The hurricane makes landfall:
 1. Screen whites out. Massive wind roar.
 2. Silence.
-3. Text: "Hurricane Megiddo made landfall at 11:47 AM EST. Wind speeds exceeded 200 mph. There were no survivors in Pasco County."
+3. Text: "Hurricane Kendra made landfall at 11:47 AM EST. Wind speeds exceeded 200 mph. There were no survivors in Pasco County."
 4. Beat. "Juan's rocket sat [X/5] systems complete in Cypress Creek Preserve."
 5. Visual: the rocket with installed and missing systems clearly shown
 6. Stats screen + RETRY + SHARE
