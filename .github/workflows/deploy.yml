@@ -35,16 +35,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Performance: Cache dist/ directory to avoid rebuilding in deploy job
-      # Cache key includes commit SHA to ensure cache per-commit
-      # Restore fallback allows cache reuse across commits if exact match not found
-      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          path: dist
-          key: build-dist-${{ github.sha }}
-          restore-keys: |
-            build-dist-
-
       # Visibility: Track build artifact sizes to detect bloat/regressions
       - name: Report Build Size
         run: |
@@ -98,7 +88,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       # Security: Pin to full SHA for supply chain security
-      # Deploy job reads cached dist/ from build job (see logs for "Cache hit")
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
