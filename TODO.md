@@ -1,0 +1,205 @@
+# Swampfire Protocol -- Incremental Refactoring TODO
+
+The codebase is a side-scrolling dungeon crawler ("Dungeon Bobble" by Pello).
+The target is a top-down hurricane scavenger game per SPEC.md.
+Each task is small enough to fit in a single Claude Code session.
+
+---
+
+## Phase 0 -- Foundation (make it run as top-down)
+
+- [ ] **0.1 Kill gravity, resize canvas**
+  - `main.js`: change resolution from 600x600 to 960x640, add `Phaser.Scale.FIT` + `CENTER_BOTH`
+  - Set Matter gravity to `{ x: 0, y: 0 }` (top-down = no gravity)
+  - Remove `MatterGravityFixPlugin` (no longer needed when gravity is zero)
+  - Verify the game still boots and renders
+
+- [ ] **0.2 Convert Player to 4-directional top-down movement**
+  - Replace side-scroller movement (velocity X + jump Y) with 4-dir WASD movement
+  - Remove jump, wall-climb, and bubble-shoot mechanics
+  - Remove `isTouching` / `onWall` / `canJump` / `canShoot` state
+  - Remove left/right wall sensors (keep a single circular or square hitbox)
+  - Add sprint (Shift key, infinite -- no stamina per spec)
+  - Keep `invincible` blink-on-spawn, keep `destroy()` cleanup pattern
+  - Delete `basicPlayer.js` (unused alternate version)
+  - Delete `bubble.js` (no bubble mechanic in Swampfire)
+
+- [ ] **0.3 Gut dungeon generation, add placeholder zone**
+  - Remove `@mikewesthad/dungeon` dependency and `dungeon_generator.js`
+  - Create a simple `ZoneManager` that loads a single blank tilemap (Zone 0 placeholder)
+  - Player spawns at center of a flat ground plane with no walls
+  - Camera follows player, background color is dark swamp green
+  - Game still boots, player walks around freely
+
+---
+
+## Phase 1 -- Scene Flow (match the spec's game flow)
+
+- [ ] **1.1 Replace Splash screen with Swampfire title**
+  - Change "DUNGEON BOBBLE" text to "SWAMPFIRE PROTOCOL"
+  - Remove wizard/bat showcase sprites
+  - Update instructions text to match spec controls
+  - Keep SPACE/ENTER to start
+
+- [ ] **1.2 Replace Transition with 10-second micro-intro**
+  - Emergency alert banner: "HURRICANE MEGIDDO -- CAT 6 -- LANDFALL 60 MIN"
+  - Hard cut to rocket clearing (can be placeholder rectangle)
+  - "FIND. BUILD. LAUNCH." text slam with screen shake
+  - Countdown appears, skippable with any key
+  - Transition to Game scene
+
+- [ ] **1.3 Add HUD scene (parallel scene stacking)**
+  - Create `HUDScene` that runs parallel to `GameScene`
+  - 60-minute countdown timer (real-time seconds, counts down)
+  - Heart display (3 HP)
+  - XP counter
+  - Minimap placeholder (empty rectangle)
+  - Remove old coin/key/seconds score display from Game scene
+
+- [ ] **1.4 Replace Outro with EndRunScreen**
+  - Win condition: all 4 rocket systems installed + launch
+  - Lose condition: timer hits 0:00 or 0 HP
+  - Show stats: time, XP, items collected, combos
+  - Share card placeholder (styled div with stats)
+  - Restart button returns to Splash
+
+---
+
+## Phase 2 -- Core Game Objects
+
+- [ ] **2.1 Searchable containers (loot system)**
+  - Create `SearchableContainer` game object (sprite + interact prompt)
+  - Player walks up, presses E to search
+  - Items pop out with tween animation (rise + fade)
+  - Loot table: array of possible items per container type
+  - Place 3-4 test containers in Zone 0
+
+- [ ] **2.2 Inventory + item pickup**
+  - Simple inventory array on Player (no UI yet, just data)
+  - Items are game objects that can be picked up on collision
+  - Distinguish: junk items, crafting ingredients, rocket components
+  - Registry stores inventory state
+
+- [ ] **2.3 Workbench + instant crafting**
+  - Workbench game object at Zone 0 (interact with E)
+  - Recipe system: 2 ingredients -> 1 output (per spec)
+  - Crafting is instant, produces XP popup + screen shake
+  - 4 rocket systems: fuel injector, oxidizer, avionics, battery array
+
+- [ ] **2.4 Rocket + visual progress**
+  - Rocket game object at Zone 0 with 5 visual states (0-4 parts installed)
+  - Player brings crafted system to rocket, presses E to install
+  - Installation triggers: camera zoom, XP dump, achievement toast placeholder
+  - When all 4 installed: enable "LAUNCH" interaction
+
+---
+
+## Phase 3 -- World Building
+
+- [ ] **3.1 Zone 0 tilemap (Cypress Creek Preserve)**
+  - Design small tilemap: clearing, campfire, workbench, rocket, trails
+  - Swamp tiles: standing water, cypress trees, Spanish moss
+  - Exit points: south (to Zone 1), west (to Zone 3)
+  - Camera bounds match zone size
+
+- [ ] **3.2 Zone manager + zone transitions**
+  - `ZoneManager` tracks current zone, handles loading/unloading
+  - Zone boundary triggers: 0.5s fade transition (no loading screen)
+  - Player position preserved across transitions
+  - Start with Zone 0 <-> Zone 1 connection
+
+- [ ] **3.3 Zone 1 tilemap (US-41 corridor)**
+  - Commercial strip: store fronts as searchable locations
+  - Harvey's Hardware, NAPA, Advance Auto, O'Reilly, Gulf Coast Tractor, RaceTrac
+  - Road connectors north (Zone 3), south (Zone 4), east (Zone 2)
+  - Place searchable containers in each store
+
+- [ ] **3.4 Remaining zones (2, 3, 4)**
+  - Zone 2: Collier Pkwy (Publix, Library/Foundry, Rec Center)
+  - Zone 3: Conner Preserve (RC Field, Fire Tower)
+  - Zone 4: LOLHS + SR-54 (school, Tractor Supply)
+  - Road corridors between all zones per spec road network table
+
+---
+
+## Phase 4 -- Storm + Hazard Systems
+
+- [ ] **4.1 Storm phase system**
+  - `StormManager` tracks 4 phases based on countdown timer
+  - Phase 1 (60-45 min): light rain particle overlay
+  - Phase transitions: screen shake, thunder, HUD toast
+  - Weather visuals intensify each phase (rain density, wind, darkness)
+
+- [ ] **4.2 Hazard game objects**
+  - Rattlesnakes (Zone 0 edges, Zone 3)
+  - Downed power lines (Zone 1, after 40 min)
+  - Looters (Zone 1, after 20 min) -- simple patrol AI
+  - Flooding (low roads, after 35 min) -- tile overlay that slows player
+  - All hazards damage player (1 HP) with near-miss detection zone
+
+- [ ] **4.3 Wind + environmental effects**
+  - Wind force pushes player sideways (Phase 3+)
+  - Screen shake from thunder (Phase 4 = constant)
+  - Lightning flashes (Phase 4, every 5-15s)
+  - Visibility reduction (camera tint darkening per phase)
+
+---
+
+## Phase 5 -- Feedback + Polish
+
+- [ ] **5.1 XP popup system**
+  - `FeedbackSystem` class for floating XP numbers
+  - Color-coded per action type (white/gold/cyan/orange/red/green/purple)
+  - Overlapping popups merge into single number
+  - Screen effects: flash, shake, edge glow per spec table
+
+- [ ] **5.2 Combo streak system**
+  - `ComboTracker`: items within 3s build multiplier (2x-5x cap)
+  - Large center-screen text: DOUBLE / TRIPLE / QUAD / FRENZY
+  - FRENZY (5x) triggers particle burst + distorted SFX
+  - Combo breaks after 3s without pickup
+
+- [ ] **5.3 Audio overhaul**
+  - Replace dungeon SFX with swamp/hurricane audio
+  - Ambient layers per zone (cypress canopy, strip mall, wind)
+  - Storm audio intensifies per phase
+  - Pickup/craft/install SFX per spec feedback table
+  - Music: calm acoustic at Zone 0, tense elsewhere
+
+- [ ] **5.4 NPC system**
+  - Simple NPC game object: sprite + dialog box on E press
+  - Harvey (Zone 1), Maria (Zone 2), Old Dale (Zone 3), Coach Reeves (Zone 4)
+  - Each gives one side quest (fetch item, return for reward)
+  - Quest completion awards XP + unlocks access/recipes
+
+---
+
+## Phase 6 -- Endgame + Meta
+
+- [ ] **6.1 Launch sequence**
+  - When all 4 systems installed and player interacts with rocket
+  - Cinematic: camera pulls back, rocket ignites, lifts off
+  - Screen fades to EndRunScreen with WIN state
+  - "Under-the-Wire" achievement if < 2 min remaining
+
+- [ ] **6.2 End-of-run share card**
+  - Styled canvas overlay with run stats
+  - Time remaining, XP total, items found, combos hit, zones visited
+  - "Copy to clipboard" or "Download as image" button
+  - Florida Man-style death headline if player lost
+
+- [ ] **6.3 Achievement toasts**
+  - `AchievementManager` with predefined milestones
+  - Toast notification slides in from top-right
+  - Examples: first craft, first zone discovered, FRENZY, fire tower panoramic
+  - Stored in localStorage for persistence
+
+---
+
+## Cleanup (do anytime)
+
+- [ ] Remove unused assets: `pello_ok.png`, dungeon tiles, `block.png`, `platform.png`
+- [ ] Remove unused game objects: `fireball.js`, `coin.js`, `key.js`, `bat.js`, `wizard.js`, `seesaw.js`
+  (only after their replacements exist)
+- [ ] Remove `@mikewesthad/dungeon` from package.json
+  (only after Zone system replaces it)
