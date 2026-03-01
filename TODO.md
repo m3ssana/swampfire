@@ -36,7 +36,7 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 1 -- Scene Flow (match the spec's game flow)
 
-- [ ] **1.1 Replace Splash screen with Swampfire title**
+- [x] **1.1 Replace Splash screen with Swampfire title**
   - Change "DUNGEON BOBBLE" text to "SWAMPFIRE PROTOCOL"
   - Remove wizard/bat showcase sprites
   - Update instructions text to match spec controls

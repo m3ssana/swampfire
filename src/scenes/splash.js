@@ -3,19 +3,15 @@ export default class Splash extends Phaser.Scene {
     super({ key: "splash" });
   }
 
-  /*
-  As always, we create everything we need on the scene from the create method.
-  */
   create() {
     this.width = this.sys.game.config.width;
     this.height = this.sys.game.config.height;
     this.center_width = this.width / 2;
     this.center_height = this.height / 2;
 
-    this.backLayer = this.add.layer();
     this.cameras.main.setBackgroundColor(0x000000);
     this.showTitle();
-    this.addPlayerAndFoe();
+    this.addPlayerShowcase();
     this.addAnimationTweens();
 
     this.time.delayedCall(1000, () => this.showInstructions(), null, this);
@@ -31,46 +27,134 @@ export default class Splash extends Phaser.Scene {
   }
 
   /*
-    This shows the title of the game. It's a bitmap text with a shadow and a tween to make it move.
+    Three-layer title stack: drifting shadow, dark body, bright highlight.
+    Palette is swamp green to establish the game's visual identity immediately.
   */
   showTitle() {
+    // Layer 1 — shadow (animates to drift right+down)
     this.textShadow1 = this.add
-      .bitmapText(this.center_width, 100, "default", "DUNGEON", 85)
-      .setTint(0xff787a)
+      .bitmapText(this.center_width, 110, "default", "SWAMPFIRE", 72)
+      .setTint(0x1a4d2a)
       .setOrigin(0.5);
     this.textShadow2 = this.add
-      .bitmapText(this.center_width, 250, "default", "BOBBLE", 85)
-      .setTint(0xff787a)
+      .bitmapText(this.center_width, 210, "default", "PROTOCOL", 72)
+      .setTint(0x1a4d2a)
       .setOrigin(0.5);
-    this.text1 = this.add
-      .bitmapText(this.center_width, 100, "default", "DUNGEON", 85)
-      .setTint(0x302030)
+
+    // Layer 2 — dark body (creates depth against the shadow)
+    this.add
+      .bitmapText(this.center_width, 110, "default", "SWAMPFIRE", 72)
+      .setTint(0x0d1f10)
       .setOrigin(0.5);
-    this.text2 = this.add
-      .bitmapText(this.center_width, 250, "default", "BOBBLE", 85)
-      .setTint(0x302030)
+    this.add
+      .bitmapText(this.center_width, 210, "default", "PROTOCOL", 72)
+      .setTint(0x0d1f10)
       .setOrigin(0.5);
-    this.text11 = this.add
-      .bitmapText(this.center_width, 100, "default", "DUNGEON", 88)
-      .setTint(0x00aafb)
+
+    // Layer 3 — bright highlight (top, reads as the "real" text)
+    this.add
+      .bitmapText(this.center_width, 110, "default", "SWAMPFIRE", 74)
+      .setTint(0x4fffaa)
       .setOrigin(0.5);
-    this.text22 = this.add
-      .bitmapText(this.center_width, 250, "default", "BOBBLE", 88)
-      .setTint(0x00aafb)
+    this.add
+      .bitmapText(this.center_width, 210, "default", "PROTOCOL", 74)
+      .setTint(0x4fffaa)
       .setOrigin(0.5);
+
+    // Shadow drift tween — gives the title a subtle, unsettling pulse
     this.tweens.add({
       targets: [this.textShadow1, this.textShadow2],
-      duration: 1000,
-      x: "+=10",
-      y: "+=10",
+      duration: 1200,
+      x: "+=8",
+      y: "+=8",
       yoyo: true,
       repeat: -1,
     });
   }
 
   /*
-    This method plays the music of the game. It's a looped music with a volume of 0.3.
+    Show the player sprite walking across the screen so new players immediately
+    know who they're controlling. No wizard — this isn't a dungeon anymore.
   */
+  addPlayerShowcase() {
+    this.playerSprite = this.add
+      .sprite(this.width - 80, 360, "player")
+      .setScale(2.5);
+
+    this.anims.create({
+      key: "splash_walk",
+      frames: this.anims.generateFrameNumbers("player", { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1,
+    });
+    this.playerSprite.anims.play("splash_walk");
+  }
+
+  /*
+    Player walks the full width of the screen, flipping direction on each repeat.
+    Gives the splash screen life without needing any extra art assets.
+  */
+  addAnimationTweens() {
+    this.tweens.add({
+      targets: this.playerSprite,
+      x: { from: this.width - 80, to: 80 },
+      duration: 3000,
+      yoyo: true,
+      repeat: -1,
+      onYoyo: () => {
+        this.playerSprite.flipX = true;
+      },
+      onRepeat: () => {
+        this.playerSprite.flipX = false;
+      },
+    });
+  }
+
+  /*
+    Controls block. Matches spec: WASD move, Shift sprint, E interact.
+    Shown after a 1s delay so the title has time to land first.
+  */
+  showInstructions() {
+    const cx = this.center_width;
+
+    this.add
+      .bitmapText(cx, 310, "default", "WASD  —  Move", 22)
+      .setDropShadow(1, 1, 0x4fffaa, 0.5)
+      .setOrigin(0.5);
+    this.add
+      .bitmapText(cx, 345, "default", "SHIFT  —  Sprint", 22)
+      .setDropShadow(1, 1, 0x4fffaa, 0.5)
+      .setOrigin(0.5);
+    this.add
+      .bitmapText(cx, 380, "default", "E  —  Interact", 22)
+      .setDropShadow(1, 1, 0x4fffaa, 0.5)
+      .setOrigin(0.5);
+
+    // Hurricane urgency tagline
+    this.add
+      .bitmapText(cx, 430, "default", "HURRICANE MEGIDDO IS COMING.", 18)
+      .setTint(0xff6633)
+      .setOrigin(0.5);
+    this.add
+      .bitmapText(cx, 455, "default", "FIND. BUILD. LAUNCH.", 18)
+      .setTint(0xff6633)
+      .setOrigin(0.5);
+
+    // Blinking prompt
+    this.startPrompt = this.add
+      .bitmapText(cx, 510, "default", "PRESS SPACE TO START", 22)
+      .setDropShadow(1, 1, 0x1a4d2a, 0.8)
+      .setOrigin(0.5);
+
+    this.tweens.add({
+      targets: this.startPrompt,
+      duration: 400,
+      alpha: { from: 1, to: 0 },
+      repeat: -1,
+      yoyo: true,
+    });
+  }
+
   playMusic(theme = "splash") {
     this.theme = this.sound.add(theme);
     this.theme.stop();
@@ -82,90 +166,6 @@ export default class Splash extends Phaser.Scene {
       seek: 0,
       loop: true,
       delay: 0,
-    });
-  }
-
-  /*
-    This method shows the instructions of the game, the classic controls, the author, and a blinking text to start the game.
-  */
-  showInstructions() {
-    this.add
-      .bitmapText(this.center_width, 430, "default", "WASD/Arrows: move", 30)
-      .setDropShadow(1, 1, 0xff787a, 0.7)
-      .setOrigin(0.5);
-    this.add
-      .sprite(this.center_width - 60, 490, "pello")
-      .setOrigin(0.5)
-      .setScale(0.3);
-    this.add
-      .bitmapText(this.center_width + 40, 490, "default", "By PELLO", 15)
-      .setDropShadow(1, 1, 0xff787a, 0.7)
-      .setOrigin(0.5);
-    this.space = this.add
-      .bitmapText(this.center_width, 550, "default", "Press SPACE to start", 25)
-      .setDropShadow(1, 1, 0x3d253b, 0.7)
-      .setOrigin(0.5);
-    this.tweens.add({
-      targets: this.space,
-      duration: 300,
-      alpha: { from: 0, to: 1 },
-      repeat: -1,
-      yoyo: true,
-    });
-  }
-
-  /*
-    This method adds the player and the foe to the scene and creates the animations for both.
-  */
-  addPlayerAndFoe() {
-    this.player = this.add.sprite(this.width - 100, 350, "player").setScale(2);
-    this.anims.create({
-      key: "playeridle",
-      frames: this.anims.generateFrameNumbers("player", { start: 0, end: 3 }),
-      frameRate: 5,
-      repeat: -1,
-    });
-    this.player.anims.play("playeridle");
-    this.foe = this.add.sprite(this.width, 350, "wizard").setScale(2);
-    this.anims.create({
-      key: "foe",
-      frames: this.anims.generateFrameNumbers("wizard", { start: 0, end: 4 }),
-      frameRate: 5,
-      repeat: -1,
-    });
-    this.foe.anims.play("foe");
-  }
-
-  /*
-    We also add some tweens to the player and the foe to make them move. The interesting part is how we can use the tweens to simulate a walk cycle. We just need to change the x value of the target and flip the sprite.
-  */
-  addAnimationTweens() {
-    this.tweens.add({
-      targets: [this.player],
-      x: { from: this.player.x, to: 0 },
-      duration: 2500,
-      yoyo: true,
-      repeat: -1,
-      onYoyo: () => {
-        this.player.flipX = !this.player.flipX;
-      },
-      onRepeat: () => {
-        this.player.flipX = !this.player.flipX;
-      },
-    });
-
-    this.tweens.add({
-      targets: [this.foe],
-      x: { from: this.foe.x, to: 100 },
-      duration: 2500,
-      yoyo: true,
-      repeat: -1,
-      onYoyo: () => {
-        this.foe.flipX = !this.foe.flipX;
-      },
-      onRepeat: () => {
-        this.foe.flipX = !this.foe.flipX;
-      },
     });
   }
 }
