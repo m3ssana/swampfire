@@ -54,3 +54,45 @@
 - Combo FRENZY (5x) = clip-worthy moment with particle burst + distorted SFX
 - Fire tower panoramic = scripted screenshot moment (zoom-out showing hurricane wall)
 - Under-the-Wire achievement (launch < 2 min remaining) = peak clutch share moment
+
+## Confirmed Implementation Details (Phase 0-2 done)
+- Registry keys: `hp` (0-3), `xp`, `timeLeft` (3600 start), `timerExpired` (bool), `systemsInstalled` (0-4)
+- HUD: parallel scene launched from game.js; guards double-launch with `scene.isActive("hud")`
+- HUD owns countdown tick via `this.time.addEvent`. Writes `timerExpired=true` when done.
+- Game listens for `changedata-timerExpired` event (specific key, not all mutations)
+- Registry listener cleanup: `this.events.once("shutdown", () => registry.events.off(...))` pattern
+- Transition.js seeds registry (hp=3, xp=0, timeLeft=3600, timerExpired=false) in `loadNext()`
+- SPACE-gated cinematic phases via `keyboard.once("keydown-SPACE", callback)`
+- Juan spritesheet: `public/assets/images/player.png`, 192×48px, 4 frames × 48×48
+  - Frame 0: idle neutral | Frame 1: idle bob | Frame 2: left leg fwd | Frame 3: right leg fwd
+  - `playeridle` (frames 0-1, 5fps) | `playerwalk` (frames 0-3, 6fps) | flipX for L/R facing
+  - Generator: `scripts/generate-juan-sprite.js` (ESM, pure Node zlib — no npm deps)
+- CI fix: removed broken `actions/cache` step placed AFTER build (restored stale dist/ on hits)
+- `*:Zone.Identifier` in .gitignore — Windows NTFS metadata files from downloads
+- `package.json` has `"type":"module"` — scripts must use `import` not `require`; or rename `.cjs`
+
+## TODO Progress (as of TODO 2.1)
+All of Phase 0 + Phase 1 done. Phase 2 in progress.
+- [x] 2.0 Juan sprite
+- [x] 2.1 Searchable containers (loot system, XP-only)
+- [ ] 2.2 Inventory → 2.3 Workbench → 2.4 Rocket
+
+## Phase 2.1 — Searchable Containers (confirmed patterns)
+- Container spritesheet: `public/assets/images/container.png`, 96×48px, 2 frames × 48×48
+  - Frame 0: closed toolbox | Frame 1: open/searched
+  - Generator: `scripts/generate-container-sprite.js` (same ESM+zlib pattern as Juan)
+- `SearchableContainer` class: `src/gameobjects/searchable_container.js`
+  - Static Matter sprite (isStatic:true, setFixedRotation())
+  - `search()` is idempotent — checks `this.searched` guard, sets frame 1, shakes camera (80ms, 0.004)
+  - Weighted random loot via `pickLoot()` — iterates table, subtracts weight from roll
+  - XP awarded via `registry.set("xp", current + item.xp)` — HUD auto-redraws
+  - SFX: `playAudio("coin")` as placeholder (rummage SFX in Phase 5.3)
+  - Cleanup: `scene.events.once("shutdown", this.destroy, this)` → scene.restart() resets all containers
+- Interact prompt: single `bitmapText` with `setScrollFactor(0)` — camera-fixed to screen bottom
+  - Alpha tweened 0↔1 (150ms) via `showInteractPrompt()` / `hideInteractPrompt()`
+- Proximity check: runs via `this.events.on("update", ...)` (scene update event, not Phaser's built-in update)
+  - RANGE=64px, Euclidean check (dx²+dy² < RANGE²) — only updates prompt on transition, not every frame
+  - `nearbyContainer` pointer compared — avoids redundant tween firing
+- E-key: `this.input.keyboard.on("keydown-E", this.onEKey, this)` — delegates to `nearbyContainer?.search()`
+- All listeners cleaned up in shutdown: `this.events.once("shutdown", () => { keyboard.off; events.off; })`
+- 4 containers hardcoded around spawn point (Phase 3 will load from Tiled object layer)

@@ -125,6 +125,10 @@ export default class Bootloader extends Phaser.Scene {
       frameWidth: 48,
       frameHeight: 48,
     });
+    this.load.spritesheet("container", "assets/images/container.png", {
+      frameWidth: 48,
+      frameHeight: 48,
+    });
   }
 
   /*

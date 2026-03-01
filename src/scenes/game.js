@@ -1,5 +1,6 @@
-import Player from "../gameobjects/player";
-import ZoneManager from "../gameobjects/zone_manager";
+import Player              from "../gameobjects/player";
+import ZoneManager         from "../gameobjects/zone_manager";
+import SearchableContainer from "../gameobjects/searchable_container";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -8,20 +9,26 @@ export default class Game extends Phaser.Scene {
   }
 
   init(data) {
-    this.name = data.name;
+    this.name   = data.name;
     this.number = data.number;
   }
 
   create() {
-    this.width = this.sys.game.config.width;
-    this.height = this.sys.game.config.height;
-    this.center_width = this.width / 2;
+    this.width         = this.sys.game.config.width;
+    this.height        = this.sys.game.config.height;
+    this.center_width  = this.width / 2;
     this.center_height = this.height / 2;
+
+    // Nearest unsearched container in E-key range; null when none
+    this.nearbyContainer = null;
 
     this.addMap();
     this.addPlayer();
     this.addCollisions();
     this.addCamera();
+    this.addContainers();
+    this.addInteractPrompt();
+    this.addInputHandlers();
     this.launchHUD();
     this.loadAudios();
     this.listenForGameOver();
@@ -44,6 +51,117 @@ export default class Game extends Phaser.Scene {
     const spawn = this.zone.getSpawnPoint();
     this.trailLayer = this.add.layer();
     this.player = new Player(this, spawn.x, spawn.y, 100);
+  }
+
+  // ─── Containers ────────────────────────────────────────────────────────────
+
+  /*
+    Spawns 4 searchable containers around the Zone 0 spawn point.
+    Positions are hardcoded for Phase 2.1; Phase 3 will load them from
+    a Tiled object layer instead.
+  */
+  addContainers() {
+    const s = this.zone.getSpawnPoint();
+    const positions = [
+      { x: s.x - 220, y: s.y - 160 },
+      { x: s.x + 260, y: s.y -  80 },
+      { x: s.x - 120, y: s.y + 210 },
+      { x: s.x + 180, y: s.y + 140 },
+    ];
+    this.containers = positions.map(
+      (p) => new SearchableContainer(this, p.x, p.y)
+    );
+  }
+
+  // ─── Interact prompt ───────────────────────────────────────────────────────
+
+  /*
+    A single camera-fixed "[E] Search" label shown when the player is in
+    range of an unsearched container. Alpha is tweened between 0 and 1 so
+    the prompt fades smoothly in/out rather than snapping.
+  */
+  addInteractPrompt() {
+    this.interactPrompt = this.add
+      .bitmapText(this.center_width, this.height - 40, "default", "[E] Search", 16)
+      .setOrigin(0.5)
+      .setTint(0xffffff)
+      .setScrollFactor(0)  // fixed to camera — stays at screen bottom
+      .setAlpha(0)
+      .setDepth(10);
+  }
+
+  showInteractPrompt() {
+    this.tweens.add({
+      targets:  this.interactPrompt,
+      alpha:    1,
+      duration: 150,
+    });
+  }
+
+  hideInteractPrompt() {
+    this.tweens.add({
+      targets:  this.interactPrompt,
+      alpha:    0,
+      duration: 150,
+    });
+  }
+
+  // ─── Input handlers ────────────────────────────────────────────────────────
+
+  /*
+    Registers the E-key listener and the per-frame proximity check.
+    Both are cleaned up on scene shutdown so scene.restart() starts fresh.
+  */
+  addInputHandlers() {
+    this.input.keyboard.on("keydown-E", this.onEKey, this);
+
+    // Proximity check runs every frame via the scene's update event
+    this.events.on("update", this.checkContainerProximity, this);
+
+    this.events.once("shutdown", () => {
+      this.input.keyboard.off("keydown-E", this.onEKey, this);
+      this.events.off("update", this.checkContainerProximity, this);
+    });
+  }
+
+  /*
+    Called on every E keydown. Delegates to the currently-highlighted
+    container, if any. search() is idempotent so extra presses are safe.
+  */
+  onEKey() {
+    this.nearbyContainer?.search();
+  }
+
+  /*
+    Per-frame check: finds the nearest unsearched container within RANGE
+    pixels of the player. Shows/hides the prompt on transition.
+  */
+  checkContainerProximity() {
+    if (!this.player?.sprite) return;
+
+    const { x: px, y: py } = this.player.sprite;
+    const RANGE = 64; // pixels — keep in sync with container sprite size
+
+    let found = null;
+    for (const c of this.containers) {
+      if (c.searched) continue;
+      const dx = px - c.sprite.x;
+      const dy = py - c.sprite.y;
+      if (dx * dx + dy * dy < RANGE * RANGE) {
+        found = c;
+        break;
+      }
+    }
+
+    // Only update UI when the nearby container changes
+    if (found !== this.nearbyContainer) {
+      this.nearbyContainer = found;
+      if (found) {
+        this.showInteractPrompt();
+      } else {
+        this.hideInteractPrompt();
+      }
+    }
   }
 
   // ─── Game-over routing ─────────────────────────────────────────────────────
@@ -150,12 +268,12 @@ export default class Game extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.tweens.add({
-      targets: text,
+      targets:  text,
       duration: 1000,
-      alpha: { from: 1, to: 0 },
+      alpha:    { from: 1, to: 0 },
       x: {
         from: text.x + Phaser.Math.Between(-10, 10),
-        to: text.x + Phaser.Math.Between(-40, 40),
+        to:   text.x + Phaser.Math.Between(-40, 40),
       },
       y: { from: text.y - 10, to: text.y - 60 },
       onComplete: () => text.destroy(),
