@@ -42,7 +42,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Update instructions text to match spec controls
   - Keep SPACE/ENTER to start
 
-- [ ] **1.2 Replace Transition with 10-second micro-intro**
+- [x] **1.2 Replace Transition with 10-second micro-intro**
   - Emergency alert banner: "HURRICANE KENDRA -- CAT 6 -- LANDFALL 60 MIN"
   - Hard cut to rocket clearing (can be placeholder rectangle)
   - "FIND. BUILD. LAUNCH." text slam with screen shake
