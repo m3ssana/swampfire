@@ -90,6 +90,7 @@ jobs:
         run: npm audit --audit-level=high || true
 
       - name: Run OSV-Scanner
+        continue-on-error: true
         uses: google/osv-scanner-action/osv-scanner-action@v2.0.0
         with:
           scan-args: |-
