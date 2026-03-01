@@ -25,7 +25,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Delete `basicPlayer.js` (unused alternate version)
   - Delete `bubble.js` (no bubble mechanic in Swampfire)
 
-- [ ] **0.3 Gut dungeon generation, add placeholder zone**
+- [x] **0.3 Gut dungeon generation, add placeholder zone**
   - Remove `@mikewesthad/dungeon` dependency and `dungeon_generator.js`
   - Create a simple `ZoneManager` that loads a single blank tilemap (Zone 0 placeholder)
   - Player spawns at center of a flat ground plane with no walls

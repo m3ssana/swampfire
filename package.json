@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "phaser": "^3.80.1",
-    "@mikewesthad/dungeon": "^2.0.1",
     "phaser-matter-collision-plugin": "^1.0.0"
   }
 }

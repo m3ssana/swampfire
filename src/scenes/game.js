@@ -1,5 +1,5 @@
 import Player from "../gameobjects/player";
-import DungeonGenerator from "../gameobjects/dungeon_generator";
+import ZoneManager from "../gameobjects/zone_manager";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -38,11 +38,12 @@ export default class Game extends Phaser.Scene {
   }
 
   /*
-    This method creates the map using the DungeonGenerator class.
+    Loads the current zone via ZoneManager.
+    Zone 0 is a blank placeholder (Cypress Creek Preserve).
+    Tile content and physics layers will be added in Phase 3.
   */
   addMap() {
-    this.dungeon = new DungeonGenerator(this);
-    this.input.keyboard.on("keydown-ENTER", () => this.finishScene(), this);
+    this.zone = new ZoneManager(this);
   }
 
   /*
@@ -85,13 +86,9 @@ export default class Game extends Phaser.Scene {
     This method adds the player to the scene. It creates a new Player object along with a trail layer that will be used to draw the trail of the player.
   */
   addPlayer() {
+    const spawn = this.zone.getSpawnPoint();
     this.trailLayer = this.add.layer();
-    this.player = new Player(
-      this,
-      this.dungeon.map.widthInPixels / 2,
-      this.dungeon.map.heightInPixels / 2,
-      100
-    );
+    this.player = new Player(this, spawn.x, spawn.y, 100);
   }
 
   /*
@@ -147,12 +144,7 @@ export default class Game extends Phaser.Scene {
   */
   playerPicksKey(key) {
     this.updateKeys();
-    this.showPoints(
-      key.x,
-      key.y,
-      this.registry.get("keys") + "/" + this.dungeon.dungeon.rooms.length,
-      this.scoreKeys
-    );
+    this.showPoints(key.x, key.y, this.registry.get("keys"), this.scoreKeys);
     key.destroy();
   }
 
@@ -195,14 +187,10 @@ export default class Game extends Phaser.Scene {
   This method adds the camera to the scene and the background color. It sets the bounds of the camera to the size of the map and makes it follow the player.
   */
   addCamera() {
-    this.cameras.main.setBounds(
-      0,
-      0,
-      this.dungeon.map.widthInPixels,
-      this.dungeon.map.heightInPixels
-    );
+    const { width, height } = this.zone.getBounds();
+    this.cameras.main.setBounds(0, 0, width, height);
     this.cameras.main.startFollow(this.player.sprite, false, 0.5, 0.5);
-    this.cameras.main.setBackgroundColor(0x25131a);
+    this.cameras.main.setBackgroundColor(0x1a2e1a); // dark swamp green
   }
 
   /*
@@ -267,9 +255,6 @@ export default class Game extends Phaser.Scene {
     const keys = +this.registry.get("keys") + points;
     this.registry.set("keys", keys);
     this.scoreKeys.setText("x" + keys);
-    if (keys === this.dungeon.dungeon.rooms.length) {
-      this.finishScene();
-    }
   }
 
   /*
