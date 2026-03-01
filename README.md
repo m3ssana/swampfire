@@ -2,7 +2,7 @@
 
 A hurricane hits in 60 minutes. Juan has a half-built rocket in the swamp. Scavenge the real streets of Land O' Lakes, FL 34639 for parts, slam them together, and launch before the storm erases everything -- in one breathless hour.
 
-**Play it now:** https://m3ssana.github.io/swampfire/
+**Play it now:** <a href="https://m3ssana.github.io/swampfire/" target="_blank">https://m3ssana.github.io/swampfire/</a>
 
 ## Tech Stack
 
