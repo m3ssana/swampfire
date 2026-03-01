@@ -281,6 +281,13 @@ export default class Transition extends Phaser.Scene {
   // ─── Shared helpers ───────────────────────────────────────────────────────
 
   loadNext() {
+    // Seed a fresh game session in the registry before handing off to GameScene.
+    // HUDScene reads these on launch; GameScene reads hp/xp on player events.
+    this.registry.set("hp", 3);
+    this.registry.set("xp", 0);
+    this.registry.set("timeLeft", 3600); // 60 minutes in seconds
+    this.registry.set("timerExpired", false);
+
     this.cameras.main.fade(300, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => {
       this.scene.start("game", { name: "ZONE 0", number: 0 });

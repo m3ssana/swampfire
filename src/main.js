@@ -4,6 +4,7 @@ import Outro from "./scenes/outro";
 import Splash from "./scenes/splash";
 import Transition from "./scenes/transition";
 import Game from "./scenes/game";
+import HUD from "./scenes/hud";
 import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
 
 const config = {
@@ -31,7 +32,7 @@ const config = {
       },
     ],
   },
-  scene: [Bootloader, Splash, Transition, Game, Outro],
+  scene: [Bootloader, Splash, Transition, Game, HUD, Outro],
 };
 
 const game = new Phaser.Game(config);

@@ -5,8 +5,6 @@ export default class Game extends Phaser.Scene {
   constructor() {
     super({ key: "game" });
     this.player = null;
-    this.score = 0;
-    this.scoreText = null;
   }
 
   init(data) {
@@ -14,15 +12,6 @@ export default class Game extends Phaser.Scene {
     this.number = data.number;
   }
 
-  preload() {
-    this.registry.set("seconds", 0);
-    this.registry.set("coins", 0);
-    this.registry.set("keys", 0);
-  }
-
-  /*
-    From this, we create the whole thing. We call the methods to add the map, the player, the collisions, the camera and the scores.
-  */
   create() {
     this.width = this.sys.game.config.width;
     this.height = this.sys.game.config.height;
@@ -33,9 +22,11 @@ export default class Game extends Phaser.Scene {
     this.addPlayer();
     this.addCollisions();
     this.addCamera();
-    this.addScores();
+    this.launchHUD();
     this.loadAudios();
   }
+
+  // ─── Map ───────────────────────────────────────────────────────────────────
 
   /*
     Loads the current zone via ZoneManager.
@@ -46,54 +37,29 @@ export default class Game extends Phaser.Scene {
     this.zone = new ZoneManager(this);
   }
 
-  /*
-    This method adds the scores to the scene. We add the coins, the seconds, the keys and the timer. We'll update them with other methods.
-  */
-  addScores() {
-    this.add
-      .sprite(62, 26, "coin", 0)
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setScale(0.8);
-    this.scoreCoins = this.add
-      .bitmapText(100, 24, "default", "x0", 15)
-      .setOrigin(0.5)
-      .setScrollFactor(0);
-    this.scoreSeconds = this.add
-      .bitmapText(this.center_width, 24, "default", "0", 15)
-      .setOrigin(0.5)
-      .setScrollFactor(0);
-    this.add
-      .sprite(this.width - 90, 24, "keys", 0)
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setScale(0.8);
-    this.scoreKeys = this.add
-      .bitmapText(this.width - 48, 24, "default", "x0", 15)
-      .setOrigin(0.5)
-      .setScrollFactor(0);
-    this.timer = this.time.addEvent({
-      delay: 1000,
-      callback: () => {
-        this.updateSeconds();
-      },
-      callbackScope: this,
-      loop: true,
-    });
-  }
+  // ─── Player ────────────────────────────────────────────────────────────────
 
-  /*
-    This method adds the player to the scene. It creates a new Player object along with a trail layer that will be used to draw the trail of the player.
-  */
   addPlayer() {
     const spawn = this.zone.getSpawnPoint();
     this.trailLayer = this.add.layer();
     this.player = new Player(this, spawn.x, spawn.y, 100);
   }
 
+  // ─── HUD ───────────────────────────────────────────────────────────────────
+
   /*
-  This method sets up the collisions between the player and anything else. Basically, it sets a callback function that will be called when the player collides with something.
+    Launch HUDScene as a parallel scene that renders on top of this one.
+    Guard against double-launch on scene restart (the HUD stays alive across
+    deaths — the timer should keep ticking when the player respawns).
   */
+  launchHUD() {
+    if (!this.scene.isActive("hud")) {
+      this.scene.launch("hud");
+    }
+  }
+
+  // ─── Collisions ────────────────────────────────────────────────────────────
+
   addCollisions() {
     this.unsubscribePlayerCollide = this.matterCollision.addOnCollideStart({
       objectA: this.player.sprite,
@@ -109,48 +75,35 @@ export default class Game extends Phaser.Scene {
     });
   }
 
-  /*
-  This is the callback that we call when the player collides with something. We check the label of the object that the player collides with and call the corresponding method.
-  */
   onPlayerCollide({ gameObjectA, gameObjectB }) {
     if (!gameObjectB) return;
-    if (gameObjectB.label === "coin") this.playerPicksCoin(gameObjectB);
-    if (gameObjectB.label === "keys") this.playerPicksKey(gameObjectB);
-    if (gameObjectB.label === "bat") this.playerHitsFoe(gameObjectB);
-    if (gameObjectB.label === "wizard") this.playerHitsFoe(gameObjectB);
+    if (gameObjectB.label === "coin")     this.playerPicksCoin(gameObjectB);
+    if (gameObjectB.label === "keys")     this.playerPicksKey(gameObjectB);
+    if (gameObjectB.label === "bat")      this.playerHitsFoe(gameObjectB);
+    if (gameObjectB.label === "wizard")   this.playerHitsFoe(gameObjectB);
     if (gameObjectB.label === "fireball") this.playerHitsFoe(gameObjectB);
     if (!(gameObjectB instanceof Phaser.Tilemaps.Tile)) return;
 
     const tile = gameObjectB;
-
     if (tile.properties.isLethal) {
       this.unsubscribePlayerCollide();
       this.restartScene();
     }
   }
 
-  /*
-  This is called when a player picks a coin. It destroys the coin and updates the score.
-  */
+  // ─── Pickup handlers ───────────────────────────────────────────────────────
+
   playerPicksCoin(coin) {
-    this.showPoints(coin.x, coin.y, 1, this.scoreCoins);
+    this.showPoints(coin.x, coin.y, "+1 XP");
     coin.destroy();
-    this.updateCoins();
     this.playAudio("coin");
   }
 
-  /*
-  Same as the previous one but with the key.
-  */
   playerPicksKey(key) {
-    this.updateKeys();
-    this.showPoints(key.x, key.y, this.registry.get("keys"), this.scoreKeys);
+    this.showPoints(key.x, key.y, "+KEY");
     key.destroy();
   }
 
-  /*
-  Unless the player is invincible (blinking at the beginning), this is called when the player hits any foe. It kills the player, destroys the foe, and restarts the scene.
-  */
   playerHitsFoe(foe) {
     if (this.player.invincible) return;
     this.player.explosion();
@@ -158,14 +111,18 @@ export default class Game extends Phaser.Scene {
     this.restartScene();
   }
 
+  // ─── Floating XP popup ─────────────────────────────────────────────────────
+
   /*
-  Every time we need to show points, we call this method. It creates a text element, adds a tween to it, and destroys it when the tween is finished.
+    Spawns a floating text label at world coordinates (x, y).
+    Used for XP gains, pickups, and future combat feedback.
   */
-  showPoints(x, y, score, textElement, color = 0xffffff) {
-    let text = this.add
-      .bitmapText(x + 20, y - 80, "default", "+" + score, 10)
-      .setDropShadow(2, 3, color, 0.7)
+  showPoints(x, y, label, tint = 0xffffff) {
+    const text = this.add
+      .bitmapText(x + 20, y - 80, "default", String(label), 10)
+      .setDropShadow(2, 3, tint, 0.7)
       .setOrigin(0.5);
+
     this.tweens.add({
       targets: text,
       duration: 1000,
@@ -175,17 +132,12 @@ export default class Game extends Phaser.Scene {
         to: text.x + Phaser.Math.Between(-40, 40),
       },
       y: { from: text.y - 10, to: text.y - 60 },
-      onComplete: () => {
-        text.destroy();
-      },
+      onComplete: () => text.destroy(),
     });
-
-    this.textUpdateEffect(textElement, color);
   }
 
-  /*
-  This method adds the camera to the scene and the background color. It sets the bounds of the camera to the size of the map and makes it follow the player.
-  */
+  // ─── Camera ────────────────────────────────────────────────────────────────
+
   addCamera() {
     const { width, height } = this.zone.getBounds();
     this.cameras.main.setBounds(0, 0, width, height);
@@ -193,15 +145,14 @@ export default class Game extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(0x1a2e1a); // dark swamp green
   }
 
-  /*
-  As we did in other games, here we add the audio files to the scene along with a method to play them.
-  */
+  // ─── Audio ─────────────────────────────────────────────────────────────────
+
   loadAudios() {
     this.audios = {
-      crash: this.sound.add("crash"),
+      crash:    this.sound.add("crash"),
       fireball: this.sound.add("fireball"),
-      death: this.sound.add("death"),
-      coin: this.sound.add("start"),
+      death:    this.sound.add("death"),
+      coin:     this.sound.add("start"),
     };
   }
 
@@ -209,10 +160,16 @@ export default class Game extends Phaser.Scene {
     this.audios[key].play();
   }
 
+  // ─── Scene transitions ─────────────────────────────────────────────────────
+
   /*
-  This method is called when the player dies. It makes the camera shake and fade out and then restarts the scene.
+    Player took a hit. Decrement HP in registry (HUD redraws automatically),
+    then restart the game scene. The HUD stays alive — the clock keeps ticking.
   */
   restartScene() {
+    const hp = Math.max(0, (this.registry.get("hp") ?? 1) - 1);
+    this.registry.set("hp", hp);
+
     this.player.sprite.visible = false;
     this.cameras.main.shake(100);
     this.cameras.main.fade(250, 0, 0, 0);
@@ -220,59 +177,18 @@ export default class Game extends Phaser.Scene {
   }
 
   /*
-  If a player finishes the stage, we fade out the camera and start the outro scene.
+    Player completed the run. Stop the HUD then hand off to the end screen.
+    Wired to actual win condition in task 1.4.
   */
   finishScene() {
+    this.scene.stop("hud");
     this.cameras.main.fade(250, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => {
       this.scene.start("outro", {
-        next: "underwater",
-        name: "STAGE",
+        next: "swampfire",
+        name: "ZONE",
         number: this.number + 1,
       });
-    });
-  }
-
-  /*
-    This method is called every second. It updates the seconds and the timer because, for any competitive player, time is the most important thing. We could add a scoreboard at the end ordered by time.
-  */
-  updateSeconds(points = 1) {
-    const seconds = +this.registry.get("seconds") + points;
-    this.registry.set("seconds", seconds);
-    this.scoreSeconds.setText(seconds);
-  }
-
-  /*
-  The next two functions update the coins and keys scores. In the case of the keys, if the player has collected all the keys, we finish the scene.
-  */
-  updateCoins(points = 1) {
-    const coins = +this.registry.get("coins") + points;
-    this.registry.set("coins", coins);
-    this.scoreCoins.setText("x" + coins);
-  }
-
-  updateKeys(points = 1) {
-    const keys = +this.registry.get("keys") + points;
-    this.registry.set("keys", keys);
-    this.scoreKeys.setText("x" + keys);
-  }
-
-  /*
-  We have this method to update the text elements when we add points to the score. In this class is not used currently but we could use it later or in other classes.
-  */
-  textUpdateEffect(textElement, color) {
-    textElement.setTint(color);
-    const prev = textElement.y;
-    this.tweens.add({
-      targets: textElement,
-      duration: 100,
-      alpha: { from: 1, to: 0.8 },
-      scale: { from: 1.2, to: 1 },
-      repeat: 5,
-      onComplete: () => {
-        textElement.setTint(0xffffff);
-        textElement.y = prev;
-      },
     });
   }
 }

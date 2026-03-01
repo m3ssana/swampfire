@@ -49,7 +49,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Countdown appears, skippable with any key
   - Transition to Game scene
 
-- [ ] **1.3 Add HUD scene (parallel scene stacking)**
+- [x] **1.3 Add HUD scene (parallel scene stacking)**
   - Create `HUDScene` that runs parallel to `GameScene`
   - 60-minute countdown timer (real-time seconds, counts down)
   - Heart display (3 HP)
