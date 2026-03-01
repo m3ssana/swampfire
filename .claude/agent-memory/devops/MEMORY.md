@@ -10,17 +10,17 @@
 - Prevents tag hijacking attacks and ensures reproducible builds
 - Also improves workflow performance through intelligent caching
 
-### Action SHAs Used (Primary Workflow Actions)
-- **actions/checkout**: `f43a0e5ff2bd7f9801952a7f684d20aabe3c9bc4` (v4.1.1)
-- **actions/setup-node**: `1a4442caab129478691007db0d7c6555ca1d7eac` (v4.1.0)
-- **actions/cache**: `0057852bfaa89a56745cba8c7296529d2fc39830` (v4.3.0) ⚠️ Updated from deprecated v4.0.1
-- **actions/upload-pages-artifact**: `56823921972563692c2b3a370fcf8d42f4442543` (v4.0.0)
-- **actions/deploy-pages**: `b97bd36e06d7ee5d4181a2b178baf4c4eadadda1` (v4.0.1)
+### Action SHAs Used (Primary Workflow Actions) - VERIFIED & CURRENT
+- **actions/checkout**: `de0fac2e4500dabe0009e67214ff5f5447ce83dd` (v6.0.2)
+- **actions/setup-node**: `6044e13b5dc448c55e2357c09f80417699197238` (v6.2.0)
+- **actions/cache**: `cdf6c1fa76f9f475f3d7449005a359c84ca0f306` (v5.0.3)
+- **actions/upload-pages-artifact**: `7b1f4a764d45c48632c6b24a0339c27f5614fb0b` (v4.0.0)
+- **actions/deploy-pages**: `d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e` (v4.0.5)
 
-### Security Workflow Actions
-- **gitleaks/gitleaks-action**: `4baea7f17b75c2f3a2c4d7e8f9a0b1c2d3e4f5a6` (v2.5.1)
-- **github/codeql-action/***: `32dc499307d133bb3a37e304f6b546e3f61b0f63` (v3.25.3)
-- **google/osv-scanner-action**: `b5c9d8d7b7e6f5f4e3c2b1a0f9e8d7c6b5a4f3e` (v2.0.0)
+### Security Workflow Actions - VERIFIED & CURRENT
+- **gitleaks/gitleaks-action**: `ff98106e4c7b2bc287b24eaf42907196329070c7` (v2.3.9)
+- **github/codeql-action/***: `5e7a52feb2a3dfb87f88be2af33b9e2275f48de6` (codeql-bundle-v2.24.2)
+- **google/osv-scanner-action**: `c5996e0193a3df57d695c1b8a1dec2a4c62e8730` (v2.3.3)
 
 ### Files Modified
 1. `.github/workflows/deploy.yml` - Added artifact caching + build size reporting

@@ -21,10 +21,10 @@ jobs:
     steps:
       # Security: Pin to full SHA for supply chain security
       # Prevents tag hijacking attacks and ensures reproducible builds
-      - uses: actions/checkout@f43a0e5ff2bd7f9801952a7f684d20aabe3c9bc4 # v4.1.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       # Security: Pin to full SHA to prevent malicious action updates
-      - uses: actions/setup-node@1a4442caab129478691007db0d7c6555ca1d7eac # v4.1.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: 20
           cache: npm
@@ -38,7 +38,7 @@ jobs:
       # Performance: Cache dist/ directory to avoid rebuilding in deploy job
       # Cache key includes commit SHA to ensure cache per-commit
       # Restore fallback allows cache reuse across commits if exact match not found
-      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: dist
           key: build-dist-${{ github.sha }}
@@ -85,7 +85,7 @@ jobs:
 
       # Security: Pin to full SHA for supply chain security
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@56823921972563692c2b3a370fcf8d42f4442543 # v4.0.0
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           path: dist
 
@@ -101,7 +101,7 @@ jobs:
       # Deploy job reads cached dist/ from build job (see logs for "Cache hit")
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@b97bd36e06d7ee5d4181a2b178baf4c4eadadda1 # v4.0.1
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
 
       - name: Summary
         run: |
