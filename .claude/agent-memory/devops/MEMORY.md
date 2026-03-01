@@ -13,7 +13,7 @@
 ### Action SHAs Used (Primary Workflow Actions)
 - **actions/checkout**: `f43a0e5ff2bd7f9801952a7f684d20aabe3c9bc4` (v4.1.1)
 - **actions/setup-node**: `1a4442caab129478691007db0d7c6555ca1d7eac` (v4.1.0)
-- **actions/cache**: `0c45773b623bea8c8e75f6c82b208c3cf94ea4f9` (v4.0.1)
+- **actions/cache**: `0057852bfaa89a56745cba8c7296529d2fc39830` (v4.3.0) ⚠️ Updated from deprecated v4.0.1
 - **actions/upload-pages-artifact**: `56823921972563692c2b3a370fcf8d42f4442543` (v4.0.0)
 - **actions/deploy-pages**: `b97bd36e06d7ee5d4181a2b178baf4c4eadadda1` (v4.0.1)
 
