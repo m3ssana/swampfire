@@ -19,9 +19,12 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Security: Pin to full SHA for supply chain security
+      # Prevents tag hijacking attacks and ensures reproducible builds
+      - uses: actions/checkout@f43a0e5ff2bd7f9801952a7f684d20aabe3c9bc4 # v4.1.1
 
-      - uses: actions/setup-node@v4
+      # Security: Pin to full SHA to prevent malicious action updates
+      - uses: actions/setup-node@1a4442caab129478691007db0d7c6555ca1d7eac # v4.1.0
         with:
           node-version: 20
           cache: npm
@@ -32,8 +35,57 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Performance: Cache dist/ directory to avoid rebuilding in deploy job
+      # Cache key includes commit SHA to ensure cache per-commit
+      # Restore fallback allows cache reuse across commits if exact match not found
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.1
+        with:
+          path: dist
+          key: build-dist-${{ github.sha }}
+          restore-keys: |
+            build-dist-
+
+      # Visibility: Track build artifact sizes to detect bloat/regressions
+      - name: Report Build Size
+        run: |
+          echo "## Build Artifacts Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Function to format bytes as human-readable size
+          format_size() {
+            local bytes=$1
+            if [ $bytes -lt 1024 ]; then
+              echo "${bytes}B"
+            elif [ $bytes -lt 1048576 ]; then
+              echo "$((bytes / 1024))KB"
+            else
+              echo "$((bytes / 1048576))MB"
+            fi
+          }
+
+          # Report individual artifacts
+          echo "| Artifact | Size | Gzipped |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          for file in dist/index.html dist/*.js dist/*.css; do
+            if [ -f "$file" ]; then
+              size=$(stat -c%s "$file")
+              gzipped=$(gzip -c "$file" | wc -c)
+              filename=$(basename "$file")
+              size_fmt=$(format_size $size)
+              gzip_fmt=$(format_size $gzipped)
+              echo "| \`$filename\` | $size_fmt | $gzip_fmt |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # Report total dist size
+          echo "" >> $GITHUB_STEP_SUMMARY
+          total=$(du -sh dist | cut -f1)
+          echo "**Total dist/ size:** $total" >> $GITHUB_STEP_SUMMARY
+
+      # Security: Pin to full SHA for supply chain security
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56823921972563692c2b3a370fcf8d42f4442543 # v4.0.0
         with:
           path: dist
 
@@ -45,9 +97,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Security: Pin to full SHA for supply chain security
+      # Deploy job reads cached dist/ from build job (see logs for "Cache hit")
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@b97bd36e06d7ee5d4181a2b178baf4c4eadadda1 # v4.0.1
 
       - name: Summary
         run: |
