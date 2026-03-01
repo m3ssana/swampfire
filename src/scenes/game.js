@@ -210,9 +210,6 @@ export default class Game extends Phaser.Scene {
   */
   loadAudios() {
     this.audios = {
-      jump: this.sound.add("jump"),
-      bubble: this.sound.add("bubble"),
-      trap: this.sound.add("trap"),
       crash: this.sound.add("crash"),
       fireball: this.sound.add("fireball"),
       death: this.sound.add("death"),

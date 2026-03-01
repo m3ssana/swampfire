@@ -1,5 +1,4 @@
 import Fireball from "./fireball";
-import Bubble from "./bubble";
 
 export default class Wizard extends Phaser.Physics.Matter.Sprite {
   constructor(scene, x, y, texture = "wizard", ground) {
@@ -53,10 +52,7 @@ As we did with the player and the bat, we create this callback to handle the col
 This will be called when the bubble hits the wizard. We "load" the wizard inside the bubble and destroy the wizard.
   */
   onWizardCollide({ gameObjectA, gameObjectB }) {
-    if (gameObjectB instanceof Bubble) {
-      gameObjectB.load("wizard");
-      this.destroy();
-    }
+    // bubble mechanic removed -- no-op until enemy system is replaced in 0.3
   }
 
   /*

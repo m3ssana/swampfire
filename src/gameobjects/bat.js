@@ -1,4 +1,3 @@
-import Bubble from "./bubble";
 
 export default class Bat extends Phaser.Physics.Matter.Sprite {
   constructor(scene, x, y, texture = "bat", ground) {
@@ -55,10 +54,7 @@ export default class Bat extends Phaser.Physics.Matter.Sprite {
   }
 
   onBatCollide({ gameObjectA, gameObjectB }) {
-    if (gameObjectB instanceof Bubble) {
-      gameObjectB.load("bat");
-      this.destroy();
-    }
+    // bubble mechanic removed -- no-op until enemy system is replaced in 0.3
   }
 
   /*
