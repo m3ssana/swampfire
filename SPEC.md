@@ -34,16 +34,16 @@ Hurricane Kendra -- a Category 6+ hypercane -- has formed in the Gulf of Mexico.
 
 ### 2.3 Story Delivery -- The 10-Second Intro
 
-The game opens with a **micro-intro** designed to be absorbed in under 15 seconds and skippable at any point:
+The game opens with a **micro-intro** that lets players absorb each beat at their own pace. SPACE advances each phase:
 
-1. Black screen. EMERGENCY ALERT SYSTEM banner. CRT static. A single scrolling line: "HURRICANE MEGIDDO -- CAT 6 -- LANDFALL 60 MIN -- EVACUATE NOW" (3 seconds)
-2. Hard cut: the rocket in a clearing, clearly unfinished. Wind whipping. (2 seconds)
-3. Three words slam onto screen, one at a time, with screen shake: "FIND. BUILD. LAUNCH." (3 seconds)
-4. The 60:00 countdown appears. Gameplay begins immediately. (2 seconds)
+1. Black screen. EMERGENCY ALERT SYSTEM banner. CRT static. Scrolling ticker: "HURRICANE KENDRA -- CAT 6 -- LANDFALL 60 MIN -- EVACUATE NOW". Press SPACE to continue.
+2. Hard cut: the rocket in a clearing, clearly unfinished. Wind whipping. Press SPACE to continue.
+3. Three words slam onto screen automatically, one at a time, with screen shake: "FIND. BUILD. LAUNCH." Press SPACE to continue.
+4. The 60:00 countdown appears. Press SPACE to begin.
 
-Total: 10 seconds. Skippable with any key after first play. No text walls. No monologue. Pure visual storytelling.
+Self-paced. No auto-advance. Players can read the full EAS broadcast, study the rocket, absorb the mission before the clock starts. No text walls. No monologue. Pure visual storytelling.
 
-**Why this works:** Players understand the stakes in 10 seconds through visuals alone. The emergency broadcast is universally recognized. The unfinished rocket is self-explanatory. "FIND. BUILD. LAUNCH." is the entire tutorial. Everything else is learned by doing.
+**Why this works:** Players understand the stakes in four beats through visuals alone. The emergency broadcast is universally recognized. The unfinished rocket is self-explanatory. "FIND. BUILD. LAUNCH." is the entire tutorial. Everything else is learned by doing.
 
 ---
 
@@ -656,15 +656,16 @@ Custom GLSL shaders via `Phaser.GameObjects.Shader` or render texture:
 - Swampfire Protocol logo fades in behind progress bar
 - Lightning flash effect when loading completes, transition to MenuScene
 
-### 7.2 IntroScene -- 10-Second Micro-Intro
+### 7.2 IntroScene -- SPACE-to-Continue Micro-Intro
 
-1. Black screen. Low hum. "EMERGENCY ALERT SYSTEM" banner appears with CRT shader. (1.5s)
-2. Single scrolling ticker: "HURRICANE MEGIDDO -- CAT 6 -- LANDFALL 60 MIN -- EVACUATE NOW" (3s)
-3. Hard cut (no fade): aerial view of Cypress Creek clearing. Rocket scaffold, tarps flapping. (2s)
-4. Three words slam on screen sequentially with screen shake: "FIND." (0.5s) "BUILD." (0.5s) "LAUNCH." (0.5s)
-5. 60:00 countdown appears. Camera zooms down to player level. Gameplay begins. (2s)
+Each phase waits for SPACE before advancing. No timers. Players set the pace.
 
-Total: ~10 seconds. Skippable with any key after first play. No text dumps. No monologue.
+1. Black screen. "EMERGENCY ALERT SYSTEM" banner with CRT static. Scrolling ticker: "HURRICANE KENDRA -- CAT 6 -- LANDFALL 60 MIN -- EVACUATE NOW". Body text block with broadcast details. Blinking "PRESS SPACE TO CONTINUE" prompt.
+2. Hard cut (no fade): Cypress Creek clearing. Placeholder rocket on launch pad. Zone label. Blinking "PRESS SPACE TO CONTINUE" prompt.
+3. Three words slam on screen automatically with screen shake: "FIND." → "BUILD." → "LAUNCH." After sequence completes, blinking "PRESS SPACE TO CONTINUE" prompt.
+4. 60:00 countdown appears. "PRESS SPACE TO BEGIN" prompt. SPACE starts gameplay.
+
+No auto-advance. No skip. Each phase is meaningful context.
 
 ### 7.3 MenuScene
 
