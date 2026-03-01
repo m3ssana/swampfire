@@ -68,6 +68,16 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 2 -- Core Game Objects
 
+- [ ] **2.0 Replace player sprite with custom pixel art — Juan**
+  - 48×48px spritesheet: bald Hispanic man, short beard, black-framed glasses,
+    cargo pants, tool belt, work boots
+  - Animations required (same frame layout as current `player.png`):
+    - Idle: 2 frames
+    - Run 4-directional: 4 frames per direction (or 4-frame sheet with flipX for left/right)
+  - Drop replacement PNG at `public/assets/images/player.png` — same 48×48 frame size
+    so `bootloader.js` needs no changes
+  - Remove old Dungeon Bobble wizard-hat placeholder sprite
+
 - [ ] **2.1 Searchable containers (loot system)**
   - Create `SearchableContainer` game object (sprite + interact prompt)
   - Player walks up, presses E to search

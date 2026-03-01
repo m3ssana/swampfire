@@ -1004,7 +1004,7 @@ Buttons: RETRY (last checkpoint), NEW RUN, SHARE.
 
 ### 12.2 Character Design
 
-- **Juan:** Hispanic male, mid-30s, work boots, cargo pants, tool belt, baseball cap. Animations: idle, run (4-dir), search (crouch), carry (heavy item), craft (workbench). No walk animation -- Juan only runs.
+- **Juan:** Hispanic male, mid-30s, bald, short beard, black-framed glasses, cargo pants, tool belt, work boots. No baseball cap -- the baldness and glasses are his defining silhouette read at 48×48px. Pixel art at 48×48px per frame. Animations: idle (2 frames), run 4-directional (4 frames per direction), search (crouch), carry (heavy item), craft (workbench). No walk animation -- Juan only runs.
 - **NPCs:** Distinct silhouettes. Harvey in overalls. Maria with glasses. Sergeant Polk in fatigues. Old Dale in camo. Coach Reeves in polo and whistle.
 
 ### 12.3 Environment Tiles
