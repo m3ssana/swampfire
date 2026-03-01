@@ -1,34 +1,36 @@
+# Swampfire Protocol
 
-# Generic Game
+A hurricane hits in 60 minutes. Juan has a half-built rocket in the swamp. Scavenge the real streets of Land O' Lakes, FL 34639 for parts, slam them together, and launch before the storm erases everything -- in one breathless hour.
 
-A *Generic* adventure
+**Play it now:** https://m3ssana.github.io/swampfire/
 
-Bitmap font generator:
-https://snowb.org/
+## Tech Stack
 
-Music: ETC
+- [Phaser 3.80+](https://phaser.io/) with Matter.js physics
+- [Vite](https://vitejs.dev/) build system
+- Deployed to GitHub Pages
 
-dark:
-#25131a
-clear:
-#0x3d253b
+## Development
 
-Font
-https://github.com/juanitogan/p8-programming-fonts/tree/master/vector-fonts/DejaVu
+```bash
+npm install
+npm run dev
+```
 
-Collisions plugin reference
-https://mikewesthad.github.io/phaser-matter-collision-plugin/docs/
+## Build
 
-https://blog.ourcade.co/posts/2020/phaser-3-matter-physics-moving-platforms/
-https://www.codeandweb.com/physicseditor/tutorials/how-to-create-physics-shapes-for-phaser-3-and-matterjs
-https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-3-procedural-dungeon-3bc19b841cd
-https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-5-matter-physics-platformer-d14d1f614557
+```bash
+npm run build
+```
 
-Hook:
-https://www.emanueleferonato.com/2019/02/22/build-a-html5-game-like-mikey-hooks-using-phaser-and-matter-js/
-https://www.emanueleferonato.com/2019/03/08/fling-unity-game-built-in-html5-with-phaser-and-matter-js-updated-with-the-latest-constraints-tweaks-fly-through-the-screen-with-your-ninja-rope/
+## Origin
 
-Bubble bobble theme:
-https://www.youtube.com/watch?v=4vBydMuC32c&ab_channel=LloydTheHammer
+Forked from the "Dungeon Bobble" example in [Phaser by Example](https://github.com/phaserjs/phaser-by-example) by Pello. Being incrementally refactored into a top-down speed scavenger game. See [TODO.md](TODO.md) for progress.
 
-https://www.youtube.com/watch?v=PFK_26rK9O0&ab_channel=pressplayontape
+## Reference Links
+
+- [phaser-matter-collision-plugin docs](https://mikewesthad.github.io/phaser-matter-collision-plugin/docs/)
+- [Bitmap font generator (snowb)](https://snowb.org/)
+- [Modular game worlds in Phaser 3 - Tilemaps](https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-3-procedural-dungeon-3bc19b841cd)
+- [Matter.js moving platforms](https://blog.ourcade.co/posts/2020/phaser-3-matter-physics-moving-platforms/)
+- [PhysicsEditor for Phaser 3 + Matter.js](https://www.codeandweb.com/physicseditor/tutorials/how-to-create-physics-shapes-for-phaser-3-and-matterjs)
