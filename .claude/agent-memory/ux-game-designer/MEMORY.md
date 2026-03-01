@@ -95,4 +95,9 @@ All of Phase 0 + Phase 1 done. Phase 2 in progress.
   - `nearbyContainer` pointer compared — avoids redundant tween firing
 - E-key: `this.input.keyboard.on("keydown-E", this.onEKey, this)` — delegates to `nearbyContainer?.search()`
 - All listeners cleaned up in shutdown: `this.events.once("shutdown", () => { keyboard.off; events.off; })`
-- 4 containers hardcoded around spawn point (Phase 3 will load from Tiled object layer)
+- 4 containers hardcoded around spawn point (~260 px radius, <7% of zone radius) — intentional Phase 2.1 placeholder
+- No respawn timer by design — containers stay open until death/restart
+- **Phase 3 replaces hardcoded placement** (see `docs/ddr/container-placement.md`):
+  - Load from Tiled object layer in `zone_manager.js` (type=`"container"`, property `table`)
+  - Remove `addContainers()` from `game.js`
+  - Target: ~15–20 containers for Zone 0

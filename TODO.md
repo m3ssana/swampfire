@@ -75,12 +75,14 @@ Each task is small enough to fit in a single Claude Code session.
   - 4 frames: idle neutral, idle bob (+1px), walk left leg, walk right leg
   - flipX used for left/right facing — same 48×48 frame size, bootloader unchanged
 
-- [ ] **2.1 Searchable containers (loot system)**
+- [x] **2.1 Searchable containers (loot system)** _(b6e2640)_
   - Create `SearchableContainer` game object (sprite + interact prompt)
   - Player walks up, presses E to search
   - Items pop out with tween animation (rise + fade)
   - Loot table: array of possible items per container type
   - Place 3-4 test containers in Zone 0
+  - 4 containers hardcoded near spawn (~260 px radius); stay open until death/restart
+  - See `docs/ddr/container-placement.md` — Phase 3 replaces hardcoded positions with Tiled object layer
 
 - [ ] **2.2 Inventory + item pickup**
   - Simple inventory array on Player (no UI yet, just data)
@@ -109,6 +111,9 @@ Each task is small enough to fit in a single Claude Code session.
   - Swamp tiles: standing water, cypress trees, Spanish moss
   - Exit points: south (to Zone 1), west (to Zone 3)
   - Camera bounds match zone size
+  - Add Tiled object layer for containers (type = `"container"`, property `table`)
+  - Load container positions in `zone_manager.js`; remove `addContainers()` from `game.js`
+  - Target ~15–20 containers for Zone 0 (see `docs/ddr/container-placement.md`)
 
 - [ ] **3.2 Zone manager + zone transitions**
   - `ZoneManager` tracks current zone, handles loading/unloading
