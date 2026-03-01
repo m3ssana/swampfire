@@ -8,11 +8,12 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 0 -- Foundation (make it run as top-down)
 
-- [x] **0.1 Kill gravity, resize canvas**
-  - `main.js`: change resolution from 600x600 to 960x640, add `Phaser.Scale.FIT` + `CENTER_BOTH`
-  - Set Matter gravity to `{ x: 0, y: 0 }` (top-down = no gravity)
-  - Remove `MatterGravityFixPlugin` (no longer needed when gravity is zero)
-  - Verify the game still boots and renders
+- [x] **0.1 Kill gravity, resize canvas** _(760f9d0)_
+  - Canvas: 600x600 → 960x640, parent div fixed to `game-container`
+  - Matter gravity set to `{ x: 0, y: 0 }` (top-down)
+  - Removed `MatterGravityFixPlugin` import and plugin registration
+  - Rebranded: index.html title, package.json name/description
+  - Dead code left in place: `matter_gravity_fix.js`, `setIgnoreGravity` calls in bat/fireball (cleaned up later)
 
 - [ ] **0.2 Convert Player to 4-directional top-down movement**
   - Replace side-scroller movement (velocity X + jump Y) with 4-dir WASD movement
