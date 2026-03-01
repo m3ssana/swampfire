@@ -5,35 +5,29 @@ import Splash from "./scenes/splash";
 import Transition from "./scenes/transition";
 import Game from "./scenes/game";
 import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
-import { MatterGravityFixPlugin } from "./plugins/matter_gravity_fix";
 
 const config = {
-  width: 600,
-  height: 600,
+  width: 960,
+  height: 640,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   autoRound: false,
-  parent: "contenedor",
+  parent: "game-container",
   physics: {
     default: "matter",
     matter: {
       debug: false,
+      gravity: { x: 0, y: 0 },
     },
   },
   plugins: {
     scene: [
       {
-        plugin: PhaserMatterCollisionPlugin, // The plugin class
-        key: "matterCollision", // Where to store in Scene.Systems, e.g. scene.sys.matterCollision
-        mapping: "matterCollision", // Where to store in the Scene, e.g. scene.matterCollision
-      },
-      {
-        key: "MatterGravityFixPlugin",
-        plugin: MatterGravityFixPlugin,
-        mapping: "matterGravityFix",
-        start: true,
+        plugin: PhaserMatterCollisionPlugin,
+        key: "matterCollision",
+        mapping: "matterCollision",
       },
     ],
   },

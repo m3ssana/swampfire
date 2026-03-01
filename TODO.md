@@ -8,7 +8,7 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 0 -- Foundation (make it run as top-down)
 
-- [ ] **0.1 Kill gravity, resize canvas**
+- [x] **0.1 Kill gravity, resize canvas**
   - `main.js`: change resolution from 600x600 to 960x640, add `Phaser.Scale.FIT` + `CENTER_BOTH`
   - Set Matter gravity to `{ x: 0, y: 0 }` (top-down = no gravity)
   - Remove `MatterGravityFixPlugin` (no longer needed when gravity is zero)
