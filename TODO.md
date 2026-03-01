@@ -15,7 +15,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Rebranded: index.html title, package.json name/description
   - Dead code left in place: `matter_gravity_fix.js`, `setIgnoreGravity` calls in bat/fireball (cleaned up later)
 
-- [ ] **0.2 Convert Player to 4-directional top-down movement**
+- [x] **0.2 Convert Player to 4-directional top-down movement** _(eec5f74)_
   - Replace side-scroller movement (velocity X + jump Y) with 4-dir WASD movement
   - Remove jump, wall-climb, and bubble-shoot mechanics
   - Remove `isTouching` / `onWall` / `canJump` / `canShoot` state
