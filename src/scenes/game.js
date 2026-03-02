@@ -1,6 +1,8 @@
 import Player              from "../gameobjects/player";
 import ZoneManager         from "../gameobjects/zone_manager";
 import SearchableContainer from "../gameobjects/searchable_container";
+import Workbench           from "../gameobjects/workbench";
+import Rocket              from "../gameobjects/rocket";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -19,14 +21,14 @@ export default class Game extends Phaser.Scene {
     this.center_width  = this.width / 2;
     this.center_height = this.height / 2;
 
-    // Nearest unsearched container in E-key range; null when none
-    this.nearbyContainer = null;
+    // Nearest interactable (container / workbench / rocket) in E-key range; null when none
+    this.nearbyInteractable = null;
 
     this.addMap();
     this.addPlayer();
     this.addCollisions();
     this.addCamera();
-    this.addContainers();
+    this.addWorldObjects();
     this.addInteractPrompt();
     this.addInputHandlers();
     this.launchHUD();
@@ -53,14 +55,13 @@ export default class Game extends Phaser.Scene {
     this.player = new Player(this, spawn.x, spawn.y, 100);
   }
 
-  // ─── Containers ────────────────────────────────────────────────────────────
+  // ─── World objects ─────────────────────────────────────────────────────────
 
   /*
-    Spawns 4 searchable containers around the Zone 0 spawn point.
-    Positions are hardcoded for Phase 2.1; Phase 3 will load them from
-    a Tiled object layer instead.
+    Spawns containers, workbench, and rocket around the Zone 0 spawn point.
+    Positions are hardcoded for Phase 2.x; Phase 3 will load from Tiled layer.
   */
-  addContainers() {
+  addWorldObjects() {
     const s = this.zone.getSpawnPoint();
     const positions = [
       { x: s.x - 220, y: s.y - 160 },
@@ -68,21 +69,21 @@ export default class Game extends Phaser.Scene {
       { x: s.x - 120, y: s.y + 210 },
       { x: s.x + 180, y: s.y + 140 },
     ];
-    this.containers = positions.map(
-      (p) => new SearchableContainer(this, p.x, p.y)
-    );
+    this.containers = positions.map((p) => new SearchableContainer(this, p.x, p.y));
+    this.workbench  = new Workbench(this, s.x,      s.y + 80);
+    this.rocket     = new Rocket(this,   s.x - 100, s.y - 60);
   }
 
   // ─── Interact prompt ───────────────────────────────────────────────────────
 
   /*
-    A single camera-fixed "[E] Search" label shown when the player is in
-    range of an unsearched container. Alpha is tweened between 0 and 1 so
-    the prompt fades smoothly in/out rather than snapping.
+    A single camera-fixed interact label shown when the player is in range of
+    an interactable. Text is set dynamically by each object's promptText().
+    Alpha is tweened between 0 and 1 so the prompt fades smoothly in/out.
   */
   addInteractPrompt() {
     this.interactPrompt = this.add
-      .bitmapText(this.center_width, this.height - 40, "default", "[E] Search", 16)
+      .bitmapText(this.center_width, this.height - 40, "default", "[E]", 16)
       .setOrigin(0.5)
       .setTint(0xffffff)
       .setScrollFactor(0)  // fixed to camera — stays at screen bottom
@@ -116,47 +117,51 @@ export default class Game extends Phaser.Scene {
     this.input.keyboard.on("keydown-E", this.onEKey, this);
 
     // Proximity check runs every frame via the scene's update event
-    this.events.on("update", this.checkContainerProximity, this);
+    this.events.on("update", this.checkInteractableProximity, this);
 
     this.events.once("shutdown", () => {
       this.input.keyboard.off("keydown-E", this.onEKey, this);
-      this.events.off("update", this.checkContainerProximity, this);
+      this.events.off("update", this.checkInteractableProximity, this);
     });
   }
 
   /*
-    Called on every E keydown. Delegates to the currently-highlighted
-    container, if any. search() is idempotent so extra presses are safe.
+    Called on every E keydown. Delegates to whichever interactable is
+    currently highlighted (container, workbench, or rocket).
   */
   onEKey() {
-    this.nearbyContainer?.search();
+    this.nearbyInteractable?.interact();
   }
 
   /*
-    Per-frame check: finds the nearest unsearched container within RANGE
-    pixels of the player. Shows/hides the prompt on transition.
+    Per-frame check: finds the nearest eligible interactable within RANGE pixels
+    of the player. Priority order: unsearched containers → workbench → rocket.
+    Shows/hides and updates the prompt text on any change.
   */
-  checkContainerProximity() {
+  checkInteractableProximity() {
     if (!this.player?.sprite) return;
 
     const { x: px, y: py } = this.player.sprite;
-    const RANGE = 64; // pixels — keep in sync with container sprite size
+    const RANGE = 72;
+
+    const candidates = [
+      ...this.containers.filter(c => !c.searched),
+      this.workbench,
+      this.rocket,
+    ];
 
     let found = null;
-    for (const c of this.containers) {
-      if (c.searched) continue;
-      const dx = px - c.sprite.x;
-      const dy = py - c.sprite.y;
-      if (dx * dx + dy * dy < RANGE * RANGE) {
-        found = c;
-        break;
-      }
+    for (const obj of candidates) {
+      const dx = px - obj.sprite.x;
+      const dy = py - obj.sprite.y;
+      if (dx * dx + dy * dy < RANGE * RANGE) { found = obj; break; }
     }
 
-    // Only update UI when the nearby container changes
-    if (found !== this.nearbyContainer) {
-      this.nearbyContainer = found;
+    // Only update UI when the highlighted interactable changes
+    if (found !== this.nearbyInteractable) {
+      this.nearbyInteractable = found;
       if (found) {
+        this.interactPrompt.setText(found.promptText());
         this.showInteractPrompt();
       } else {
         this.hideInteractPrompt();

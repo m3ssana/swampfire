@@ -8,6 +8,8 @@ export default class Bootloader extends Phaser.Scene {
     */
   preload() {
     this.generateItemTexture();
+    this.generateWorkbenchTexture();
+    this.generateRocketTexture();
     this.createBars();
     this.setLoadEvents();
     this.loadFonts();
@@ -27,6 +29,39 @@ export default class Bootloader extends Phaser.Scene {
     g.fillStyle(0xffffff, 1);
     g.fillRoundedRect(0, 0, 16, 16, 3);
     g.generateTexture('item_pixel', 16, 16);
+    g.destroy();
+  }
+
+  /*
+    Programmatically generates a 40×28 brown workbench texture.
+    Drawn before asset loads so 'workbench_pixel' is available immediately.
+  */
+  generateWorkbenchTexture() {
+    const g = this.make.graphics({ add: false });
+    g.fillStyle(0x8b5e3c, 1);     // wood brown base
+    g.fillRect(0, 0, 40, 28);
+    g.fillStyle(0x5a3a1a, 1);     // darker top surface
+    g.fillRect(2, 2, 36, 10);
+    g.fillStyle(0x3a2a10, 1);     // legs
+    g.fillRect(2, 22, 8, 6);
+    g.fillRect(30, 22, 8, 6);
+    g.generateTexture('workbench_pixel', 40, 28);
+    g.destroy();
+  }
+
+  /*
+    Programmatically generates a 32×72 white rocket texture.
+    Drawn before asset loads so 'rocket_pixel' is available immediately.
+  */
+  generateRocketTexture() {
+    const g = this.make.graphics({ add: false });
+    g.fillStyle(0xffffff, 1);
+    g.fillTriangle(16, 0, 8, 20, 24, 20);   // nose cone
+    g.fillRect(8, 18, 16, 44);               // body
+    g.fillTriangle(0, 56, 8, 36, 8, 62);    // left fin
+    g.fillTriangle(32, 56, 24, 36, 24, 62); // right fin
+    g.fillRect(10, 62, 12, 8);              // nozzle
+    g.generateTexture('rocket_pixel', 32, 72);
     g.destroy();
   }
 

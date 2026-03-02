@@ -288,6 +288,7 @@ export default class Transition extends Phaser.Scene {
     this.registry.set("timeLeft", 3600); // 60 minutes in seconds
     this.registry.set("timerExpired", false);
     this.registry.set("inventory", []);  // cleared fresh each run; fed by item pickups
+    this.registry.set("systemsInstalled", 0); // reset rocket progress each run
 
     this.cameras.main.fade(300, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => {

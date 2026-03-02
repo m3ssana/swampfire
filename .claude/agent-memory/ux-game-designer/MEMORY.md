@@ -71,12 +71,13 @@
 - `*:Zone.Identifier` in .gitignore — Windows NTFS metadata files from downloads
 - `package.json` has `"type":"module"` — scripts must use `import` not `require`; or rename `.cjs`
 
-## TODO Progress (as of TODO 2.2)
-All of Phase 0 + Phase 1 done. Phase 2 in progress.
+## TODO Progress (as of TODO 2.4)
+All of Phase 0 + Phase 1 done. Phase 2 complete.
 - [x] 2.0 Juan sprite
 - [x] 2.1 Searchable containers (loot system, XP-only)
 - [x] 2.2 Inventory + Item Pickup
-- [ ] 2.3 Workbench → 2.4 Rocket
+- [x] 2.3 Workbench crafting
+- [x] 2.4 Rocket install + win condition
 
 ## Phase 2.1 — Searchable Containers (confirmed patterns)
 - Container spritesheet: `public/assets/images/container.png`, 96×48px, 2 frames × 48×48
@@ -118,5 +119,36 @@ All of Phase 0 + Phase 1 done. Phase 2 in progress.
 - Loot table `type` field: `"ingredient"` (blue 0x4fc3f7) = crafting materials; `"junk"` (white/grey) = filler/flavor
 - **Phase 3 replaces hardcoded placement** (see `docs/ddr/container-placement.md`):
   - Load from Tiled object layer in `zone_manager.js` (type=`"container"`, property `table`)
-  - Remove `addContainers()` from `game.js`
+  - Remove `addWorldObjects()` from `game.js`
   - Target: ~15–20 containers for Zone 0
+
+## Phase 2.3+2.4 — Workbench + Rocket (confirmed patterns)
+
+### Unified Interactable Interface
+All world objects implement `interact()` + `promptText()`. game.js stores one pointer:
+`this.nearbyInteractable` (was `nearbyContainer`). `checkInteractableProximity()` builds
+candidates array `[...unsearched containers, workbench, rocket]`; first within RANGE=72px wins.
+`interactPrompt.setText(found.promptText())` called on transition — dynamic text per object.
+
+### Workbench (`src/gameobjects/workbench.js`)
+- Consumes 2 `type:"ingredient"` items, produces next in ROCKET_SYSTEMS[totalBuilt]
+- `totalBuilt = systemsInstalled + inventory.components.length` — cap at 4
+- Awards +15 XP per craft. Camera shake 120ms/0.006.
+- Error popups via `scene.showPoints()` with red 0xff4444 tint
+
+### Rocket (`src/gameobjects/rocket.js`)
+- 5 tint states: TINTS[0–4] grey→gold via `this.sprite.setTint(TINTS[n])`
+- `updateVisual()` called after every install to keep sprite in sync
+- promptText() returns "[E] Launch" when n>=4, else "[E] Install"
+- Installs consume first `type:"component"` from inventory; awards +20 XP
+- n>=4 → calls `scene.finishScene()` → `endRun("victory")`
+
+### Registry addition
+- `systemsInstalled` (0–4): seeded in `transition.loadNext()`, updated in `rocket.interact()`
+- HUD watches via `onRegistryChange` case `"systemsInstalled"` → `updateSystems(n)`
+- `updateSystems`: text turns cyan (0x4fffaa) at 4/4, stays gold (0xffee44) otherwise
+- Persists across death/restart within a run; reset only on new run via transition
+
+### Texture generation
+- `generateWorkbenchTexture()` + `generateRocketTexture()` in `bootloader.preload()`
+- Both called alongside `generateItemTexture()` before `setLoadEvents()`

@@ -40,6 +40,7 @@ export default class HUD extends Phaser.Scene {
     this.updateTimerDisplay(this.registry.get("timeLeft") ?? 3600);
     this.updateHearts(this.registry.get("hp") ?? MAX_HP);
     this.updateXP(this.registry.get("xp") ?? 0);
+    this.updateSystems(this.registry.get("systemsInstalled") ?? 0);
 
     // Tick every real second — HUDScene owns the countdown
     this.countdown = this.time.addEvent({
@@ -104,32 +105,32 @@ export default class HUD extends Phaser.Scene {
   }
 
   buildMinimap() {
-    const mw = 130;
-    const mh = 90;
+    const mw = 130, mh = 90;
     const mx = this.w - mw / 2 - 8;
     const my = mh / 2 + 60; // sits just below the top bar
 
     // Background fill
-    this.add
-      .rectangle(mx, my, mw, mh, 0x000000)
-      .setAlpha(0.7);
+    this.add.rectangle(mx, my, mw, mh, 0x000000).setAlpha(0.7);
 
     // Border
     const border = this.add.graphics();
     border.lineStyle(1, 0x4fffaa, 0.5);
     border.strokeRect(mx - mw / 2, my - mh / 2, mw, mh);
 
-    // Placeholder label
+    // Header label
     this.add
-      .bitmapText(mx, my, "default", "MINIMAP", 11)
-      .setOrigin(0.5)
-      .setTint(0x4fffaa)
-      .setAlpha(0.4);
+      .bitmapText(mx, my - 24, 'default', 'ROCKET', 10)
+      .setOrigin(0.5).setTint(0x4fffaa).setAlpha(0.8);
 
+    // Live systems counter — updated via updateSystems()
+    this.systemsText = this.add
+      .bitmapText(mx, my - 8, 'default', '0 / 4', 26)
+      .setOrigin(0.5).setTint(0xffee44);
+
+    // Footer label
     this.add
-      .bitmapText(mx, my + 16, "default", "(Phase 3)", 9)
-      .setOrigin(0.5)
-      .setTint(0x555555);
+      .bitmapText(mx, my + 20, 'default', 'SYSTEMS', 10)
+      .setOrigin(0.5).setTint(0x888888);
   }
 
   // ─── Countdown ─────────────────────────────────────────────────────────────
@@ -149,9 +150,10 @@ export default class HUD extends Phaser.Scene {
 
   onRegistryChange(parent, key, value) {
     switch (key) {
-      case "timeLeft": this.updateTimerDisplay(value); break;
-      case "hp":       this.updateHearts(value);       break;
-      case "xp":       this.updateXP(value);           break;
+      case "timeLeft":        this.updateTimerDisplay(value); break;
+      case "hp":              this.updateHearts(value);       break;
+      case "xp":              this.updateXP(value);           break;
+      case "systemsInstalled": this.updateSystems(value);     break;
     }
   }
 
@@ -189,6 +191,11 @@ export default class HUD extends Phaser.Scene {
 
   updateXP(xp) {
     this.xpText.setText(String(xp));
+  }
+
+  updateSystems(n) {
+    this.systemsText?.setText(`${n} / 4`);
+    this.systemsText?.setTint(n >= 4 ? 0x4fffaa : 0xffee44);
   }
 
   // ─── Cleanup ────────────────────────────────────────────────────────────────

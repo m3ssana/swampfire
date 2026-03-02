@@ -57,6 +57,14 @@ export default class SearchableContainer {
     this.scene.events.once("shutdown", this.destroy, this);
   }
 
+  // ── Interactable interface ───────────────────────────────────────────────────
+
+  /** Unified interact() call — delegates to search(). */
+  interact()   { this.search(); }
+
+  /** Returns the prompt text shown when the player is in range. */
+  promptText() { return '[E] Search'; }
+
   // ── Search action ───────────────────────────────────────────────────────────
 
   /**
