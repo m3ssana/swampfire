@@ -7,6 +7,7 @@ export default class Bootloader extends Phaser.Scene {
     Once again we use the Scene `preload` method to call the different methods that will load the game assets.
     */
   preload() {
+    this.generateItemTexture();
     this.createBars();
     this.setLoadEvents();
     this.loadFonts();
@@ -14,6 +15,19 @@ export default class Bootloader extends Phaser.Scene {
     this.loadMaps();
     this.loadAudios();
     this.loadSpritesheets();
+  }
+
+  /*
+    Programmatically generates a 16×16 white rounded-rect texture used by
+    DroppedItem. Runs synchronously before any load events so the key
+    'item_pixel' is available immediately when the game scene creates items.
+  */
+  generateItemTexture() {
+    const g = this.make.graphics({ add: false });
+    g.fillStyle(0xffffff, 1);
+    g.fillRoundedRect(0, 0, 16, 16, 3);
+    g.generateTexture('item_pixel', 16, 16);
+    g.destroy();
   }
 
   /*

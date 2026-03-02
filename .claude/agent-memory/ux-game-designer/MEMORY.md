@@ -71,11 +71,12 @@
 - `*:Zone.Identifier` in .gitignore — Windows NTFS metadata files from downloads
 - `package.json` has `"type":"module"` — scripts must use `import` not `require`; or rename `.cjs`
 
-## TODO Progress (as of TODO 2.1)
+## TODO Progress (as of TODO 2.2)
 All of Phase 0 + Phase 1 done. Phase 2 in progress.
 - [x] 2.0 Juan sprite
 - [x] 2.1 Searchable containers (loot system, XP-only)
-- [ ] 2.2 Inventory → 2.3 Workbench → 2.4 Rocket
+- [x] 2.2 Inventory + Item Pickup
+- [ ] 2.3 Workbench → 2.4 Rocket
 
 ## Phase 2.1 — Searchable Containers (confirmed patterns)
 - Container spritesheet: `public/assets/images/container.png`, 96×48px, 2 frames × 48×48
@@ -97,6 +98,24 @@ All of Phase 0 + Phase 1 done. Phase 2 in progress.
 - All listeners cleaned up in shutdown: `this.events.once("shutdown", () => { keyboard.off; events.off; })`
 - 4 containers hardcoded around spawn point (~260 px radius, <7% of zone radius) — intentional Phase 2.1 placeholder
 - No respawn timer by design — containers stay open until death/restart
+## Phase 2.2 — Inventory + Item Pickup (confirmed patterns)
+- Registry key `inventory`: `Array<{ label: string, type: "ingredient"|"junk"|"component" }>`
+  - Seeded as `[]` in `transition.loadNext()` alongside hp/xp/timeLeft/timerExpired
+  - Persists across deaths (registry lives as long as HUD); cleared on new run
+  - `type: "component"` reserved for rocket parts (Phase 2.4)
+- `DroppedItem`: `src/gameobjects/dropped_item.js` — mirrors Coin pattern
+  - `Phaser.Physics.Matter.Sprite`, `isStatic: true`, `label = 'item'`
+  - Texture key `'item_pixel'`: programmatic 16×16 white rounded rect, generated in bootloader
+  - Tinted per-item via `setTint(itemDef.tint)` at construction
+  - Pulse tween: scaleX/Y 0.9→1.2, 600ms, yoyo, repeat -1, Sine.easeInOut
+  - Cleanup: `pulseTween?.stop()` before `super.destroy()`; deregisters shutdown listener
+- `generateItemTexture()` in bootloader: called FIRST in `preload()` before `setLoadEvents()`
+  - `this.make.graphics({ add: false })` generates texture synchronously (no async needed)
+- Two-step loot loop: XP on search (instant dopamine) → item on floor → walk over (tension)
+  - "Empty" containers: no DroppedItem spawned, no entry in inventory (guard in both search() and playerPicksItem())
+  - Item spawn offset: `Phaser.Math.Between(-30, 30)` on both axes from container center
+- `playerPicksItem()` in game.js: reads itemDef, spreads new entry onto inventory array, shows popup, plays audio, destroys sprite
+- Loot table `type` field: `"ingredient"` (blue 0x4fc3f7) = crafting materials; `"junk"` (white/grey) = filler/flavor
 - **Phase 3 replaces hardcoded placement** (see `docs/ddr/container-placement.md`):
   - Load from Tiled object layer in `zone_manager.js` (type=`"container"`, property `table`)
   - Remove `addContainers()` from `game.js`

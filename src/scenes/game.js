@@ -223,6 +223,7 @@ export default class Game extends Phaser.Scene {
     if (!gameObjectB) return;
     if (gameObjectB.label === "coin")     this.playerPicksCoin(gameObjectB);
     if (gameObjectB.label === "keys")     this.playerPicksKey(gameObjectB);
+    if (gameObjectB.label === "item")     this.playerPicksItem(gameObjectB);
     if (gameObjectB.label === "bat")      this.playerHitsFoe(gameObjectB);
     if (gameObjectB.label === "wizard")   this.playerHitsFoe(gameObjectB);
     if (gameObjectB.label === "fireball") this.playerHitsFoe(gameObjectB);
@@ -246,6 +247,22 @@ export default class Game extends Phaser.Scene {
   playerPicksKey(key) {
     this.showPoints(key.x, key.y, "+KEY");
     key.destroy();
+  }
+
+  playerPicksItem(itemSprite) {
+    const { itemDef } = itemSprite;
+    if (!itemDef) return;
+
+    // Append to persistent inventory registry (feed for Phase 2.3 crafting)
+    const inv = this.registry.get('inventory') ?? [];
+    this.registry.set('inventory', [
+      ...inv,
+      { label: itemDef.label, type: itemDef.type },
+    ]);
+
+    this.showPoints(itemSprite.x, itemSprite.y, `+ ${itemDef.label}`, itemDef.tint);
+    this.playAudio('coin');
+    itemSprite.destroy();
   }
 
   playerHitsFoe(foe) {

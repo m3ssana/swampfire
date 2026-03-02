@@ -1,3 +1,5 @@
+import DroppedItem from './dropped_item';
+
 /**
  * SearchableContainer — a static, lootable world object.
  *
@@ -16,11 +18,11 @@
 
 const LOOT_TABLES = {
   default: [
-    { label: "Copper Wiring",  xp:  5, tint: 0x4fc3f7, weight: 25 },
-    { label: "Solenoid Valve", xp: 10, tint: 0x4fc3f7, weight: 20 },
-    { label: "Hydraulic Seal", xp:  5, tint: 0x4fc3f7, weight: 20 },
-    { label: "PVC Coupler",    xp:  3, tint: 0xffffff, weight: 20 },
-    { label: "Empty",          xp:  0, tint: 0x666666, weight: 15 },
+    { label: "Copper Wiring",  xp:  5, tint: 0x4fc3f7, weight: 25, type: "ingredient" },
+    { label: "Solenoid Valve", xp: 10, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
+    { label: "Hydraulic Seal", xp:  5, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
+    { label: "PVC Coupler",    xp:  3, tint: 0xffffff, weight: 20, type: "junk" },
+    { label: "Empty",          xp:  0, tint: 0x666666, weight: 15, type: "junk" },
   ],
 };
 
@@ -85,6 +87,14 @@ export default class SearchableContainer {
     if (item.xp > 0) {
       const current = this.scene.registry.get("xp") ?? 0;
       this.scene.registry.set("xp", current + item.xp);
+    }
+
+    // Spawn a pickupable DroppedItem at a small random offset from the container.
+    // "Empty" loot has no physical item — only XP-less flavour text was shown.
+    if (item.label !== 'Empty') {
+      const ox = Phaser.Math.Between(-30, 30);
+      const oy = Phaser.Math.Between(-30, 30);
+      new DroppedItem(this.scene, this.sprite.x + ox, this.sprite.y + oy, item);
     }
 
     // Audio: "coin" SFX as placeholder — proper rummage SFX added in Phase 5.3
