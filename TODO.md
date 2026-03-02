@@ -84,23 +84,26 @@ Each task is small enough to fit in a single Claude Code session.
   - 4 containers hardcoded near spawn (~260 px radius); stay open until death/restart
   - See `docs/ddr/container-placement.md` — Phase 3 replaces hardcoded positions with Tiled object layer
 
-- [ ] **2.2 Inventory + item pickup**
+- [x] **2.2 Inventory + item pickup** _(a6fc987)_
   - Simple inventory array on Player (no UI yet, just data)
   - Items are game objects that can be picked up on collision
   - Distinguish: junk items, crafting ingredients, rocket components
   - Registry stores inventory state
 
-- [ ] **2.3 Workbench + instant crafting**
+- [x] **2.3 Workbench + instant crafting** _(6075dbc)_
   - Workbench game object at Zone 0 (interact with E)
   - Recipe system: 2 ingredients -> 1 output (per spec)
   - Crafting is instant, produces XP popup + screen shake
-  - 4 rocket systems: fuel injector, oxidizer, avionics, battery array
+  - 4 rocket systems: Fuel Injector, Oxidizer Tank, Avionics Board, Battery Array
+  - Unified interactable interface (`interact()` + `promptText()`) shared with containers + rocket
 
-- [ ] **2.4 Rocket + visual progress**
-  - Rocket game object at Zone 0 with 5 visual states (0-4 parts installed)
-  - Player brings crafted system to rocket, presses E to install
-  - Installation triggers: camera zoom, XP dump, achievement toast placeholder
-  - When all 4 installed: enable "LAUNCH" interaction
+- [x] **2.4 Rocket + visual progress** _(6075dbc)_
+  - Rocket game object at Zone 0 with 5 visual states (0-4 parts installed) via tint
+  - Player brings crafted system to rocket, presses E to install (+20 XP per install)
+  - Prompt flips "[E] Install" → "[E] Launch" after 4th system
+  - HUD minimap placeholder replaced with live SYSTEMS 0/4 counter (gold → cyan at 4/4)
+  - `systemsInstalled` registry key persists across deaths; reset in `transition.loadNext()`
+  - When all 4 installed: E at rocket calls `finishScene()` → outro "victory"
 
 ---
 
@@ -112,7 +115,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Exit points: south (to Zone 1), west (to Zone 3)
   - Camera bounds match zone size
   - Add Tiled object layer for containers (type = `"container"`, property `table`)
-  - Load container positions in `zone_manager.js`; remove `addContainers()` from `game.js`
+  - Load container positions in `zone_manager.js`; remove `addWorldObjects()` from `game.js`
   - Target ~15–20 containers for Zone 0 (see `docs/ddr/container-placement.md`)
 
 - [ ] **3.2 Zone manager + zone transitions**
