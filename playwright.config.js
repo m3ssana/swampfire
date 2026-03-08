@@ -33,12 +33,14 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
 
-  // Local dev server: spin up vite dev server for tests
-  webServer: {
-    command: 'npm run dev',
-    port: 8080,
-    reuseExistingServer: !process.env.CI,
-  },
+  // Local dev server: only start if testing against localhost (not live deployment)
+  webServer: process.env.PLAYWRIGHT_BASE_URL?.includes('localhost') || !process.env.PLAYWRIGHT_BASE_URL
+    ? {
+        command: 'npm run dev',
+        port: 8080,
+        reuseExistingServer: !process.env.CI,
+      }
+    : undefined,
 
   // Browsers to test against
   projects: [
