@@ -32,7 +32,8 @@ export default class Player {
     this.sprite
       .setExistingBody(mainBody)
       .setFixedRotation()
-      .setPosition(x, y);
+      .setPosition(x, y)
+      .setDepth(10); // Always render above tile layers (ground=0, obstacles=1)
 
     this.addEvents();
     this.addAnimations();
