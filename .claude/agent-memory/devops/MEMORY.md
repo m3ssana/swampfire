@@ -63,3 +63,92 @@
 - Changes are non-breaking; can revert to version tags if needed
 - Caching can be disabled by removing the cache step
 - Build size reporting can be removed without affecting build process
+
+---
+
+## Subagent Delegation Strategy
+
+**Purpose**: Optimize devops workflow by delegating specialized work to focused subagents.
+
+### When to Use Subagents
+
+#### 🔍 **Explore Agent** - Codebase Discovery & Analysis
+**Use when**: Need to search, find, or understand code patterns across the codebase
+- Finding files matching patterns (e.g., "all GitHub Actions workflows", "security-related configs")
+- Searching for specific keywords or function implementations
+- Understanding existing patterns and architecture
+- **NOT** writing code — just discovery/reading
+- **Speed advantage**: Fast, specialized tool set optimized for grep/glob
+
+**Examples**:
+- "Find all `.yml` files in `.github/workflows/`"
+- "Search for all references to `GITHUB_TOKEN` in the codebase"
+- "How is authentication currently configured?"
+
+#### 📋 **Plan Agent** - Implementation Architecture
+**Use when**: Need to design a complex multi-step implementation before coding
+- Designing new CI/CD pipelines or infrastructure changes
+- Planning refactors that affect multiple files
+- Exploring tradeoffs between architectural approaches
+- **Critical**: Use BEFORE you start writing code if uncertain about approach
+
+**Examples**:
+- "Plan a deployment pipeline for a new environment"
+- "Design a secrets management strategy for this game"
+- "Outline steps to implement OIDC-based GitHub Actions authentication"
+
+#### 🎮 **UX Game Designer** - Game-Specific Optimizations
+**Use when**: Deployment or performance impacts game player experience
+- Optimizing asset loading for mobile performance
+- Designing CDN cache invalidation strategies that affect gameplay
+- Analyzing particle effect performance on deployment targets
+- **NOT** for general devops work — only game-specific UX/performance
+
+**Examples**:
+- "Optimize asset delivery to improve mobile game performance"
+- "Design cache headers so new game builds deploy instantly"
+
+#### 🔐 **Security-Focused Work** - Specialized Security Hardening
+**Use when**: Complex security implementations (usually covered by main devops tasks)
+- The devops agent already handles OWASP, CSP, CORS, secrets
+- Deploy security specialist only if work goes beyond standard hardening
+- Example: Complex WAF rule design, advanced SIEM integration
+
+### When NOT to Use Subagents
+
+✅ **Do this yourself**:
+- Writing GitHub Actions workflows (primary devops responsibility)
+- Configuring secrets and environment variables
+- Troubleshooting failing deployments
+- Reviewing or implementing security in CI/CD pipelines
+- Most infrastructure/containerization work (unless delegating to Plan first)
+
+### Recommended Workflow Pattern
+
+1. **Understand the task** → Assess scope and complexity
+2. **Explore if uncertain** → Use Explore agent if codebase unfamiliar
+3. **Plan if complex** → Use Plan agent for major architecture decisions
+4. **Execute** → Write workflows, configs, and deployment code yourself
+5. **Verify** → Test and validate; use agents for final checks if needed
+
+### Agent Memory Integration
+
+- Update this MEMORY.md when discovering new stable patterns
+- Document action SHAs and workflow changes here
+- Link to other `.md` files for detailed topics (e.g., `security-patterns.md`, `performance-tuning.md`)
+- Keep records of successful deployments and configurations for future reference
+
+---
+
+## GitHub Issues Workflow (All Agents)
+
+**Location**: `.claude/GITHUB_ISSUES_WORKFLOW.md`
+
+**Key Rules** (enforce across all agents):
+1. Update issues with progress as work advances
+2. **Definition of Done**: Changes must be pushed to main branch
+3. **Never close issues** until merged to main
+4. Provide status comments during development
+5. Close issue only after: PR created → approved → merged to main
+
+**Critical**: A closed issue = feature is in production. Do not close prematurely.
