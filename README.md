@@ -1,5 +1,7 @@
 # Swampfire Protocol
 
+![Swampfire Protocol](public/assets/images/swampfire-cover.jpg)
+
 > "What do you mean the hurricane is in 60 minutes?! I haven't even found the fuel injector yet!"
 > — Juan, probably
 
