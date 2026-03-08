@@ -21,6 +21,9 @@ export default class Game extends Phaser.Scene {
     // Nearest interactable (container / workbench / rocket) in E-key range; null when none
     this.nearbyInteractable = null;
 
+    // Lock flag — true while a zone-transition fade is in progress
+    this._transitioning = false;
+
     this.addMap();
     this.addPlayer();
     this.addCollisions();
@@ -94,12 +97,14 @@ export default class Game extends Phaser.Scene {
   addInputHandlers() {
     this.input.keyboard.on("keydown-E", this.onEKey, this);
 
-    // Proximity check runs every frame via the scene's update event
+    // Both proximity checks run every frame via the scene's update event
     this.events.on("update", this.checkInteractableProximity, this);
+    this.events.on("update", this.checkExitZones, this);
 
     this.events.once("shutdown", () => {
       this.input.keyboard.off("keydown-E", this.onEKey, this);
       this.events.off("update", this.checkInteractableProximity, this);
+      this.events.off("update", this.checkExitZones, this);
     });
   }
 
@@ -323,6 +328,80 @@ export default class Game extends Phaser.Scene {
       } else {
         this.scene.restart();
       }
+    });
+  }
+
+  // ─── Zone transitions ───────────────────────────────────────────────────────
+
+  /*
+    Per-frame: checks whether the player has walked into any exit zone rectangle.
+    Uses a simple AABB overlap test (no physics body needed — exits are logical
+    trigger regions, not physical obstacles).
+
+    Skipped during death-restart, game-over, or an in-progress zone transition.
+  */
+  checkExitZones() {
+    if (this._transitioning || !this.player?.sprite) return;
+
+    const px = this.player.sprite.x;
+    const py = this.player.sprite.y;
+
+    for (const exit of (this.zone.exits ?? [])) {
+      if (
+        px >= exit.x && px <= exit.x + exit.width &&
+        py >= exit.y && py <= exit.y + exit.height
+      ) {
+        this.transitionToZone(exit.targetZone);
+        return;
+      }
+    }
+  }
+
+  /*
+    Performs the 0.5s fade-out → zone swap → fade-in transition.
+
+    1. Lock: prevents re-entry and freezes player input.
+    2. Fade to black (250 ms).
+    3. Destroy current zone (tilemap + objects), load target zone,
+       reposition player at the correct entry point.
+    4. Update camera bounds to new zone size.
+    5. Hide interact prompt (stale from old zone).
+    6. Fade back in (250 ms), unlock.
+
+    Registry state (inventory, xp, hp, systemsInstalled) is preserved because
+    it lives in the Phaser registry — independent of which scene/zone is active.
+  */
+  transitionToZone(targetZoneId) {
+    if (this._transitioning) return;
+    this._transitioning  = true;
+    this.player.locked   = true;           // freeze WASD input
+    this.nearbyInteractable = null;
+    this.hideInteractPrompt();
+
+    const sourceZoneId = this.zone.currentZoneId;
+
+    this.cameras.main.fade(250, 0, 0, 0);
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      // ── Swap zones ──────────────────────────────────────────────────────────
+      this.zone.destroyCurrentZone();
+      this.zone.loadZone(targetZoneId, sourceZoneId);
+
+      // ── Reposition player ───────────────────────────────────────────────────
+      const entry = this.zone.getEntryPoint(sourceZoneId);
+      this.player.sprite.setPosition(entry.x, entry.y);
+      this.player.sprite.setVelocity(0, 0);
+
+      // ── Update camera to new zone ───────────────────────────────────────────
+      const { width, height } = this.zone.getBounds();
+      this.cameras.main.setBounds(0, 0, width, height);
+      // Camera is already following player.sprite — no need to re-bind.
+
+      // ── Fade back in ────────────────────────────────────────────────────────
+      this.cameras.main.fadeIn(250, 0, 0, 0);
+      this.cameras.main.once("camerafadeincomplete", () => {
+        this.player.locked  = false;
+        this._transitioning = false;
+      });
     });
   }
 

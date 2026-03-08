@@ -71,13 +71,33 @@
 - `*:Zone.Identifier` in .gitignore — Windows NTFS metadata files from downloads
 - `package.json` has `"type":"module"` — scripts must use `import` not `require`; or rename `.cjs`
 
-## TODO Progress (as of TODO 2.4)
-All of Phase 0 + Phase 1 done. Phase 2 complete.
-- [x] 2.0 Juan sprite
-- [x] 2.1 Searchable containers (loot system, XP-only)
-- [x] 2.2 Inventory + Item Pickup
-- [x] 2.3 Workbench crafting
-- [x] 2.4 Rocket install + win condition
+## TODO Progress (as of Phase 3.1)
+All of Phase 0 + Phase 1 + Phase 2 done. Phase 3.1 done.
+- [x] 2.0–2.4 Phase 2 complete
+- [x] 3.1 Zone 0 tilemap (PR #19, commit 4b6a079)
+- [ ] 3.2 Zone transitions (#3) — NEXT TASK
+- [ ] 3.3 Zone 1 US-41 corridor (#4)
+- [ ] 3.4 Zones 2-4 (#5)
+
+## Phase 3.1 — Zone 0 Tilemap (confirmed patterns)
+
+- **Tileset**: `public/assets/images/swamp-tiles.png` (288×48px, 6 tiles × 48px)
+  - GID 1: mud/ground | GID 2: water (impassable) | GID 3: cypress tree (impassable)
+  - GID 4: trail/path | GID 5: campfire | GID 6: swamp grass
+  - Generator: `scripts/generate-swamp-tiles.js` (ESM pure Node zlib)
+- **Tilemap**: `public/assets/maps/zone0.json` (Tiled JSON, 80×60 tiles)
+  - Generator: `scripts/generate-zone0.js` — deterministic via seeded RNG
+  - DO NOT edit by hand — regenerate with script
+- **ZoneManager** now owns world object creation, game.js reads from `zone.containers/workbench/rocket`
+- **Object Tiled types**: `container` (prop: table), `workbench`, `rocket`, `spawn`, `exit` (prop: targetZone)
+- **Tiled object coords**: top-left corner pixels → add `obj.width/2, obj.height/2` for center
+- **Collision**: `obstacleLayer.setCollisionByProperty({impassable:true})` then `matter.world.convertTilemapLayer(obstacleLayer)`
+- **Bootloader**: `swamp-tiles` image key, `zone0` tilemap key; load image before tilemap
+- **ZoneManager addTilesetImage**: `map.addTilesetImage('swamp', 'swamp-tiles')` — first arg = tileset name in JSON
+
+## Loot Tables (searchable_container.js)
+5 tables: `default`, `toolbox` (hardware), `cooler` (food), `backpack` (mixed), `crate` (rare parts)
+Weights are relative (not %). Higher-reward: toolbox/crate. Lower-reward: cooler.
 
 ## Phase 2.1 — Searchable Containers (confirmed patterns)
 - Container spritesheet: `public/assets/images/container.png`, 96×48px, 2 frames × 48×48

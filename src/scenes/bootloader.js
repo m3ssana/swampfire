@@ -119,11 +119,13 @@ export default class Bootloader extends Phaser.Scene {
   }
 
   /*
-    Loads all zone tilemaps. "scene0" (old dungeon) kept temporarily until
-    Zone system fully replaces it; zone0 is the new Cypress Creek Preserve map.
+    Loads all zone tilemaps. All zones are pre-loaded at startup so transitions
+    are instantaneous (no async loading during gameplay).
+    Zone 1 is a placeholder — replaced with the real US-41 layout in Phase 3.3.
   */
   loadMaps() {
     this.load.tilemapTiledJSON("zone0", "assets/maps/zone0.json");
+    this.load.tilemapTiledJSON("zone1", "assets/maps/zone1.json");
   }
 
   /*
