@@ -36,3 +36,9 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+
+// Expose game instance for E2E tests to access state directly
+// Tests can access: window.game.scene.scenes[3].registry.get('hp'), etc.
+if (typeof window !== 'undefined') {
+  window.game = game;
+}
