@@ -9,9 +9,10 @@
 **Every task you work on has a GitHub issue (#XX). You must:**
 
 1. **Update the issue** as you work (don't wait until the end)
-2. **Push changes to main** before considering work complete
-3. **Never close the issue** until merged to main
-4. **Close with evidence** — link the merged PR/commit
+2. **Create a PR** when work is complete — then **STOP and wait for human review**
+3. **Never merge your own PR** — a human must approve it first
+4. **Never close the issue** until the PR is merged to main by a human
+5. **Close with evidence** — link the merged PR/commit
 
 ### Quick Workflow
 
@@ -26,9 +27,11 @@ Post updates: "✅ Completed X, working on Y..."
   ↓
 Push to feature branch & create PR
   ↓
-Post comment: "📋 PR #123 ready for review"
+Post comment: "📋 PR #123 ready for human review — waiting for approval"
   ↓
-Merge PR to main
+⏸️  STOP — do not merge. A human reviews and approves the PR.
+  ↓
+Human merges PR to main
   ↓
 Close issue: "✅ Merged to main (commit: SHA)"
 ```
@@ -36,12 +39,31 @@ Close issue: "✅ Merged to main (commit: SHA)"
 ### Definition of Done
 - ✅ Code written & tested
 - ✅ All acceptance criteria met
-- ✅ PR approved & **merged to main** ← CRITICAL
+- ✅ PR created with clear description
+- ✅ **Human reviewed and approved** ← NEW REQUIREMENT
+- ✅ **PR merged to main by human** ← CRITICAL
 - ✅ Issue closed with proof
 
-**Do not close issues until step 3 is complete.**
+**Do not merge your own PRs. Do not close issues until a human has merged the PR.**
 
-### Example Issue Closure Comment
+### Example Issue Comment After PR Creation
+
+```
+📋 PR #42 ready for human review
+
+Branch: feature/issue-12-npc-system
+PR: https://github.com/m3ssana/swampfire/pull/42
+
+All acceptance criteria met:
+- [x] NPC base class created
+- [x] Dialog system implemented
+- [x] Quest tracking works
+- [x] Rewards awarded on completion
+
+Waiting for approval before merge.
+```
+
+### Example Issue Closure Comment (after human merges)
 
 ```
 ✅ Completed and merged to main
@@ -50,14 +72,17 @@ Commit: a1b2c3d
 PR: #42
 Branch: feature/issue-12-npc-system
 
-All acceptance criteria met:
-- [x] NPC base class created
-- [x] Dialog system implemented
-- [x] Quest tracking works
-- [x] Rewards awarded on completion
-
 Changes are now live on main branch.
 ```
+
+---
+
+## ⚠️ Branch Protection
+
+The `main` branch requires **1 approving review** before any PR can be merged.
+GitHub will block self-merges. This is enforced at the repository level — not optional.
+
+**Agents must never attempt to `gh pr merge` their own PRs.**
 
 ---
 
@@ -78,18 +103,20 @@ Changes are now live on main branch.
 1. **Find the GitHub issue** (check TODO.md for links)
 2. **Read the issue** — it has acceptance criteria
 3. **Post a comment**: "🚀 Started work on this"
-4. **Create a branch** (optional): `git checkout -b feature/issue-X-description`
+4. **Create a branch**: `git checkout -b feature/issue-X-description`
 5. **Work** and post progress updates
-6. **Don't close until main** — read the workflow above
+6. **Create a PR** and post "📋 PR #N ready for human review"
+7. **Wait** — do not merge. Do not close the issue.
 
 ---
 
 ## ⚠️ Critical Rules
 
-- **Push to main first** — that's when work is "done"
+- **Never merge your own PR** — human approval is required
+- **Create a PR, then stop** — leave merging to the human
 - **Update issues regularly** — don't go silent for hours
 - **Link PRs to issues** — "Closes #XX" in PR description
-- **Close with evidence** — include commit/PR link in closure comment
+- **Close with evidence** — include commit/PR link in closure comment, AFTER merge
 - **Reopen if needed** — if PR rejected, reopen issue and update
 
 ---

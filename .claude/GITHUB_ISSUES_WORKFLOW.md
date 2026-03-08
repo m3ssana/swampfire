@@ -15,8 +15,9 @@ All agents must actively manage GitHub issues throughout development. This ensur
 
 1. **Every task = Every GitHub issue** — If you're assigned a task, it has a GitHub issue (#XX)
 2. **Real-time updates** — Update issues as work progresses, not just at the end
-3. **Definition of Done (DoD)** — Work is ONLY complete when changes are **pushed to main**
-4. **Never close prematurely** — A closed issue means the feature is in production (main branch)
+3. **Human-in-the-loop** — Agents create PRs and stop. A human reviews and merges.
+4. **Definition of Done (DoD)** — Work is ONLY complete when a human has **merged the PR to main**
+5. **Never close prematurely** — A closed issue means the feature is merged and in main
 
 ---
 
@@ -83,19 +84,30 @@ gh pr create --title "feat: implement NPC system (#12)" \
 
 **Update the issue:**
 ```
-✅ Pull request created: #PR_NUMBER
-Ready for review before merging to main
+📋 PR #PR_NUMBER ready for human review
+Waiting for approval before merge to main.
 ```
 
-### 4. **Merge to Main**
+**⏸️ STOP HERE.** Do not merge the PR yourself. A human must review and approve it.
 
-When the PR is approved and merged:
+> Branch protection on `main` requires 1 approving review. GitHub will block
+> any attempt to self-merge. This is enforced at the repository level.
 
-```bash
-gh pr merge PR_NUMBER --squash --delete-branch
+### 4. **Human Reviews & Merges**
+
+A human reviews the PR, requests changes if needed, and approves + merges to main.
+
+Agents do not run `gh pr merge`. Agents wait.
+
+If the human requests changes, address the feedback, push new commits, and update the issue:
+```
+📝 Addressed review feedback:
+- [feedback item 1]: fixed by [approach]
+- [feedback item 2]: fixed by [approach]
+Ready for re-review.
 ```
 
-### 5. **Close the Issue (FINAL STEP)**
+### 5. **Close the Issue (FINAL STEP — after human merges)**
 
 **ONLY after the change is merged to main:**
 
@@ -118,12 +130,12 @@ A work item is **ONLY complete** when:
 
 1. ✅ Code is written and tested locally
 2. ✅ All acceptance criteria are met
-3. ✅ PR is created and passes review
-4. ✅ **PR is merged to main** ← CRITICAL
-5. ✅ Change is verified on main branch
-6. ✅ Issue is closed with final comment
+3. ✅ PR is created with a clear description
+4. ✅ **Human has reviewed and approved the PR**
+5. ✅ **Human has merged PR to main** ← CRITICAL (agents do not self-merge)
+6. ✅ Issue is closed with final comment linking the merged commit
 
-**⚠️ CRITICAL: Do NOT close the issue until step 4 is complete.**
+**⚠️ CRITICAL: Agents must not merge their own PRs. Do NOT close the issue until step 5 is complete.**
 
 If the PR is closed/abandoned before merging, **reopen** the issue and update its status.
 
@@ -246,6 +258,15 @@ gh pr create --title "feat: [description] (#ISSUE_NUMBER)" \
 - [x] Done"
 ```
 
+> **Agents stop here.** Post a comment on the issue: "📋 PR #N ready for human review."
+> Do not run `gh pr merge`. Wait for a human to approve and merge.
+
+### Check PR Status
+```bash
+gh pr view PR_NUMBER
+gh pr checks PR_NUMBER
+```
+
 ---
 
 ## Why This Matters
@@ -270,5 +291,5 @@ Refer to this document first. If unclear, ask in the issue comments and wait for
 
 ---
 
-**Last Updated**: 2026-03-08
+**Last Updated**: 2026-03-08 (added human-in-the-loop PR review requirement)
 **Maintained by**: DevOps Agent + all team members

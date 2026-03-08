@@ -71,12 +71,17 @@
 - `*:Zone.Identifier` in .gitignore — Windows NTFS metadata files from downloads
 - `package.json` has `"type":"module"` — scripts must use `import` not `require`; or rename `.cjs`
 
-## TODO Progress (as of Phase 3.1)
+## ⚠️ GitHub Workflow — HUMAN-IN-THE-LOOP (enforced 2026-03-08)
+branch → commit → push → `gh pr create` → post "📋 PR #N ready for human review" → **STOP**.
+**NEVER run `gh pr merge`**. A human approves + merges. Close issue only AFTER human merges.
+Branch protection on main requires 1 approving review — GitHub blocks self-merge.
+
+## TODO Progress (as of Phase 3.2)
 All of Phase 0 + Phase 1 + Phase 2 done. Phase 3.1 done.
 - [x] 2.0–2.4 Phase 2 complete
 - [x] 3.1 Zone 0 tilemap (PR #19, commit 4b6a079)
-- [ ] 3.2 Zone transitions (#3) — NEXT TASK
-- [ ] 3.3 Zone 1 US-41 corridor (#4)
+- [x] 3.2 Zone transitions (PR #20, commit eb22d7a)
+- [ ] 3.3 Zone 1 US-41 corridor (#4) — NEXT TASK
 - [ ] 3.4 Zones 2-4 (#5)
 
 ## Phase 3.1 — Zone 0 Tilemap (confirmed patterns)
