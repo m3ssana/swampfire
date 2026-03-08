@@ -222,7 +222,7 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 2. Add it to this section as ⏳
 3. Fix it, mark ✅ with commit hash, close the issue
 
-- ✅ **Loot item spawns inside wall/container body after searching** [#21](https://github.com/m3ssana/swampfire/issues/21) _(see below)_
+- ✅ **Loot item spawns inside wall/container body after searching** [#21](https://github.com/m3ssana/swampfire/issues/21) _(26b1acb)_
   - Item dropped at `container ± 30px` could land in adjacent tree/wall/water or inside the container's own physics body
   - Fix: drop at player's current position `± 10px` — player is always in passable space
 
