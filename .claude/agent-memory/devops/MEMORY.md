@@ -152,3 +152,19 @@
 5. Close issue only after: PR created → approved → merged to main
 
 **Critical**: A closed issue = feature is in production. Do not close prematurely.
+
+---
+
+## GitHub Milestones (Phase Organization)
+
+**Location**: `.claude/MILESTONES.md`
+
+**5 Milestones Created** (2026-03-08):
+- Phase 3 - World Building (#2-#5): 4 issues
+- Phase 4 - Storm & Hazards (#6-#8): 3 issues
+- Phase 5 - Feedback & Polish (#9-#12): 4 issues
+- Phase 6 - Endgame & Meta (#13-#15): 3 issues
+- Cleanup & Maintenance (#16-#18): 3 issues
+
+**Purpose**: Organize 17 development tasks by release phase with clear dependencies.
+**View Progress**: https://github.com/m3ssana/swampfire/milestones
