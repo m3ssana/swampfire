@@ -108,20 +108,22 @@ export default class Bootloader extends Phaser.Scene {
     This one loads the static images.
     */
   loadImages() {
-    this.load.image("pello", "assets/images/pello_ok.png");
-    this.load.image("fireball", "assets/images/fireball.png");
-    this.load.image("tiles", "assets/maps/pixel-poem-tiles.png");
-    this.load.image("block", "assets/images/block.png");
-    this.load.image("seesaw", "assets/images/seesaw.png");
-    this.load.image("bubble", "assets/images/bubble.png");
-    this.load.image("platform", "assets/images/platform.png");
+    this.load.image("pello",       "assets/images/pello_ok.png");
+    this.load.image("fireball",    "assets/images/fireball.png");
+    this.load.image("block",       "assets/images/block.png");
+    this.load.image("seesaw",      "assets/images/seesaw.png");
+    this.load.image("bubble",      "assets/images/bubble.png");
+    this.load.image("platform",    "assets/images/platform.png");
+    // Zone 0 swamp tileset
+    this.load.image("swamp-tiles", "assets/images/swamp-tiles.png");
   }
 
   /*
-    This loads the level map. In this game, we just use one empty map that we'll fill with the different elements of the game using a dungeon generator class.
-    */
+    Loads all zone tilemaps. "scene0" (old dungeon) kept temporarily until
+    Zone system fully replaces it; zone0 is the new Cypress Creek Preserve map.
+  */
   loadMaps() {
-    this.load.tilemapTiledJSON("scene0", "assets/maps/level.json");
+    this.load.tilemapTiledJSON("zone0", "assets/maps/zone0.json");
   }
 
   /*
