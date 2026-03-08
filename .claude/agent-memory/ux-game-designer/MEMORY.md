@@ -89,8 +89,13 @@ If worktree isolation isn't used and branches get cross-contaminated, check
 to see where commits actually landed.
 
 ## ⚠️ GitHub Workflow — HUMAN-IN-THE-LOOP (enforced 2026-03-08)
+**ALL changes** (features, bug fixes, docs) go through a branch + PR. Nothing direct to main.
+- Features: `git checkout -b feature/issue-X-description`
+- Bugs:     `git checkout -b fix/issue-X-description`
+- Docs:     `git checkout -b docs/issue-X-description`
+
 branch → commit → push → `gh pr create` → post "📋 PR #N ready for human review" → **STOP**.
-**NEVER run `gh pr merge`**. A human approves + merges. Close issue only AFTER human merges.
+**NEVER run `gh pr merge`**. A human approves + merges. Close issue + update TODO only AFTER merge.
 Branch protection on main requires 1 approving review — GitHub blocks self-merge.
 
 ## TODO Progress (as of Phase 3.2)

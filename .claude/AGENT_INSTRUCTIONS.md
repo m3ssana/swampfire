@@ -106,10 +106,16 @@ GitHub will block self-merges. This is enforced at the repository level — not 
 1. **Find the GitHub issue** (check TODO.md for links)
 2. **Read the issue** — it has acceptance criteria
 3. **Post a comment**: "🚀 Started work on this"
-4. **Create a branch**: `git checkout -b feature/issue-X-description`
+4. **Create a branch** — naming convention:
+   - Features: `git checkout -b feature/issue-X-description`
+   - Bugs:     `git checkout -b fix/issue-X-description`
+   - Docs:     `git checkout -b docs/issue-X-description`
 5. **Work** and post progress updates
 6. **Create a PR** and post "📋 PR #N ready for human review"
 7. **Wait** — do not merge. Do not close the issue.
+
+> **Every change — features, bug fixes, docs — goes through a branch and PR.**
+> Nothing is committed directly to `main`.
 
 ---
 
@@ -163,11 +169,23 @@ gh issue create \
   - Fix: [one-line solution]
 ```
 
-### Step 3 — Fix the bug
-Work on the fix. Reference the issue number in commits: `fix: drop item at player position (fixes #21)`.
+### Step 3 — Fix the bug on a branch + open a PR
+Bugs follow the **exact same branch → PR → human review → merge** workflow as features.
 
-### Step 4 — Mark done in both places
-- TODO.md: `⏳` → `✅` with commit hash
+```bash
+git checkout -b fix/issue-21-loot-spawn
+# make the fix
+git commit -m "fix: drop loot at player position (fixes #21)"
+git push -u origin fix/issue-21-loot-spawn
+gh pr create --title "fix: [short description] (#21)" --body "..."
+```
+
+Post on the issue: `"📋 PR #N ready for human review — waiting for approval"`
+
+⏸️ **STOP** — do not merge. Wait for human approval.
+
+### Step 4 — After human merges: mark done in both places
+- TODO.md `## Bugs` section: `⏳` → `✅` with commit hash
 - GitHub issue: close with evidence comment
 
 ### What makes a good bug issue
