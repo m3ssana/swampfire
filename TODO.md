@@ -222,8 +222,9 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 2. Add it to this section as ⏳
 3. Fix it, mark ✅ with commit hash, close the issue
 
-- ✅ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27) _(1dbe258)_
-  - Same root cause as #24; resolved by PR #26
+- ✅ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27)
+  - Root cause: `Tilemap.destroy()` does NOT remove Matter.js bodies from `convertTilemapLayer()` — Zone 0's static obstacle bodies persist as invisible colliders in Zone 1, blocking the north corridor
+  - Fix: added `_removeTileBodies()` to `destroyCurrentZone()` — explicitly calls `MatterTileBody.destroy()` on every tile before map teardown
 
 - ✅ **Cannot return north from Zone 1 to Zone 0 after transition** [#24](https://github.com/m3ssana/swampfire/issues/24) _(1dbe258)_
   - Root cause: `camerafadeincomplete` event unreliable after tilemap load → `_transitioning` stuck true forever
