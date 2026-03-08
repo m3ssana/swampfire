@@ -222,6 +222,42 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 2. Add it to this section as ⏳
 3. Fix it, mark ✅ with commit hash, close the issue
 
+### E2E Test Suite (Playwright)
+
+- ⏳ **E2E tests absent from CI/CD — browser binaries not installed** [#29](https://github.com/m3ssana/swampfire/issues/29)
+  - Root cause: `deploy.yml` never calls `npx playwright install` or `npm run test:e2e`; browsers not installed locally either
+  - Fix: add browser install + E2E run step to build job in `deploy.yml`; document `npx playwright install` in README setup
+
+- ⏳ **`keyboard.press` doesn't hold keys — player never moves in E2E tests** [#30](https://github.com/m3ssana/swampfire/issues/30)
+  - Root cause: `keyboard.press` dispatches instantaneous keydown+keyup; Phaser requires `isDown` held across multiple update ticks
+  - Fix: replace with `keyboard.down(key)` + `waitForTimeout(duration)` + `keyboard.up(key)` in `movePlayer` helper
+
+- ⏳ **`getGameState` uses hardcoded `scenes[3]` index — breaks if scene order changes** [#31](https://github.com/m3ssana/swampfire/issues/31)
+  - Root cause: array index access instead of Phaser's public `game.scene.getScene('game')` API
+  - Fix: replace all `scenes[3]` references with `game.scene.getScene('game')`
+
+- ⏳ **`waitForGameReady` uses 500ms magic delay — flaky under CI load** [#32](https://github.com/m3ssana/swampfire/issues/32)
+  - Root cause: `waitForTimeout(500)` added after `window.game` check; not a real scene-readiness signal
+  - Fix: poll `waitForFunction` on scene active state + registry populated condition
+
+- ⏳ **Scenarios 3 & 4 manipulate registry directly — not real combat/timer testing** [#33](https://github.com/m3ssana/swampfire/issues/33)
+  - Root cause: both scenarios use `page.evaluate()` to write registry keys instead of triggering actual game mechanics
+  - Fix: Scenario 3 should trigger damage via collision/event; Scenario 4 should observe real timer tick to zero
+
+- ⏳ **HUD tests use CSS class selectors on a Canvas game — always silently pass** [#34](https://github.com/m3ssana/swampfire/issues/34)
+  - Root cause: `[class*="timer"]` / `[class*="heart"]` find no DOM nodes; Phaser renders to `<canvas>`; tests pass vacuously
+  - Fix: access HUD text objects via `game.scene.getScene('hud')` in `page.evaluate`; expose HUD properties for testability
+
+- ⏳ **30-second stability test always times out — loop duration equals global timeout** [#35](https://github.com/m3ssana/swampfire/issues/35)
+  - Root cause: `endTime = Date.now() + 30000` consumes entire 30s global timeout; setup overhead guarantees timeout
+  - Fix: reduce loop to 20s and add `test.setTimeout(35000)` inside the test
+
+- ⏳ **Playwright config missing retries and WebGL launch args for headless game testing** [#36](https://github.com/m3ssana/swampfire/issues/36)
+  - Root cause: default config has 0 retries and no `--use-gl=swiftshader` for Chromium; WebGL unreliable in headless CI
+  - Fix: add `retries: process.env.CI ? 2 : 0` and `launchOptions: { args: ['--use-gl=swiftshader'] }` to Chromium project
+
+### Game Bugs
+
 - ✅ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27)
   - Root cause: `Tilemap.destroy()` does NOT remove Matter.js bodies from `convertTilemapLayer()` — Zone 0's static obstacle bodies persist as invisible colliders in Zone 1, blocking the north corridor
   - Fix: added `_removeTileBodies()` to `destroyCurrentZone()` — explicitly calls `MatterTileBody.destroy()` on every tile before map teardown
