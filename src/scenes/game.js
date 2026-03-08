@@ -1,5 +1,5 @@
-import Player      from "../gameobjects/player";
-import ZoneManager  from "../gameobjects/zone_manager";
+import Player                         from "../gameobjects/player";
+import ZoneManager, { isZoneDefined } from "../gameobjects/zone_manager";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -373,6 +373,13 @@ export default class Game extends Phaser.Scene {
   */
   transitionToZone(targetZoneId) {
     if (this._transitioning) return;
+
+    // Guard: target zone not yet built (e.g. Zone 2, 3, 4 in later phases)
+    if (!isZoneDefined(targetZoneId)) {
+      const { x: px, y: py } = this.player.sprite;
+      this.showPoints(px, py, 'Road closed — storm ahead', 0xff8800);
+      return;
+    }
     this._transitioning  = true;
     this.player.locked   = true;           // freeze WASD input
     this.nearbyInteractable = null;

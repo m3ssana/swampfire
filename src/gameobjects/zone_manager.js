@@ -46,18 +46,25 @@ const ZONES = {
     },
   },
   1: {
-    name:        'US-41 Corridor (placeholder)',
+    name:        'US-41 Corridor',
     mapKey:      'zone1',
-    tileKey:     'swamp-tiles',
-    tilesetName: 'swamp',
+    tileKey:     'us41-tiles',
+    tilesetName: 'us41',
     entryPoints: {
-      // Arriving from Zone 0 (north exit) → appear row 5 of Zone 1
+      // Arriving from Zone 0 (north) → appear on highway just south of north corridor
       0: { x: 40 * 48, y: 5 * 48 },
-      // Arriving from Zone 4 (south exit) → appear near south trail, row 55
-      4: { x: 40 * 48, y: 55 * 48 },
+      // Arriving from Zone 4 (south) → appear on highway just north of south corridor
+      4: { x: 40 * 48, y: 54 * 48 },
+      // Arriving from Zone 2 (east) → appear in east parking lot near east exit
+      2: { x: 75 * 48, y: 30 * 48 },
     },
   },
 };
+
+/** Returns true if a zone ID is defined and loadable. Used by game.js. */
+export function isZoneDefined(zoneId) {
+  return zoneId in ZONES;
+}
 
 // ── ZoneManager ────────────────────────────────────────────────────────────────
 

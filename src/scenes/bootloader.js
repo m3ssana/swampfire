@@ -114,14 +114,13 @@ export default class Bootloader extends Phaser.Scene {
     this.load.image("seesaw",      "assets/images/seesaw.png");
     this.load.image("bubble",      "assets/images/bubble.png");
     this.load.image("platform",    "assets/images/platform.png");
-    // Zone 0 swamp tileset
-    this.load.image("swamp-tiles", "assets/images/swamp-tiles.png");
+    // Zone tilesets
+    this.load.image("swamp-tiles", "assets/images/swamp-tiles.png"); // Zone 0
+    this.load.image("us41-tiles",  "assets/images/us41-tiles.png");  // Zone 1
   }
 
   /*
-    Loads all zone tilemaps. All zones are pre-loaded at startup so transitions
-    are instantaneous (no async loading during gameplay).
-    Zone 1 is a placeholder — replaced with the real US-41 layout in Phase 3.3.
+    All zone tilemaps are pre-loaded at startup so transitions are instantaneous.
   */
   loadMaps() {
     this.load.tilemapTiledJSON("zone0", "assets/maps/zone0.json");
