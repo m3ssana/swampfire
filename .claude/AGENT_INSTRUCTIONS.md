@@ -19,7 +19,7 @@
 ```
 Start Work
   ↓
-Post comment: "🚀 Started work..."
+Post comment on GitHub issue: "🚀 Started work..."
   ↓
 Make progress
   ↓
@@ -33,6 +33,8 @@ Post comment: "📋 PR #123 ready for human review — waiting for approval"
   ↓
 Human merges PR to main
   ↓
+Update TODO.md: change ⏳ → ✅, add commit hash _(abc1234)_
+  ↓
 Close issue: "✅ Merged to main (commit: SHA)"
 ```
 
@@ -40,11 +42,12 @@ Close issue: "✅ Merged to main (commit: SHA)"
 - ✅ Code written & tested
 - ✅ All acceptance criteria met
 - ✅ PR created with clear description
-- ✅ **Human reviewed and approved** ← NEW REQUIREMENT
+- ✅ **Human reviewed and approved** ← REQUIRED
 - ✅ **PR merged to main by human** ← CRITICAL
-- ✅ Issue closed with proof
+- ✅ **TODO.md updated** — task marked ✅ with commit hash ← REQUIRED
+- ✅ **GitHub issue closed** with commit/PR link ← REQUIRED
 
-**Do not merge your own PRs. Do not close issues until a human has merged the PR.**
+**Do not merge your own PRs. Do not close issues or update TODO.md until a human has merged the PR.**
 
 ### Example Issue Comment After PR Creation
 
@@ -114,6 +117,7 @@ GitHub will block self-merges. This is enforced at the repository level — not 
 
 - **Never merge your own PR** — human approval is required
 - **Create a PR, then stop** — leave merging to the human
+- **Update TODO.md when done** — mark ✅, add commit hash, after merge
 - **Update issues regularly** — don't go silent for hours
 - **Link PRs to issues** — "Closes #XX" in PR description
 - **Close with evidence** — include commit/PR link in closure comment, AFTER merge

@@ -107,10 +107,16 @@ If the human requests changes, address the feedback, push new commits, and updat
 Ready for re-review.
 ```
 
-### 5. **Close the Issue (FINAL STEP — after human merges)**
+### 5. **Update TODO.md + Close the Issue (FINAL STEP — after human merges)**
 
 **ONLY after the change is merged to main:**
 
+First, update `TODO.md` — find the task, change `⏳` to `✅`, and append the commit hash:
+```markdown
+- ✅ **3.X Task name** [#N](url) _(abc1234)_
+```
+
+Then close the GitHub issue:
 ```bash
 gh issue close ISSUE_NUMBER --comment "✅ Completed and merged to main (commit: [SHA])
 
@@ -119,7 +125,7 @@ All acceptance criteria met:
 - [x] Criterion 2
 - [x] Criterion 3
 
-Changes are now in production on main branch."
+TODO.md updated. Changes are now in production on main branch."
 ```
 
 ---
@@ -133,7 +139,8 @@ A work item is **ONLY complete** when:
 3. ✅ PR is created with a clear description
 4. ✅ **Human has reviewed and approved the PR**
 5. ✅ **Human has merged PR to main** ← CRITICAL (agents do not self-merge)
-6. ✅ Issue is closed with final comment linking the merged commit
+6. ✅ **TODO.md updated** — task marked ✅ with commit hash
+7. ✅ Issue is closed with final comment linking the merged commit
 
 **⚠️ CRITICAL: Agents must not merge their own PRs. Do NOT close the issue until step 5 is complete.**
 
