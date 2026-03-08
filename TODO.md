@@ -222,6 +222,10 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 2. Add it to this section as ⏳
 3. Fix it, mark ✅ with commit hash, close the issue
 
+- ⏳ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27)
+  - Player-facing: walking north into the Zone 1 border produces no transition, Juan is trapped
+  - Fix pending in PR #26 (relates to #24)
+
 - ⏳ **Cannot return north from Zone 1 to Zone 0 after transition** [#24](https://github.com/m3ssana/swampfire/issues/24)
   - North exit trigger in Zone 1 never fires after arriving from Zone 0
   - Likely causes: `_transitioning` flag not reset, stale `zone.exits[]`, or entry point too close to south exit trigger
