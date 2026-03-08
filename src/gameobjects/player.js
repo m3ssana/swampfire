@@ -104,8 +104,16 @@ export default class Player {
   /*
     4-directional movement with diagonal normalization and Shift sprint.
     Velocity is set directly each frame so input is tight and responsive.
+
+    Set `player.locked = true` to freeze movement (e.g., during zone transitions).
   */
   update() {
+    if (this.locked) {
+      this.sprite.setVelocity(0, 0);
+      this.sprite.anims.play('playeridle', true);
+      return;
+    }
+
     const speed = this.shift.isDown ? SPRINT_SPEED : WALK_SPEED;
     let vx = 0;
     let vy = 0;
