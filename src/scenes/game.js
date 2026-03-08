@@ -1,8 +1,5 @@
-import Player              from "../gameobjects/player";
-import ZoneManager         from "../gameobjects/zone_manager";
-import SearchableContainer from "../gameobjects/searchable_container";
-import Workbench           from "../gameobjects/workbench";
-import Rocket              from "../gameobjects/rocket";
+import Player      from "../gameobjects/player";
+import ZoneManager  from "../gameobjects/zone_manager";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -28,7 +25,6 @@ export default class Game extends Phaser.Scene {
     this.addPlayer();
     this.addCollisions();
     this.addCamera();
-    this.addWorldObjects();
     this.addInteractPrompt();
     this.addInputHandlers();
     this.launchHUD();
@@ -39,9 +35,10 @@ export default class Game extends Phaser.Scene {
   // ─── Map ───────────────────────────────────────────────────────────────────
 
   /*
-    Loads the current zone via ZoneManager.
-    Zone 0 is a blank placeholder (Cypress Creek Preserve).
-    Tile content and physics layers will be added in Phase 3.
+    Loads Zone 0 (Cypress Creek Preserve) via ZoneManager.
+    ZoneManager renders the tilemap, sets up physics collision on impassable tiles,
+    and spawns all world objects (containers, workbench, rocket) from the Tiled
+    object layer. Exposes them as zone.containers, zone.workbench, zone.rocket.
   */
   addMap() {
     this.zone = new ZoneManager(this);
@@ -53,25 +50,6 @@ export default class Game extends Phaser.Scene {
     const spawn = this.zone.getSpawnPoint();
     this.trailLayer = this.add.layer();
     this.player = new Player(this, spawn.x, spawn.y, 100);
-  }
-
-  // ─── World objects ─────────────────────────────────────────────────────────
-
-  /*
-    Spawns containers, workbench, and rocket around the Zone 0 spawn point.
-    Positions are hardcoded for Phase 2.x; Phase 3 will load from Tiled layer.
-  */
-  addWorldObjects() {
-    const s = this.zone.getSpawnPoint();
-    const positions = [
-      { x: s.x - 220, y: s.y - 160 },
-      { x: s.x + 260, y: s.y -  80 },
-      { x: s.x - 120, y: s.y + 210 },
-      { x: s.x + 180, y: s.y + 140 },
-    ];
-    this.containers = positions.map((p) => new SearchableContainer(this, p.x, p.y));
-    this.workbench  = new Workbench(this, s.x,      s.y + 80);
-    this.rocket     = new Rocket(this,   s.x - 100, s.y - 60);
   }
 
   // ─── Interact prompt ───────────────────────────────────────────────────────
@@ -145,10 +123,10 @@ export default class Game extends Phaser.Scene {
     const RANGE = 72;
 
     const candidates = [
-      ...this.containers.filter(c => !c.searched),
-      this.workbench,
-      this.rocket,
-    ];
+      ...(this.zone.containers ?? []).filter(c => !c.searched),
+      this.zone.workbench,
+      this.zone.rocket,
+    ].filter(Boolean);
 
     let found = null;
     for (const obj of candidates) {

@@ -17,12 +17,67 @@ import DroppedItem from './dropped_item';
 // ── Loot tables ───────────────────────────────────────────────────────────────
 
 const LOOT_TABLES = {
+  /**
+   * default — general swamp finds; balanced mix of junk and ingredients.
+   */
   default: [
     { label: "Copper Wiring",  xp:  5, tint: 0x4fc3f7, weight: 25, type: "ingredient" },
     { label: "Solenoid Valve", xp: 10, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
     { label: "Hydraulic Seal", xp:  5, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
     { label: "PVC Coupler",    xp:  3, tint: 0xffffff, weight: 20, type: "junk" },
     { label: "Empty",          xp:  0, tint: 0x666666, weight: 15, type: "junk" },
+  ],
+
+  /**
+   * toolbox — workshop/hardware items; higher chance of crafting ingredients.
+   * Found near workshops, hardware stores, Zone 0 clearing.
+   */
+  toolbox: [
+    { label: "Copper Wiring",    xp: 10, tint: 0x4fc3f7, weight: 25, type: "ingredient" },
+    { label: "Solenoid Valve",   xp: 15, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
+    { label: "Steel Bracket",    xp:  8, tint: 0x90a4ae, weight: 20, type: "ingredient" },
+    { label: "Wire Stripper",    xp:  3, tint: 0xffd54f, weight: 15, type: "junk" },
+    { label: "Duct Tape",        xp:  2, tint: 0xe0e0e0, weight: 12, type: "junk" },
+    { label: "Empty",            xp:  0, tint: 0x666666, weight:  8, type: "junk" },
+  ],
+
+  /**
+   * cooler — food and convenience store supplies.
+   * Low ingredient chance; decent XP for morale.
+   */
+  cooler: [
+    { label: "Energy Drink",     xp:  4, tint: 0x76ff03, weight: 30, type: "junk" },
+    { label: "Water Bottle",     xp:  2, tint: 0x40c4ff, weight: 25, type: "junk" },
+    { label: "Beef Jerky",       xp:  3, tint: 0xa1887f, weight: 20, type: "junk" },
+    { label: "Hydraulic Seal",   xp:  5, tint: 0x4fc3f7, weight: 15, type: "ingredient" },
+    { label: "PVC Coupler",      xp:  3, tint: 0xffffff, weight:  8, type: "junk" },
+    { label: "Empty",            xp:  0, tint: 0x666666, weight:  2, type: "junk" },
+  ],
+
+  /**
+   * backpack — general scavenge from abandoned bags.
+   * Mix of ingredients and personal effects.
+   */
+  backpack: [
+    { label: "Copper Wiring",    xp:  5, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
+    { label: "AA Batteries",     xp:  6, tint: 0xffca28, weight: 20, type: "ingredient" },
+    { label: "Multi-tool",       xp:  8, tint: 0x90a4ae, weight: 15, type: "ingredient" },
+    { label: "Rain Poncho",      xp:  2, tint: 0xffffff, weight: 15, type: "junk" },
+    { label: "Road Flare",       xp:  3, tint: 0xf44336, weight: 15, type: "junk" },
+    { label: "Empty",            xp:  0, tint: 0x666666, weight: 15, type: "junk" },
+  ],
+
+  /**
+   * crate — heavy-duty hardware crate.
+   * Higher XP rewards; better chance at rare crafting parts.
+   */
+  crate: [
+    { label: "Hydraulic Seal",   xp: 12, tint: 0x4fc3f7, weight: 25, type: "ingredient" },
+    { label: "Steel Bracket",    xp: 10, tint: 0x90a4ae, weight: 20, type: "ingredient" },
+    { label: "Pressure Gauge",   xp: 15, tint: 0xff7043, weight: 15, type: "ingredient" },
+    { label: "Copper Wiring",    xp:  8, tint: 0x4fc3f7, weight: 15, type: "ingredient" },
+    { label: "Bolt Set",         xp:  4, tint: 0xe0e0e0, weight: 15, type: "junk" },
+    { label: "Empty",            xp:  0, tint: 0x666666, weight: 10, type: "junk" },
   ],
 };
 
