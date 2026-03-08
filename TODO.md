@@ -109,7 +109,7 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 3 -- World Building
 
-- [ ] **3.1 Zone 0 tilemap (Cypress Creek Preserve)**
+- [ ] **3.1 Zone 0 tilemap (Cypress Creek Preserve)** [#2](https://github.com/m3ssana/swampfire/issues/2)
   - Design small tilemap: clearing, campfire, workbench, rocket, trails
   - Swamp tiles: standing water, cypress trees, Spanish moss
   - Exit points: south (to Zone 1), west (to Zone 3)
@@ -118,19 +118,19 @@ Each task is small enough to fit in a single Claude Code session.
   - Load container positions in `zone_manager.js`; remove `addWorldObjects()` from `game.js`
   - Target ~15–20 containers for Zone 0 (see `docs/ddr/container-placement.md`)
 
-- [ ] **3.2 Zone manager + zone transitions**
+- [ ] **3.2 Zone manager + zone transitions** [#3](https://github.com/m3ssana/swampfire/issues/3)
   - `ZoneManager` tracks current zone, handles loading/unloading
   - Zone boundary triggers: 0.5s fade transition (no loading screen)
   - Player position preserved across transitions
   - Start with Zone 0 <-> Zone 1 connection
 
-- [ ] **3.3 Zone 1 tilemap (US-41 corridor)**
+- [ ] **3.3 Zone 1 tilemap (US-41 corridor)** [#4](https://github.com/m3ssana/swampfire/issues/4)
   - Commercial strip: store fronts as searchable locations
   - Harvey's Hardware, NAPA, Advance Auto, O'Reilly, Gulf Coast Tractor, RaceTrac
   - Road connectors north (Zone 3), south (Zone 4), east (Zone 2)
   - Place searchable containers in each store
 
-- [ ] **3.4 Remaining zones (2, 3, 4)**
+- [ ] **3.4 Remaining zones (2, 3, 4)** [#5](https://github.com/m3ssana/swampfire/issues/5)
   - Zone 2: Collier Pkwy (Publix, Library/Foundry, Rec Center)
   - Zone 3: Conner Preserve (RC Field, Fire Tower)
   - Zone 4: LOLHS + SR-54 (school, Tractor Supply)
@@ -140,20 +140,20 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 4 -- Storm + Hazard Systems
 
-- [ ] **4.1 Storm phase system**
+- [ ] **4.1 Storm phase system** [#6](https://github.com/m3ssana/swampfire/issues/6)
   - `StormManager` tracks 4 phases based on countdown timer
   - Phase 1 (60-45 min): light rain particle overlay
   - Phase transitions: screen shake, thunder, HUD toast
   - Weather visuals intensify each phase (rain density, wind, darkness)
 
-- [ ] **4.2 Hazard game objects**
+- [ ] **4.2 Hazard game objects** [#7](https://github.com/m3ssana/swampfire/issues/7)
   - Rattlesnakes (Zone 0 edges, Zone 3)
   - Downed power lines (Zone 1, after 40 min)
   - Looters (Zone 1, after 20 min) -- simple patrol AI
   - Flooding (low roads, after 35 min) -- tile overlay that slows player
   - All hazards damage player (1 HP) with near-miss detection zone
 
-- [ ] **4.3 Wind + environmental effects**
+- [ ] **4.3 Wind + environmental effects** [#8](https://github.com/m3ssana/swampfire/issues/8)
   - Wind force pushes player sideways (Phase 3+)
   - Screen shake from thunder (Phase 4 = constant)
   - Lightning flashes (Phase 4, every 5-15s)
@@ -163,26 +163,26 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 5 -- Feedback + Polish
 
-- [ ] **5.1 XP popup system**
+- [ ] **5.1 XP popup system** [#9](https://github.com/m3ssana/swampfire/issues/9)
   - `FeedbackSystem` class for floating XP numbers
   - Color-coded per action type (white/gold/cyan/orange/red/green/purple)
   - Overlapping popups merge into single number
   - Screen effects: flash, shake, edge glow per spec table
 
-- [ ] **5.2 Combo streak system**
+- [ ] **5.2 Combo streak system** [#10](https://github.com/m3ssana/swampfire/issues/10)
   - `ComboTracker`: items within 3s build multiplier (2x-5x cap)
   - Large center-screen text: DOUBLE / TRIPLE / QUAD / FRENZY
   - FRENZY (5x) triggers particle burst + distorted SFX
   - Combo breaks after 3s without pickup
 
-- [ ] **5.3 Audio overhaul**
+- [ ] **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11)
   - Replace dungeon SFX with swamp/hurricane audio
   - Ambient layers per zone (cypress canopy, strip mall, wind)
   - Storm audio intensifies per phase
   - Pickup/craft/install SFX per spec feedback table
   - Music: calm acoustic at Zone 0, tense elsewhere
 
-- [ ] **5.4 NPC system**
+- [ ] **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
   - Simple NPC game object: sprite + dialog box on E press
   - Harvey (Zone 1), Maria (Zone 2), Old Dale (Zone 3), Coach Reeves (Zone 4)
   - Each gives one side quest (fetch item, return for reward)
@@ -192,19 +192,19 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 6 -- Endgame + Meta
 
-- [ ] **6.1 Launch sequence**
+- [ ] **6.1 Launch sequence** [#13](https://github.com/m3ssana/swampfire/issues/13)
   - When all 4 systems installed and player interacts with rocket
   - Cinematic: camera pulls back, rocket ignites, lifts off
   - Screen fades to EndRunScreen with WIN state
   - "Under-the-Wire" achievement if < 2 min remaining
 
-- [ ] **6.2 End-of-run share card**
+- [ ] **6.2 End-of-run share card** [#14](https://github.com/m3ssana/swampfire/issues/14)
   - Styled canvas overlay with run stats
   - Time remaining, XP total, items found, combos hit, zones visited
   - "Copy to clipboard" or "Download as image" button
   - Florida Man-style death headline if player lost
 
-- [ ] **6.3 Achievement toasts**
+- [ ] **6.3 Achievement toasts** [#15](https://github.com/m3ssana/swampfire/issues/15)
   - `AchievementManager` with predefined milestones
   - Toast notification slides in from top-right
   - Examples: first craft, first zone discovered, FRENZY, fire tower panoramic
@@ -214,8 +214,8 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Cleanup (do anytime)
 
-- [ ] Remove unused assets: `pello_ok.png`, dungeon tiles, `block.png`, `platform.png`
-- [ ] Remove unused game objects: `fireball.js`, `coin.js`, `key.js`, `bat.js`, `wizard.js`, `seesaw.js`
+- [ ] Remove unused assets: `pello_ok.png`, dungeon tiles, `block.png`, `platform.png` [#16](https://github.com/m3ssana/swampfire/issues/16)
+- [ ] Remove unused game objects: `fireball.js`, `coin.js`, `key.js`, `bat.js`, `wizard.js`, `seesaw.js` [#17](https://github.com/m3ssana/swampfire/issues/17)
   (only after their replacements exist)
-- [ ] Remove `@mikewesthad/dungeon` from package.json
+- [ ] Remove `@mikewesthad/dungeon` from package.json [#18](https://github.com/m3ssana/swampfire/issues/18)
   (only after Zone system replaces it)
