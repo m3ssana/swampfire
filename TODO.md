@@ -222,6 +222,11 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 2. Add it to this section as ⏳
 3. Fix it, mark ✅ with commit hash, close the issue
 
+- ⏳ **Cannot return north from Zone 1 to Zone 0 after transition** [#24](https://github.com/m3ssana/swampfire/issues/24)
+  - North exit trigger in Zone 1 never fires after arriving from Zone 0
+  - Likely causes: `_transitioning` flag not reset, stale `zone.exits[]`, or entry point too close to south exit trigger
+  - Investigate `camerafadeinstart` event timing and `checkExitZones` guard in `game.js`
+
 - ⏳ **Juan sprite hidden by tile layers after zone transition** [#22](https://github.com/m3ssana/swampfire/issues/22)
   - Player depth defaults to 0; new tile layers added after transition sit above it in display list
   - Fix: `setDepth(10)` on player sprite — always renders above ground (0) and obstacles (1)
