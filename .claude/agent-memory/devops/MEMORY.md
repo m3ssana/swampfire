@@ -66,6 +66,45 @@
 
 ---
 
+## CI/CD for Build Artifacts (Completed 2026-03-08)
+
+**Status**: ✅ Deployed and Verified
+
+### Changes Made
+1. **Remove dist/ from git tracking**
+   - Added `dist/` to `.gitignore`
+   - Ran `git rm -r --cached dist/` to untrack (files remain locally)
+   - Commit: `46aaa94` (2026-03-08 09:00)
+
+2. **GitHub Pages Deployment**
+   - GitHub Pages already configured to use Actions as source
+   - Source: main branch root `/`
+   - Build type: workflow
+   - URL: https://m3ssana.github.io/swampfire/
+   - HTTPS enforced: yes
+
+3. **Workflow Status**
+   - Deploy workflow triggers on every push to main
+   - Build job: Installs deps, runs `npm run build`, uploads `dist/` artifact
+   - Deploy job: Uses `actions/deploy-pages@v4` to publish to Pages
+   - Both jobs completed successfully on first run
+
+### Verification (Run ID 22817874442)
+- ✅ Build job (31s): npm ci + build + artifact upload
+- ✅ Deploy job (12s): Pages deployment successful
+- ✅ Pages URL live: https://m3ssana.github.io/swampfire/
+- ✅ All actions pinned to SHAs
+- ✅ Build size reporting enabled in job summary
+
+### Key Points for Future Development
+- Do NOT commit anything to `dist/` — it is gitignored
+- All new code changes will auto-deploy on push to main via Actions
+- Build artifact is ephemeral — only stored in GitHub Actions, then deployed
+- Local `dist/` folder remains for development (not tracked)
+- If Pages deployment fails, check: workflow logs, artifact upload, branch protection rules
+
+---
+
 ## Subagent Delegation Strategy
 
 **Purpose**: Optimize devops workflow by delegating specialized work to focused subagents.
