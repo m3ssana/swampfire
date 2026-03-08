@@ -3,7 +3,7 @@
 ## Project Overview
 - **Game:** Swampfire Protocol -- top-down speed scavenger set in Land O' Lakes, FL 34639
 - **Engine:** Phaser 3.80+ with Matter.js physics, Vite build system
-- **Spec:** `/home/ron/src/swampfire/SPEC.md` (major rewrite 2026-03-01)
+- **Spec:** `SPEC.md` (major rewrite 2026-03-01)
 - **Target session:** 60 minutes real-time (one sitting, one shot)
 
 ## Codebase Origin
