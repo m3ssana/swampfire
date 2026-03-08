@@ -222,6 +222,10 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 2. Add it to this section as ⏳
 3. Fix it, mark ✅ with commit hash, close the issue
 
+- ⏳ **Juan sprite hidden by tile layers after zone transition** [#22](https://github.com/m3ssana/swampfire/issues/22)
+  - Player depth defaults to 0; new tile layers added after transition sit above it in display list
+  - Fix: `setDepth(10)` on player sprite — always renders above ground (0) and obstacles (1)
+
 - ✅ **Loot item spawns inside wall/container body after searching** [#21](https://github.com/m3ssana/swampfire/issues/21) _(26b1acb)_
   - Item dropped at `container ± 30px` could land in adjacent tree/wall/water or inside the container's own physics body
   - Fix: drop at player's current position `± 10px` — player is always in passable space
