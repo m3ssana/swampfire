@@ -125,6 +125,59 @@ GitHub will block self-merges. This is enforced at the repository level — not 
 
 ---
 
+---
+
+## 🐛 Bug Reporting Pattern (MANDATORY for all reported bugs)
+
+When a bug is reported — by the user, discovered during testing, or found during development — follow this pattern **every time**, no exceptions:
+
+### Step 1 — Create a GitHub issue with label `bug`
+```bash
+gh issue create \
+  --title "Bug: [short description]" \
+  --label "bug" \
+  --body "## Description
+[What goes wrong]
+
+## Root Cause
+[Why it happens — be specific about the code]
+
+## Steps to Reproduce
+1. ...
+
+## Expected Behaviour
+[What should happen]
+
+## Fix
+[Proposed solution with code snippet]
+
+## Acceptance Criteria
+- [ ] [Testable criterion]
+- [ ] [Testable criterion]"
+```
+
+### Step 2 — Add to the `## Bugs` section of `TODO.md`
+```markdown
+- ⏳ **[Short description]** [#N](url)
+  - [One-line root cause]
+  - Fix: [one-line solution]
+```
+
+### Step 3 — Fix the bug
+Work on the fix. Reference the issue number in commits: `fix: drop item at player position (fixes #21)`.
+
+### Step 4 — Mark done in both places
+- TODO.md: `⏳` → `✅` with commit hash
+- GitHub issue: close with evidence comment
+
+### What makes a good bug issue
+- **Root cause** — not just symptoms. Identify the exact line(s) responsible.
+- **Reproduction steps** — specific enough that another agent can verify the fix.
+- **Acceptance criteria** — at least 2 testable conditions proving it's fixed.
+- **Proposed fix** — always include one, even if brief. Don't leave it open-ended.
+
+---
+
 ## Questions?
 
 1. Check `.claude/GITHUB_ISSUES_WORKFLOW.md`

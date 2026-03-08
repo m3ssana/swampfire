@@ -152,12 +152,22 @@ export default class SearchableContainer {
       this.scene.registry.set("xp", current + item.xp);
     }
 
-    // Spawn a pickupable DroppedItem at a small random offset from the container.
+    // Spawn a pickupable DroppedItem at the player's feet (guaranteed reachable).
+    // Dropping at the container's position risks landing inside an adjacent wall,
+    // tree, water tile, or the container's own physics body — all inaccessible.
+    // The player is always standing in passable space (proximity check enforces
+    // 72 px range), so their position is the safe anchor. Small jitter ensures
+    // multiple items from the same chest don't stack on one pixel.
     // "Empty" loot has no physical item — only XP-less flavour text was shown.
     if (item.label !== 'Empty') {
-      const ox = Phaser.Math.Between(-30, 30);
-      const oy = Phaser.Math.Between(-30, 30);
-      new DroppedItem(this.scene, this.sprite.x + ox, this.sprite.y + oy, item);
+      const player = this.scene.player?.sprite;
+      const dropX  = player
+        ? player.x + Phaser.Math.Between(-10, 10)
+        : this.sprite.x;
+      const dropY  = player
+        ? player.y + Phaser.Math.Between(-10, 10)
+        : this.sprite.y;
+      new DroppedItem(this.scene, dropX, dropY, item);
     }
 
     // Audio: "coin" SFX as placeholder — proper rummage SFX added in Phase 5.3
