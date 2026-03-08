@@ -227,7 +227,7 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
   - Likely causes: `_transitioning` flag not reset, stale `zone.exits[]`, or entry point too close to south exit trigger
   - Investigate `camerafadeinstart` event timing and `checkExitZones` guard in `game.js`
 
-- ⏳ **Juan sprite hidden by tile layers after zone transition** [#22](https://github.com/m3ssana/swampfire/issues/22)
+- ✅ **Juan sprite hidden by tile layers after zone transition** [#22](https://github.com/m3ssana/swampfire/issues/22) _(77a4fe7)_
   - Player depth defaults to 0; new tile layers added after transition sit above it in display list
   - Fix: `setDepth(10)` on player sprite — always renders above ground (0) and obstacles (1)
 
