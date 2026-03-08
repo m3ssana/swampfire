@@ -405,7 +405,11 @@ export default class Game extends Phaser.Scene {
 
       // ── Fade back in ────────────────────────────────────────────────────────
       this.cameras.main.fadeIn(250, 0, 0, 0);
-      this.cameras.main.once("camerafadeincomplete", () => {
+      // Use a timer rather than camerafadeincomplete — the camera event is
+      // unreliable when fades overlap or the scene is busy loading. If it
+      // never fires, _transitioning stays true forever and exit zones stop
+      // working. 300ms covers the 250ms fade-in plus a small safety margin.
+      this.time.delayedCall(300, () => {
         this.player.locked  = false;
         this._transitioning = false;
       });

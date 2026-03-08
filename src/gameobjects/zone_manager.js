@@ -39,8 +39,10 @@ const ZONES = {
     tileKey:     'swamp-tiles',
     tilesetName: 'swamp',
     entryPoints: {
-      // Arriving from Zone 1 (south exit) → appear near south trail, row 55
-      1: { x: 40 * 48, y: 55 * 48 },
+      // Arriving from Zone 1 (south exit) → appear on south trail, row 52.
+      // Row 55 (y=2640) was only 96px north of the south exit trigger (y=2736);
+      // row 52 (y=2496) gives comfortable clearance while still feeling southerly.
+      1: { x: 40 * 48, y: 52 * 48 },
       // Arriving from Zone 3 (west exit) → appear near west trail, col 4
       3: { x:  4 * 48, y: 30 * 48 },
     },
@@ -51,8 +53,11 @@ const ZONES = {
     tileKey:     'us41-tiles',
     tilesetName: 'us41',
     entryPoints: {
-      // Arriving from Zone 0 (north) → appear on highway just south of north corridor
-      0: { x: 40 * 48, y: 5 * 48 },
+      // Arriving from Zone 0 (north) → appear on highway, well south of north exit
+      // trigger (y=0–144). Row 5 (y=240) was only 96px from the trigger; row 12
+      // (y=576) gives comfortable clearance and drops the player into the main
+      // commercial area rather than right at the border fence.
+      0: { x: 40 * 48, y: 12 * 48 },
       // Arriving from Zone 4 (south) → appear on highway just north of south corridor
       4: { x: 40 * 48, y: 54 * 48 },
       // Arriving from Zone 2 (east) → appear in east parking lot near east exit
