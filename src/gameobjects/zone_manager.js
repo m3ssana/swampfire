@@ -137,7 +137,13 @@ export default class ZoneManager {
     this.workbench?.destroy();
     this.rocket?.destroy();
 
-    // Phaser tilemap destroy removes all layers and their physics bodies
+    // Phaser's Tilemap.destroy() removes TilemapLayer game objects but does
+    // NOT call MatterTileBody.destroy() on individual tiles. The static
+    // Matter.js bodies survive in the physics world as invisible colliders,
+    // blocking the player in the next zone (root cause of bug #27).
+    // We must explicitly remove them before destroying the map.
+    this._removeTileBodies();
+
     this.map?.destroy();
 
     this.containers = [];
@@ -243,6 +249,28 @@ export default class ZoneManager {
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Remove all Matter.js bodies that convertTilemapLayer() attached to tiles.
+   *
+   * Phaser's TilemapLayer.destroy() does NOT clean these up — the static bodies
+   * linger in the Matter world and collide with the player in the next zone.
+   * Each colliding tile stores its body at tile.physics.matterBody; calling
+   * .destroy() on it removes the body from the world.
+   */
+  _removeTileBodies() {
+    if (!this.map) return;
+
+    for (const layerData of this.map.layers) {
+      for (const row of layerData.data) {
+        for (const tile of row) {
+          if (tile?.physics?.matterBody) {
+            tile.physics.matterBody.destroy();
+          }
+        }
+      }
+    }
+  }
 
   /** Read a named property from a Tiled object's properties array. */
   _getProp(obj, name) {
