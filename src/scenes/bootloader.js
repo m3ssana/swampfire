@@ -10,6 +10,7 @@ export default class Bootloader extends Phaser.Scene {
     this.generateItemTexture();
     this.generateWorkbenchTexture();
     this.generateRocketTexture();
+    this.generateRainDropTexture();
     this.createBars();
     this.setLoadEvents();
     this.loadFonts();
@@ -62,6 +63,19 @@ export default class Bootloader extends Phaser.Scene {
     g.fillTriangle(32, 56, 24, 36, 24, 62); // right fin
     g.fillRect(10, 62, 12, 8);              // nozzle
     g.generateTexture('rocket_pixel', 32, 72);
+    g.destroy();
+  }
+
+  /*
+    Programmatically generates a 2×8 white rain drop texture.
+    Drawn before asset loads so 'rain-drop' is available immediately when
+    StormManager creates the particle emitter.
+  */
+  generateRainDropTexture() {
+    const g = this.make.graphics({ add: false });
+    g.fillStyle(0xffffff, 1);
+    g.fillRect(0, 0, 2, 8);
+    g.generateTexture('rain-drop', 2, 8);
     g.destroy();
   }
 

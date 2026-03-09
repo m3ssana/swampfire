@@ -10,6 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { getPhaseForTimeLeft } from '../src/gameobjects/storm_phase_logic.js';
 
 // ── Crafting system ─────────────────────────────────────────────────────────
 
@@ -404,5 +405,46 @@ describe('Core Gameplay Loop', () => {
     expect(systemsInstalled).toBe(4);
     expect(xp).toBe(60);
     expect(timeLeft).toBe(3600);
+  });
+});
+
+// ── Storm phase logic ────────────────────────────────────────────────────────
+
+describe('getPhaseForTimeLeft', () => {
+  it('returns 1 at full time (3600s)', () => {
+    expect(getPhaseForTimeLeft(3600)).toBe(1);
+  });
+  it('returns 1 at the Phase 1 lower boundary (2700s)', () => {
+    expect(getPhaseForTimeLeft(2700)).toBe(1);
+  });
+  it('returns 2 one second below Phase 1 boundary (2699s)', () => {
+    expect(getPhaseForTimeLeft(2699)).toBe(2);
+  });
+  it('returns 2 at the Phase 2 lower boundary (1800s)', () => {
+    expect(getPhaseForTimeLeft(1800)).toBe(2);
+  });
+  it('returns 3 one second below Phase 2 boundary (1799s)', () => {
+    expect(getPhaseForTimeLeft(1799)).toBe(3);
+  });
+  it('returns 3 at the Phase 3 lower boundary (900s)', () => {
+    expect(getPhaseForTimeLeft(900)).toBe(3);
+  });
+  it('returns 4 one second below Phase 3 boundary (899s)', () => {
+    expect(getPhaseForTimeLeft(899)).toBe(4);
+  });
+  it('returns 4 at zero (timer expired)', () => {
+    expect(getPhaseForTimeLeft(0)).toBe(4);
+  });
+  it('detects a transition: Phase 1 → Phase 2', () => {
+    expect(getPhaseForTimeLeft(2701)).toBe(1);
+    expect(getPhaseForTimeLeft(2699)).toBe(2);
+  });
+  it('detects a transition: Phase 2 → Phase 3', () => {
+    expect(getPhaseForTimeLeft(1801)).toBe(2);
+    expect(getPhaseForTimeLeft(1799)).toBe(3);
+  });
+  it('detects a transition: Phase 3 → Phase 4', () => {
+    expect(getPhaseForTimeLeft(901)).toBe(3);
+    expect(getPhaseForTimeLeft(899)).toBe(4);
   });
 });
