@@ -1,5 +1,6 @@
 import Player                         from "../gameobjects/player";
 import ZoneManager, { isZoneDefined } from "../gameobjects/zone_manager";
+import StormManager                   from "../gameobjects/storm_manager";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -33,6 +34,7 @@ export default class Game extends Phaser.Scene {
     this.launchHUD();
     this.loadAudios();
     this.listenForGameOver();
+    this.stormManager = new StormManager(this);
   }
 
   // ─── Map ───────────────────────────────────────────────────────────────────
@@ -283,6 +285,15 @@ export default class Game extends Phaser.Scene {
       y: { from: text.y - 10, to: text.y - 60 },
       onComplete: () => text.destroy(),
     });
+  }
+
+  /*
+    Sends a toast message to HUDScene via the shared registry.
+    HUDScene listens for changedata-hudToast and renders a centered fade-out label.
+    The pipe+timestamp suffix forces re-fire even if the same message repeats.
+  */
+  showToast(message) {
+    this.registry.set('hudToast', `${message}|${Date.now()}`);
   }
 
   // ─── Camera ────────────────────────────────────────────────────────────────

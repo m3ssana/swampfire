@@ -41,6 +41,7 @@ export default class HUD extends Phaser.Scene {
     this.updateHearts(this.registry.get("hp") ?? MAX_HP);
     this.updateXP(this.registry.get("xp") ?? 0);
     this.updateSystems(this.registry.get("systemsInstalled") ?? 0);
+    this.updatePhase(this.registry.get('stormPhase') ?? 1);
 
     // Tick every real second — HUDScene owns the countdown
     this.countdown = this.time.addEvent({
@@ -154,6 +155,8 @@ export default class HUD extends Phaser.Scene {
       case "hp":              this.updateHearts(value);       break;
       case "xp":              this.updateXP(value);           break;
       case "systemsInstalled": this.updateSystems(value);     break;
+      case "stormPhase":      this.updatePhase(value);        break;
+      case "hudToast":        this.showStormToast(value);     break;
     }
   }
 
@@ -164,7 +167,7 @@ export default class HUD extends Phaser.Scene {
     const s = (seconds % 60).toString().padStart(2, "0");
     this.timerText.setText(`${m}:${s}`);
 
-    // Colour shifts signal urgency
+    // Final-minute urgency pulse — phase tint governs everything above 60s
     if (seconds <= 60) {
       this.timerText.setTint(0xff3333);
       if (!this.timerPulse) {
@@ -176,11 +179,49 @@ export default class HUD extends Phaser.Scene {
           repeat: -1,
         });
       }
-    } else if (seconds <= 300) {
-      this.timerText.setTint(0xff8800);
-    } else {
-      this.timerText.setTint(0x4fffaa);
     }
+  }
+
+  updatePhase(phase) {
+    const PHASE_TINTS = { 1: 0x4fffaa, 2: 0xffee44, 3: 0xff8800, 4: 0xff2222 };
+    const tint = PHASE_TINTS[phase] ?? 0x4fffaa;
+
+    // Don't override the final-minute urgency pulse
+    const timeLeft = this.registry.get('timeLeft') ?? 3600;
+    if (timeLeft > 60) {
+      this.timerText.setTint(tint);
+    }
+  }
+
+  showStormToast(raw) {
+    if (!raw) return;
+    // Strip timestamp suffix added to force re-fire on repeated messages
+    const message = raw.split('|')[0].trim();
+    if (!message) return;
+
+    this._toastText?.destroy();
+    this._toastText = null;
+
+    // Position below the top HUD bar (around y=120 on a 640px screen)
+    this._toastText = this.add
+      .bitmapText(this.cameras.main.width / 2, 120, 'default', message, 20)
+      .setOrigin(0.5)
+      .setTint(0xff8800)
+      .setScrollFactor(0)
+      .setDepth(20)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets:  this._toastText,
+      alpha:    { from: 0, to: 1 },
+      duration: 400,
+      hold:     2500,
+      yoyo:     true,
+      onComplete: () => {
+        this._toastText?.destroy();
+        this._toastText = null;
+      },
+    });
   }
 
   updateHearts(hp) {
@@ -202,5 +243,7 @@ export default class HUD extends Phaser.Scene {
 
   shutdown() {
     this.registry.events.off("changedata", this.onRegistryChange, this);
+    this._toastText?.destroy();
+    this._toastText = null;
   }
 }
