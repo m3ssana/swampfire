@@ -46,6 +46,8 @@ function getObstacleLayer(mapData) {
   return mapData.layers.find(l => l.name === 'obstacles' && l.type === 'tilelayer');
 }
 
+const VALID_LOOT_TABLES = new Set(['default', 'toolbox', 'cooler', 'backpack', 'crate']);
+
 // ── Zone 1 tests (the zone where bug #27 manifests) ────────────────────────
 
 describe('Zone 1 tilemap (zone1.json)', () => {
@@ -164,5 +166,251 @@ describe('Zone 0 tilemap (zone0.json)', () => {
                      entryY >= exit.y && entryY <= exit.y + exit.height;
       expect(inside, `entry (${entryX},${entryY}) is inside exit "${exit.name}"`).toBe(false);
     }
+  });
+});
+
+// ── Zone 2 tests (Collier Commons) ──────────────────────────────────────────
+
+describe('Zone 2 tilemap (zone2.json)', () => {
+  let mapData;
+  let exits;
+  let containers;
+  let impassableGIDs;
+
+  beforeAll(() => {
+    mapData = loadZoneMap('zone2.json');
+    exits = getObjectsByType(mapData, 'exit');
+    containers = getObjectsByType(mapData, 'container');
+    impassableGIDs = getImpassableTileGIDs(mapData);
+  });
+
+  it('JSON file parses without error', () => {
+    expect(mapData).toBeDefined();
+    expect(typeof mapData).toBe('object');
+  });
+
+  it('map dimensions are 80x60 tiles', () => {
+    expect(mapData.width).toBe(80);
+    expect(mapData.height).toBe(60);
+  });
+
+  it('has exactly 3 layers: ground (tilelayer), obstacles (tilelayer), objects (objectgroup)', () => {
+    expect(mapData.layers).toHaveLength(3);
+    expect(mapData.layers[0].name).toBe('ground');
+    expect(mapData.layers[0].type).toBe('tilelayer');
+    expect(mapData.layers[1].name).toBe('obstacles');
+    expect(mapData.layers[1].type).toBe('tilelayer');
+    expect(mapData.layers[2].name).toBe('objects');
+    expect(mapData.layers[2].type).toBe('objectgroup');
+  });
+
+  it('tileset name is "collier"', () => {
+    expect(mapData.tilesets[0].name).toBe('collier');
+  });
+
+  it('has at least one spawn object', () => {
+    const spawns = getObjectsByType(mapData, 'spawn');
+    expect(spawns.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('has exactly 1 exit targeting Zone 1', () => {
+    expect(exits).toHaveLength(1);
+    expect(getProp(exits[0], 'targetZone')).toBe(1);
+  });
+
+  it('exit targetZone is numeric (not string)', () => {
+    expect(typeof getProp(exits[0], 'targetZone')).toBe('number');
+  });
+
+  it('has exactly 20 containers', () => {
+    expect(containers).toHaveLength(20);
+  });
+
+  it('all containers have a valid loot table value', () => {
+    for (const c of containers) {
+      const table = getProp(c, 'table') ?? 'default';
+      expect(VALID_LOOT_TABLES.has(table), `container "${c.name}" has invalid table "${table}"`).toBe(true);
+    }
+  });
+
+  it('exit corridor tiles (cols 0-2, rows 25-35) are passable in the obstacles layer', () => {
+    const obsLayer = getObstacleLayer(mapData);
+    const mapW = mapData.width;
+
+    const blockers = [];
+    for (let row = 25; row <= 35; row++) {
+      for (let col = 0; col <= 2; col++) {
+        const gid = obsLayer.data[row * mapW + col];
+        if (gid !== 0) {
+          blockers.push({ row, col, gid, impassable: impassableGIDs.has(gid) });
+        }
+      }
+    }
+
+    expect(blockers).toEqual([]);
+  });
+});
+
+// ── Zone 3 tests (Conner Preserve) ──────────────────────────────────────────
+
+describe('Zone 3 tilemap (zone3.json)', () => {
+  let mapData;
+  let exits;
+  let containers;
+  let impassableGIDs;
+
+  beforeAll(() => {
+    mapData = loadZoneMap('zone3.json');
+    exits = getObjectsByType(mapData, 'exit');
+    containers = getObjectsByType(mapData, 'container');
+    impassableGIDs = getImpassableTileGIDs(mapData);
+  });
+
+  it('JSON file parses without error', () => {
+    expect(mapData).toBeDefined();
+    expect(typeof mapData).toBe('object');
+  });
+
+  it('map dimensions are 80x60 tiles', () => {
+    expect(mapData.width).toBe(80);
+    expect(mapData.height).toBe(60);
+  });
+
+  it('has exactly 3 layers: ground (tilelayer), obstacles (tilelayer), objects (objectgroup)', () => {
+    expect(mapData.layers).toHaveLength(3);
+    expect(mapData.layers[0].name).toBe('ground');
+    expect(mapData.layers[0].type).toBe('tilelayer');
+    expect(mapData.layers[1].name).toBe('obstacles');
+    expect(mapData.layers[1].type).toBe('tilelayer');
+    expect(mapData.layers[2].name).toBe('objects');
+    expect(mapData.layers[2].type).toBe('objectgroup');
+  });
+
+  it('tileset name is "conner"', () => {
+    expect(mapData.tilesets[0].name).toBe('conner');
+  });
+
+  it('has at least one spawn object', () => {
+    const spawns = getObjectsByType(mapData, 'spawn');
+    expect(spawns.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('has exactly 1 exit targeting Zone 0', () => {
+    expect(exits).toHaveLength(1);
+    expect(getProp(exits[0], 'targetZone')).toBe(0);
+  });
+
+  it('exit targetZone is numeric (not string)', () => {
+    expect(typeof getProp(exits[0], 'targetZone')).toBe('number');
+  });
+
+  it('has exactly 17 containers', () => {
+    expect(containers).toHaveLength(17);
+  });
+
+  it('all containers have a valid loot table value', () => {
+    for (const c of containers) {
+      const table = getProp(c, 'table') ?? 'default';
+      expect(VALID_LOOT_TABLES.has(table), `container "${c.name}" has invalid table "${table}"`).toBe(true);
+    }
+  });
+
+  it('exit corridor tiles (cols 77-79, rows 26-34) are passable in the obstacles layer', () => {
+    const obsLayer = getObstacleLayer(mapData);
+    const mapW = mapData.width;
+
+    const blockers = [];
+    for (let row = 26; row <= 34; row++) {
+      for (let col = 77; col <= 79; col++) {
+        const gid = obsLayer.data[row * mapW + col];
+        if (gid !== 0) {
+          blockers.push({ row, col, gid, impassable: impassableGIDs.has(gid) });
+        }
+      }
+    }
+
+    expect(blockers).toEqual([]);
+  });
+});
+
+// ── Zone 4 tests (LOLHS / SR-54) ────────────────────────────────────────────
+
+describe('Zone 4 tilemap (zone4.json)', () => {
+  let mapData;
+  let exits;
+  let containers;
+  let impassableGIDs;
+
+  beforeAll(() => {
+    mapData = loadZoneMap('zone4.json');
+    exits = getObjectsByType(mapData, 'exit');
+    containers = getObjectsByType(mapData, 'container');
+    impassableGIDs = getImpassableTileGIDs(mapData);
+  });
+
+  it('JSON file parses without error', () => {
+    expect(mapData).toBeDefined();
+    expect(typeof mapData).toBe('object');
+  });
+
+  it('map dimensions are 80x60 tiles', () => {
+    expect(mapData.width).toBe(80);
+    expect(mapData.height).toBe(60);
+  });
+
+  it('has exactly 3 layers: ground (tilelayer), obstacles (tilelayer), objects (objectgroup)', () => {
+    expect(mapData.layers).toHaveLength(3);
+    expect(mapData.layers[0].name).toBe('ground');
+    expect(mapData.layers[0].type).toBe('tilelayer');
+    expect(mapData.layers[1].name).toBe('obstacles');
+    expect(mapData.layers[1].type).toBe('tilelayer');
+    expect(mapData.layers[2].name).toBe('objects');
+    expect(mapData.layers[2].type).toBe('objectgroup');
+  });
+
+  it('tileset name is "lolhs"', () => {
+    expect(mapData.tilesets[0].name).toBe('lolhs');
+  });
+
+  it('has at least one spawn object', () => {
+    const spawns = getObjectsByType(mapData, 'spawn');
+    expect(spawns.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('has exactly 1 exit targeting Zone 1', () => {
+    expect(exits).toHaveLength(1);
+    expect(getProp(exits[0], 'targetZone')).toBe(1);
+  });
+
+  it('exit targetZone is numeric (not string)', () => {
+    expect(typeof getProp(exits[0], 'targetZone')).toBe('number');
+  });
+
+  it('has exactly 19 containers', () => {
+    expect(containers).toHaveLength(19);
+  });
+
+  it('all containers have a valid loot table value', () => {
+    for (const c of containers) {
+      const table = getProp(c, 'table') ?? 'default';
+      expect(VALID_LOOT_TABLES.has(table), `container "${c.name}" has invalid table "${table}"`).toBe(true);
+    }
+  });
+
+  it('exit corridor tiles (cols 34-46, rows 0-2) are passable in the obstacles layer', () => {
+    const obsLayer = getObstacleLayer(mapData);
+    const mapW = mapData.width;
+
+    const blockers = [];
+    for (let row = 0; row <= 2; row++) {
+      for (let col = 34; col <= 46; col++) {
+        const gid = obsLayer.data[row * mapW + col];
+        if (gid !== 0) {
+          blockers.push({ row, col, gid, impassable: impassableGIDs.has(gid) });
+        }
+      }
+    }
+
+    expect(blockers).toEqual([]);
   });
 });
