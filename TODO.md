@@ -153,7 +153,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Cross-scene toasts via `registry.hudToast`; HUD timer tint driven by `registry.stormPhase`
   - 11 new unit tests (127 total)
 
-- ✅ **4.2 Hazard game objects** [#7](https://github.com/m3ssana/swampfire/issues/7) _(COMMIT_HASH)_
+- ✅ **4.2 Hazard game objects** [#7](https://github.com/m3ssana/swampfire/issues/7) _(a2bca80)_
   - Rattlesnakes (Zone 0 edges, Zone 3) — wander AI, near-miss rattle warning
   - Downed power lines (Zone 1, stormPhase >= 3) — static, arc-flash sparks, pole obstacle
   - Looters (Zone 1, stormPhase >= 2) — two-waypoint patrol, flip on turn
