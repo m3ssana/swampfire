@@ -7,7 +7,7 @@
 - `window.game` is set in `src/main.js` (line 43) after Phaser init
 
 ## Test Infrastructure
-- Unit tests: `vitest run` → `tests/*.test.js` (69 tests, all green)
+- Unit tests: `vitest run` → `tests/*.test.js` (116 tests, all green)
 - E2E tests: `playwright test` → `tests/*.e2e.js` — currently can't run (browsers not installed)
 - Playwright browsers must be installed separately: `npx playwright install`
 - **E2E tests are NOT wired into CI/CD** — `deploy.yml` only runs `npm test` (unit tests)
@@ -25,3 +25,9 @@ See `e2e-issues.md` for full detail. Key problems:
 ## Vitest Unit Test Quality
 - Strong: zone-transition.test.js, zone-tilemap-data.test.js (real logic extracted and tested)
 - Weak: game-logic.test.js has several tautological tests (testing JS arithmetic, not game code)
+
+## Phaser Import Boundary — Critical Rule
+- `src/gameobjects/zone_manager.js` imports SearchableContainer → DroppedItem → `Phaser.Physics.Matter.Sprite`
+- **Never import zone_manager.js (or any src/gameobjects/*.js) directly in Vitest tests** — Phaser is undefined in jsdom
+- Pattern: extract pure logic inline in the test file (e.g., replicate ZONES IDs as a Set for `isZoneDefined`)
+- This applies to all gameobject files; only pure-logic modules without Phaser class hierarchy are safe to import

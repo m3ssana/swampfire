@@ -94,18 +94,37 @@ to see where commits actually landed.
 - Bugs:     `git checkout -b fix/issue-X-description`
 - Docs:     `git checkout -b docs/issue-X-description`
 
-branch → commit → push → `gh pr create` → post "📋 PR #N ready for human review" → **STOP**.
-**NEVER run `gh pr merge`**. A human approves + merges. Close issue + update TODO only AFTER merge.
+### Required issue update cadence (MANDATORY — see AGENT_INSTRUCTIONS.md)
+1. **Start work** → `gh issue comment N --body "🚧 Starting work..."` immediately
+2. **During work** → comment on meaningful progress milestones (scripts created, tests passing, etc.)
+3. **PR ready** → `gh issue comment N --body "📋 PR #N ready for review"`
+4. **STOP** — wait for human to approve + merge
+5. **After merge** → final `gh issue comment N` with evidence + `gh issue close N --reason completed`
+
+**NEVER skip step 1.** The issue is the paper trail. No silent work.
+**NEVER run `gh pr merge`**. A human approves + merges.
 Branch protection on main requires 1 approving review — GitHub blocks self-merge.
 
-## TODO Progress (as of Phase 3.2)
-All of Phase 0 + Phase 1 + Phase 2 done. Phase 3.1 done.
-- [x] 2.0–2.4 Phase 2 complete
-- [x] 3.1 Zone 0 tilemap (PR #19, commit 4b6a079)
-- [x] 3.2 Zone transitions (PR #20, commit eb22d7a)
-- [x] 3.3 Zone 1 US-41 corridor (commit b928df4)
-- [ ] 3.4 Zones 2-4 (#5) — NEXT TASK
-- [ ] 3.4 Zones 2-4 (#5)
+### TODO.md update rule (MANDATORY — learned 2026-03-08)
+**TODO.md must be committed inside the feature PR — not as a separate step after merge.**
+- Stage `TODO.md` alongside the feature files before `git commit`
+- Mark the task ✅ with the commit hash in the same commit
+- Never leave TODO.md as an unstaged local edit after a merge — it will drift from reality
+- Direct pushes to main bypass branch protection and generate a GitHub warning; avoid them
+
+### Definition of Done checklist (per task)
+- [ ] Code written and tests passing
+- [ ] `TODO.md` updated to ✅ with commit hash — **in the same PR**
+- [ ] GitHub issue has progress comments throughout + final evidence comment
+- [ ] `gh issue close N --reason completed`
+- [ ] PR merged by human
+
+## TODO Progress (as of Phase 4.1 in review)
+All of Phase 0–3 done. Phase 4 in progress.
+- [x] 3.4 Zones 2, 3, 4 (PR #37, commit ff78171)
+- [ ] 4.1 StormManager (PR #38 — awaiting review) — IN REVIEW
+- [ ] 4.2 Hazard game objects (#7)
+- [ ] 4.3 Wind + environmental effects (#8)
 
 ## Phase 3.1 — Zone 0 Tilemap (confirmed patterns)
 
@@ -122,6 +141,18 @@ All of Phase 0 + Phase 1 + Phase 2 done. Phase 3.1 done.
 - **Collision**: `obstacleLayer.setCollisionByProperty({impassable:true})` then `matter.world.convertTilemapLayer(obstacleLayer)`
 - **Bootloader**: `swamp-tiles` image key, `zone0` tilemap key; load image before tilemap
 - **ZoneManager addTilesetImage**: `map.addTilesetImage('swamp', 'swamp-tiles')` — first arg = tileset name in JSON
+
+## Phase 3.4 — Zone 2/3/4 (confirmed patterns)
+
+- **Key files**: `scripts/generate-{collier,conner,lolhs}-tiles.js` → `public/assets/images/{name}-tiles.png`
+- **Key files**: `scripts/generate-zone{2,3,4}.js` → `public/assets/maps/zone{N}.json`
+- **Zone connections**: Zone1↔Zone2 east (rows 25-35), Zone0↔Zone3 west (rows 26-34), Zone1↔Zone4 south (cols 34-46)
+- **Entry point convention**: 4-tile clearance from the border (e.g. col 4 or col 75, not col 0/79)
+- **ZONES entryPoints**: key = sourceZoneId arriving FROM. Value = pixel {x,y} in THIS zone.
+- **Phaser testability gap**: `zone_manager.js` can't be imported in Vitest — Phaser class inheritance
+  at module level throws `ReferenceError: Phaser is not defined`. Mirror ZONES data inline in tests.
+- **Test coverage pattern**: for each new zone, test structure + layers + tileset name + spawn +
+  exit targetZone + container count + loot table validity + corridor passability + entry point passability
 
 ## Phase 3.3 — Zone 1 US-41 Tileset (confirmed patterns)
 
