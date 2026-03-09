@@ -7,7 +7,7 @@
 - `window.game` is set in `src/main.js` (line 43) after Phaser init
 
 ## Test Infrastructure
-- Unit tests: `vitest run` → `tests/*.test.js` (116 tests, all green)
+- Unit tests: `vitest run` → `tests/*.test.js` (201 tests, all green as of task 4.2)
 - E2E tests: `playwright test` → `tests/*.e2e.js` — currently can't run (browsers not installed)
 - Playwright browsers must be installed separately: `npx playwright install`
 - **E2E tests are NOT wired into CI/CD** — `deploy.yml` only runs `npm test` (unit tests)
@@ -29,5 +29,18 @@ See `e2e-issues.md` for full detail. Key problems:
 ## Phaser Import Boundary — Critical Rule
 - `src/gameobjects/zone_manager.js` imports SearchableContainer → DroppedItem → `Phaser.Physics.Matter.Sprite`
 - **Never import zone_manager.js (or any src/gameobjects/*.js) directly in Vitest tests** — Phaser is undefined in jsdom
-- Pattern: extract pure logic inline in the test file (e.g., replicate ZONES IDs as a Set for `isZoneDefined`)
-- This applies to all gameobject files; only pure-logic modules without Phaser class hierarchy are safe to import
+- Exception: pure-logic modules with no Phaser class dependency ARE safe: `storm_phase_logic.js`, `flood_zone.js` (only exports `FLOOD_SPEED_MULTIPLIER` constant + class)
+- Pattern: inline constants and logic from source files; add comment "inlined from X.js — keep in sync"
+
+## Hazard System Test Patterns (task 4.2)
+- Arrival thresholds use strict `<` (not `<=`): dist < 8 means exactly 8px is NOT arrived
+- Sensor sizing tests: inline BODY_RADIUS/SENSOR_RADIUS from source and assert sensor > body
+- Damage guard tests: mock `scene.player.invincible`, `cameras.main.flash/shake`, `restartScene`
+- Spawn flag idempotency: call `checkPhaseSpawns` multiple times at same phase — expect count=1
+- Zone-transition cleanup: `resetFlags()` mirrors `_clearHazards()` in hazard_manager.js
+- DO NOT test `Math.random()` range directly — test the formula that uses it (e.g., `MIN + random * (MAX - MIN)`)
+
+## Common Test Authoring Mistakes Found
+- Tautological tests: defining `const fn = () => true` then calling it — tests nothing (found in original hazard-logic.test.js)
+- Off-by-one in strict boundary: `dist < 6` — exactly 6.0 is false; 5.99 is true
+- Inverting assertion for boundary case: `392.01` is 7.99px from 400, which IS `< 8` (arrived)
