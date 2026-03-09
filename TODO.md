@@ -144,11 +144,14 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 4 -- Storm + Hazard Systems
 
-- ⏳ **4.1 Storm phase system** [#6](https://github.com/m3ssana/swampfire/issues/6)
-  - `StormManager` tracks 4 phases based on countdown timer
-  - Phase 1 (60-45 min): light rain particle overlay
-  - Phase transitions: screen shake, thunder, HUD toast
-  - Weather visuals intensify each phase (rain density, wind, darkness)
+- ✅ **4.1 Storm phase system** [#6](https://github.com/m3ssana/swampfire/issues/6) _(b74aa10)_
+  - `StormManager` + `storm_phase_logic.js` (pure, unit-tested phase fn)
+  - Phase 1 (60-45 min): light rain particle overlay, green HUD
+  - Phase 2 (45-30 min): moderate rain, blue flash, yellow HUD, toast
+  - Phase 3 (30-15 min): heavy rain, shake, 28% darkness overlay, orange HUD, toast
+  - Phase 4 (15-0 min): intense rain, looping shake, lightning (8-20s), 50% darkness, red HUD, toast
+  - Cross-scene toasts via `registry.hudToast`; HUD timer tint driven by `registry.stormPhase`
+  - 11 new unit tests (127 total)
 
 - ⏳ **4.2 Hazard game objects** [#7](https://github.com/m3ssana/swampfire/issues/7)
   - Rattlesnakes (Zone 0 edges, Zone 3)
