@@ -51,7 +51,7 @@ Output Format:
 Quality Standards:
 - Unit test coverage should be ≥80% for critical game systems
 - All tests must be deterministic and reliable
-- E2E tests must validate complete user workflows
+- E2E tests must exercise the actual game pipeline (real Phaser event loop, real inputs, real scene transitions) — tests that manipulate game state via `page.evaluate()` or bypass the engine do not validate player-facing behavior
 - No known bugs should reach production
 - Performance metrics must meet established baselines
 
