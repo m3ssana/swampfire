@@ -119,12 +119,70 @@ Branch protection on main requires 1 approving review — GitHub blocks self-mer
 - [ ] `gh issue close N --reason completed`
 - [ ] PR merged by human
 
-## TODO Progress (as of Phase 4.1 in review)
-All of Phase 0–3 done. Phase 4 in progress.
-- [x] 3.4 Zones 2, 3, 4 (PR #37, commit ff78171)
-- [ ] 4.1 StormManager (PR #38 — awaiting review) — IN REVIEW
-- [ ] 4.2 Hazard game objects (#7)
+## TODO Progress (as of Phase 4.2 complete)
+All of Phase 0–4.2 done. Phase 4.3+ pending.
+- [x] 3.4 Zones 2, 3, 4 (commit ff78171)
+- [x] 4.1 StormManager (commit b74aa10)
+- [x] 4.2 Hazard game objects (commit a2bca80)
 - [ ] 4.3 Wind + environmental effects (#8)
+
+## Phase 4.2 — Hazard Game Objects (confirmed patterns)
+
+### Hazard class pattern
+Each hazard is self-contained in `src/gameobjects/`. Template:
+- Constructor builds sprite (via `_ensureTexture` static), Matter body, sensor.
+- `_body.gameObject = this` so collision callback can call `onNearMiss()`.
+- Cleanup in `destroy()`: off update listener, `matter.world.remove()`, sprite.destroy().
+- Register `scene.events.once('shutdown', this.destroy, this)` in constructor.
+
+### Texture generation pattern
+Hazards that use procedural textures call a static `_ensureTexture(scene)` guard:
+```js
+static _ensureTexture(scene) {
+  if (scene.textures.exists('key')) return;
+  const g = scene.make.graphics({ add: false });
+  // ... draw ...
+  g.generateTexture('key', w, h);
+  g.destroy();
+}
+```
+This avoids re-generating on every spawn (idempotent, cheap).
+
+### Near-miss sensor pattern (dual body)
+- Inner body (e.g. radius=10): `label: 'hazard_hit'`, `isSensor: false` — causes damage
+- Outer body (e.g. radius=20): `label: 'hazard_warn'`, `isSensor: true` — triggers warning
+- Both added to `matter.world` separately; sensor kept co-located via `Body.setPosition()` each update tick
+- `onNearMiss()` debounced with `this._nearPlayer` bool + `time.delayedCall(1500-2000ms, reset)`
+
+### FloodZone velocity scaling approach
+FloodZone does NOT modify player.js. Instead it scales the velocity AFTER the player's own
+update runs (update listeners fire in registration order). Pattern:
+```js
+const vx = player.sprite.body.velocity.x * FLOOD_SPEED_MULTIPLIER;
+player.sprite.setVelocity(vx, vy);
+```
+`FLOOD_SPEED_MULTIPLIER = 0.45` — exported so tests can import without Phaser.
+
+### HazardManager orchestration
+- Single HazardManager created in game.js `create()`, AFTER StormManager.
+- Listens to `registry.events.on('changedata-stormPhase', ...)` and scene `zoneChanged` event.
+- `zoneChanged` is emitted by `transitionToZone()` in game.js after zone swap but before fade-in.
+- Per-zone spawn flags (`_lootersSpawned`, `_powerLinesSpawned`, `_floodZonesSpawned`) reset on zone change.
+- `addCollisions(scene)` registers a single `matterCollision.addOnCollideStart` for all hazard labels.
+- Damage routing: all hazard hits → `scene.cameras.main.flash(120, 0xff, 0,0)` + shake(180, 0.012) → `restartScene()`
+
+### Hazard spawn thresholds (timeLeft seconds)
+- Phase 2 starts at timeLeft <= 2699s (~45 min left): looters spawn
+- Phase 3 starts at timeLeft <= 1799s (~30 min left): power lines + flood zones spawn
+- Rattlesnakes: always present in Zone 0 and Zone 3 (no phase condition)
+
+### Collision body labels (for routing in addCollisions)
+- `rattlesnake` (hit), `rattlesnake_warn` (near-miss)
+- `looter` (hit), `looter_warn` (near-miss)
+- `powerline_hit` (hit), `powerline_warn` (near-miss), `powerline_pole` (obstacle, not sensor)
+
+### Zone spatial constants
+Zone 0, 1, 2, 3, 4 are all 80×60 tiles × 48px = 3840×2880px world space.
 
 ## Phase 3.1 — Zone 0 Tilemap (confirmed patterns)
 

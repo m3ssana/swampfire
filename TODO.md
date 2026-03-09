@@ -153,12 +153,13 @@ Each task is small enough to fit in a single Claude Code session.
   - Cross-scene toasts via `registry.hudToast`; HUD timer tint driven by `registry.stormPhase`
   - 11 new unit tests (127 total)
 
-- ⏳ **4.2 Hazard game objects** [#7](https://github.com/m3ssana/swampfire/issues/7)
-  - Rattlesnakes (Zone 0 edges, Zone 3)
-  - Downed power lines (Zone 1, after 40 min)
-  - Looters (Zone 1, after 20 min) -- simple patrol AI
-  - Flooding (low roads, after 35 min) -- tile overlay that slows player
-  - All hazards damage player (1 HP) with near-miss detection zone
+- ✅ **4.2 Hazard game objects** [#7](https://github.com/m3ssana/swampfire/issues/7) _(a2bca80)_
+  - Rattlesnakes (Zone 0 edges, Zone 3) — wander AI, near-miss rattle warning
+  - Downed power lines (Zone 1, stormPhase >= 3) — static, arc-flash sparks, pole obstacle
+  - Looters (Zone 1, stormPhase >= 2) — two-waypoint patrol, flip on turn
+  - Flooding (Zone 1, stormPhase >= 3) — semi-transparent overlay, 45% speed penalty
+  - HazardManager orchestrates all spawns, routing, and zone-transition cleanup
+  - 34 unit tests (161 total): spawn timing, AABB overlap, patrol AI, debounce, table integrity
 
 - ⏳ **4.3 Wind + environmental effects** [#8](https://github.com/m3ssana/swampfire/issues/8)
   - Wind force pushes player sideways (Phase 3+)

@@ -1,6 +1,7 @@
 import Player                         from "../gameobjects/player";
 import ZoneManager, { isZoneDefined } from "../gameobjects/zone_manager";
 import StormManager                   from "../gameobjects/storm_manager";
+import HazardManager                  from "../gameobjects/hazard_manager";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -34,7 +35,10 @@ export default class Game extends Phaser.Scene {
     this.launchHUD();
     this.loadAudios();
     this.listenForGameOver();
-    this.stormManager = new StormManager(this);
+    this.stormManager   = new StormManager(this);
+    this.hazardManager  = new HazardManager(this);
+    // Wire hazard collision handlers now that both player and hazardManager exist
+    this.hazardManager.addCollisions(this);
   }
 
   // ─── Map ───────────────────────────────────────────────────────────────────
@@ -413,6 +417,9 @@ export default class Game extends Phaser.Scene {
       const { width, height } = this.zone.getBounds();
       this.cameras.main.setBounds(0, 0, width, height);
       // Camera is already following player.sprite — no need to re-bind.
+
+      // ── Notify hazard manager of new zone ────────────────────────────────────
+      this.events.emit('zoneChanged', targetZoneId);
 
       // ── Fade back in ────────────────────────────────────────────────────────
       this.cameras.main.fadeIn(250, 0, 0, 0);
