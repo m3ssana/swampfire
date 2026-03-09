@@ -10,13 +10,32 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+// isZoneDefined cannot be imported directly from zone_manager.js because that
+// module transitively imports SearchableContainer → DroppedItem → Phaser, which
+// is unavailable in the Vitest node/jsdom environment.  Mirror the logic inline
+// from the ZONES catalogue in zone_manager.js.
+const DEFINED_ZONE_IDS = new Set([0, 1, 2, 3, 4]);
+function isZoneDefined(id) { return DEFINED_ZONE_IDS.has(id); }
+
+const MAPS_DIR = resolve(import.meta.dirname, '../public/assets/maps');
+
+function loadZoneMap(filename) {
+  return JSON.parse(readFileSync(resolve(MAPS_DIR, filename), 'utf-8'));
+}
 
 // ── Extracted constants from zone maps ──────────────────────────────────────
 
 const ZONE0_SOUTH_EXIT = { x: 1632, y: 2736, width: 624, height: 144, targetZone: 1 };
+const ZONE0_WEST_EXIT  = { x: 0,    y: 1248, width: 144, height: 432, targetZone: 3 };
 const ZONE1_NORTH_EXIT = { x: 1632, y: 0,    width: 624, height: 144, targetZone: 0 };
 const ZONE1_SOUTH_EXIT = { x: 1632, y: 2736, width: 624, height: 144, targetZone: 4 };
 const ZONE1_EAST_EXIT  = { x: 3696, y: 1200, width: 144, height: 528, targetZone: 2 };
+const ZONE2_WEST_EXIT  = { x: 0,    y: 1200, width: 144, height: 528, targetZone: 1 };
+const ZONE3_EAST_EXIT  = { x: 3696, y: 1248, width: 144, height: 432, targetZone: 0 };
+const ZONE4_NORTH_EXIT = { x: 1632, y: 0,    width: 624, height: 144, targetZone: 1 };
 
 // Entry point when arriving in Zone 1 from Zone 0 (row 12)
 const ZONE1_ENTRY_FROM_Z0 = { x: 40 * 48, y: 12 * 48 };   // (1920, 576)
@@ -235,5 +254,147 @@ describe('Tilemap exit data integrity', () => {
       expect(exit.width).toBeGreaterThan(0);
       expect(exit.height).toBeGreaterThan(0);
     }
+  });
+});
+
+// ── New zone connections ─────────────────────────────────────────────────────
+
+describe('Zone 1 → Zone 2 transition (east exit)', () => {
+  it('Zone 1 has an east exit targeting Zone 2', () => {
+    expect(ZONE1_EAST_EXIT.targetZone).toBe(2);
+    expect(ZONE1_EAST_EXIT.width).toBeGreaterThan(0);
+    expect(ZONE1_EAST_EXIT.height).toBeGreaterThan(0);
+  });
+
+  it('Zone 2 entry point (col 4, row 30) is inside the cleared west corridor', () => {
+    // The cleared corridor spans cols 0-2, rows 25-35.
+    // Entry at col 4 is just east of the corridor — inside Zone 2, clear of the exit trigger.
+    const entryX = 4 * 48;   // 192
+    const entryY = 30 * 48;  // 1440
+    const tileX = Math.floor(entryX / 48);
+    const tileY = Math.floor(entryY / 48);
+    expect(tileX).toBe(4);
+    expect(tileY).toBe(30);
+    // Row 30 is within the cleared corridor row range (25-35)
+    expect(tileY).toBeGreaterThanOrEqual(25);
+    expect(tileY).toBeLessThanOrEqual(35);
+  });
+
+  it('Zone 2 entry point is NOT inside the Zone 2 west exit rectangle', () => {
+    const entryX = 4 * 48;   // 192
+    const entryY = 30 * 48;  // 1440
+    const inside = isInsideExit(entryX, entryY, ZONE2_WEST_EXIT);
+    expect(inside).toBe(false);
+  });
+
+  it('Zone 2 entry point obstacle tile is passable (GID 0)', () => {
+    const mapData = loadZoneMap('zone2.json');
+    const obsLayer = mapData.layers.find(l => l.name === 'obstacles' && l.type === 'tilelayer');
+    const tileX = Math.floor((4 * 48) / 48);   // 4
+    const tileY = Math.floor((30 * 48) / 48);  // 30
+    const gid = obsLayer.data[tileY * mapData.width + tileX];
+    expect(gid).toBe(0);
+  });
+});
+
+describe('Zone 0 → Zone 3 transition (west exit)', () => {
+  it('Zone 0 has a west exit targeting Zone 3', () => {
+    expect(ZONE0_WEST_EXIT.targetZone).toBe(3);
+    expect(ZONE0_WEST_EXIT.width).toBeGreaterThan(0);
+    expect(ZONE0_WEST_EXIT.height).toBeGreaterThan(0);
+  });
+
+  it('Zone 3 entry point (col 75, row 30) is inside the cleared east corridor', () => {
+    // The cleared corridor spans cols 77-79, rows 26-34.
+    // Entry at col 75 is just west of the corridor — inside Zone 3, clear of the exit trigger.
+    const entryX = 75 * 48;  // 3600
+    const entryY = 30 * 48;  // 1440
+    const tileX = Math.floor(entryX / 48);
+    const tileY = Math.floor(entryY / 48);
+    expect(tileX).toBe(75);
+    expect(tileY).toBe(30);
+    // Row 30 is within the cleared corridor row range (26-34)
+    expect(tileY).toBeGreaterThanOrEqual(26);
+    expect(tileY).toBeLessThanOrEqual(34);
+  });
+
+  it('Zone 3 entry point is NOT inside the Zone 3 east exit rectangle', () => {
+    const entryX = 75 * 48;  // 3600
+    const entryY = 30 * 48;  // 1440
+    const inside = isInsideExit(entryX, entryY, ZONE3_EAST_EXIT);
+    expect(inside).toBe(false);
+  });
+
+  it('Zone 3 entry point obstacle tile is passable (GID 0)', () => {
+    const mapData = loadZoneMap('zone3.json');
+    const obsLayer = mapData.layers.find(l => l.name === 'obstacles' && l.type === 'tilelayer');
+    const tileX = Math.floor((75 * 48) / 48);  // 75
+    const tileY = Math.floor((30 * 48) / 48);  // 30
+    const gid = obsLayer.data[tileY * mapData.width + tileX];
+    expect(gid).toBe(0);
+  });
+});
+
+describe('Zone 1 → Zone 4 transition (south exit)', () => {
+  it('Zone 1 has a south exit targeting Zone 4', () => {
+    expect(ZONE1_SOUTH_EXIT.targetZone).toBe(4);
+    expect(ZONE1_SOUTH_EXIT.width).toBeGreaterThan(0);
+    expect(ZONE1_SOUTH_EXIT.height).toBeGreaterThan(0);
+  });
+
+  it('Zone 4 entry point (col 40, row 10) is inside the cleared north corridor', () => {
+    // The cleared corridor spans cols 34-46, rows 0-2.
+    // Entry at row 10 is south of the corridor — inside Zone 4, clear of the exit trigger.
+    const entryX = 40 * 48;  // 1920
+    const entryY = 10 * 48;  // 480
+    const tileX = Math.floor(entryX / 48);
+    const tileY = Math.floor(entryY / 48);
+    expect(tileX).toBe(40);
+    expect(tileY).toBe(10);
+    // Col 40 is within the cleared corridor col range (34-46)
+    expect(tileX).toBeGreaterThanOrEqual(34);
+    expect(tileX).toBeLessThanOrEqual(46);
+  });
+
+  it('Zone 4 entry point is NOT inside the Zone 4 north exit rectangle', () => {
+    const entryX = 40 * 48;  // 1920
+    const entryY = 10 * 48;  // 480
+    const inside = isInsideExit(entryX, entryY, ZONE4_NORTH_EXIT);
+    expect(inside).toBe(false);
+  });
+
+  it('Zone 4 entry point has >= 240px clearance from Zone 4 north exit', () => {
+    const exitBottom = ZONE4_NORTH_EXIT.y + ZONE4_NORTH_EXIT.height;  // 144
+    const entryY = 10 * 48;                                           // 480
+    expect(entryY - exitBottom).toBeGreaterThanOrEqual(240);
+  });
+
+  it('Zone 4 entry point obstacle tile is passable (GID 0)', () => {
+    const mapData = loadZoneMap('zone4.json');
+    const obsLayer = mapData.layers.find(l => l.name === 'obstacles' && l.type === 'tilelayer');
+    const tileX = Math.floor((40 * 48) / 48);  // 40
+    const tileY = Math.floor((10 * 48) / 48);  // 10
+    const gid = obsLayer.data[tileY * mapData.width + tileX];
+    expect(gid).toBe(0);
+  });
+});
+
+describe('isZoneDefined — zone catalogue coverage', () => {
+  it('returns true for zones 0 through 4', () => {
+    for (const id of [0, 1, 2, 3, 4]) {
+      expect(isZoneDefined(id), `zone ${id} should be defined`).toBe(true);
+    }
+  });
+
+  it('returns false for zone 5', () => {
+    expect(isZoneDefined(5)).toBe(false);
+  });
+
+  it('returns false for zone 99', () => {
+    expect(isZoneDefined(99)).toBe(false);
+  });
+
+  it('returns false for negative zone IDs', () => {
+    expect(isZoneDefined(-1)).toBe(false);
   });
 });

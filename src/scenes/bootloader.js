@@ -117,6 +117,9 @@ export default class Bootloader extends Phaser.Scene {
     // Zone tilesets
     this.load.image("swamp-tiles", "assets/images/swamp-tiles.png"); // Zone 0
     this.load.image("us41-tiles",  "assets/images/us41-tiles.png");  // Zone 1
+    this.load.image('collier-tiles', 'assets/images/collier-tiles.png'); // Zone 2
+    this.load.image('conner-tiles',  'assets/images/conner-tiles.png');  // Zone 3
+    this.load.image('lolhs-tiles',   'assets/images/lolhs-tiles.png');   // Zone 4
   }
 
   /*
@@ -125,6 +128,9 @@ export default class Bootloader extends Phaser.Scene {
   loadMaps() {
     this.load.tilemapTiledJSON("zone0", "assets/maps/zone0.json");
     this.load.tilemapTiledJSON("zone1", "assets/maps/zone1.json");
+    this.load.tilemapTiledJSON('zone2', 'assets/maps/zone2.json');
+    this.load.tilemapTiledJSON('zone3', 'assets/maps/zone3.json');
+    this.load.tilemapTiledJSON('zone4', 'assets/maps/zone4.json');
   }
 
   /*

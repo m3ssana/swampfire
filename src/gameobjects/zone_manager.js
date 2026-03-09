@@ -64,6 +64,36 @@ const ZONES = {
       2: { x: 75 * 48, y: 30 * 48 },
     },
   },
+  2: {
+    name:        'Collier Commons',
+    mapKey:      'zone2',
+    tileKey:     'collier-tiles',
+    tilesetName: 'collier',
+    entryPoints: {
+      // Arriving from Zone 1 (west exit at rows 25-35) → col 4, row 30
+      1: { x: 4 * 48, y: 30 * 48 },
+    },
+  },
+  3: {
+    name:        'Conner Preserve',
+    mapKey:      'zone3',
+    tileKey:     'conner-tiles',
+    tilesetName: 'conner',
+    entryPoints: {
+      // Arriving from Zone 0 (east at cols 77-79, rows 26-34) → col 75, row 30
+      0: { x: 75 * 48, y: 30 * 48 },
+    },
+  },
+  4: {
+    name:        'LOLHS / SR-54',
+    mapKey:      'zone4',
+    tileKey:     'lolhs-tiles',
+    tilesetName: 'lolhs',
+    entryPoints: {
+      // Arriving from Zone 1 (south exit at cols 34-46, rows 57-59) → col 40, row 10
+      1: { x: 40 * 48, y: 10 * 48 },
+    },
+  },
 };
 
 /** Returns true if a zone ID is defined and loadable. Used by game.js. */
