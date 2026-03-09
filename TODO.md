@@ -133,11 +133,12 @@ Each task is small enough to fit in a single Claude Code session.
   - Road connections: north (Zone 0 active), south (Zone 4), east (Zone 2)
   - `isZoneDefined()` guard shows "Road closed" for unbuilt zones
 
-- ⏳ **3.4 Remaining zones (2, 3, 4)** [#5](https://github.com/m3ssana/swampfire/issues/5)
-  - Zone 2: Collier Pkwy (Publix, Library/Foundry, Rec Center)
-  - Zone 3: Conner Preserve (RC Field, Fire Tower)
-  - Zone 4: LOLHS + SR-54 (school, Tractor Supply)
-  - Road corridors between all zones per spec road network table
+- ✅ **3.4 Remaining zones (2, 3, 4)** [#5](https://github.com/m3ssana/swampfire/issues/5) _(ff78171)_
+  - Zone 2: Collier Commons — Publix, Library/Foundry, Rec Center; west exit → Zone 1
+  - Zone 3: Conner Preserve — RC Flying Field, Fire Tower; east exit → Zone 0
+  - Zone 4: LOLHS / SR-54 — school, chem lab, Tractor Supply; north exit → Zone 1
+  - 8-tile tilesets generated per zone; 56 total containers across all 3 zones
+  - 47 new unit tests (116 total): structure, passability, transition geometry
 
 ---
 
