@@ -164,6 +164,7 @@ export default class PowerLine {
       label: 'powerline_pole',
       angle: 0.6,  // slight diagonal matches the falling pole orientation
     });
+    this._poleBody.gameObject = this;
     this.scene.matter.world.add(this._poleBody);
   }
 
