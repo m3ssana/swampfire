@@ -142,7 +142,7 @@ export default class PowerLine {
       isSensor: true,
       label: 'powerline_hit',
     });
-    this._hitBody.gameObject = this;
+    this._hitBody.hazardRef = this;
     this.scene.matter.world.add(this._hitBody);
 
     // Near-miss warning sensor — slightly larger, centred at same point
@@ -151,7 +151,7 @@ export default class PowerLine {
       isSensor: true,
       label: 'powerline_warn',
     });
-    this._warnBody.gameObject = this;
+    this._warnBody.hazardRef = this;
     this.scene.matter.world.add(this._warnBody);
 
     // Pole obstacle — the fallen concrete cylinder blocks passage
@@ -164,7 +164,7 @@ export default class PowerLine {
       label: 'powerline_pole',
       angle: 0.6,  // slight diagonal matches the falling pole orientation
     });
-    this._poleBody.gameObject = this;
+    this._poleBody.hazardRef = this;
     this.scene.matter.world.add(this._poleBody);
   }
 
