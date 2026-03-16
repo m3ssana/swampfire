@@ -123,7 +123,7 @@ export default class Rattlesnake {
       label: 'rattlesnake',
       isSensor: false,
     });
-    this._body.gameObject = this;
+    this._body.hazardRef = this;
     this.scene.matter.world.add(this._body);
   }
 
@@ -134,7 +134,7 @@ export default class Rattlesnake {
       label: 'rattlesnake_warn',
       isStatic: false,
     });
-    this._sensor.gameObject = this;
+    this._sensor.hazardRef = this;
     this.scene.matter.world.add(this._sensor);
   }
 
