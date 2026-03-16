@@ -131,7 +131,10 @@ All of Phase 0–4.2 done. Phase 4.3+ pending.
 ### Hazard class pattern
 Each hazard is self-contained in `src/gameobjects/`. Template:
 - Constructor builds sprite (via `_ensureTexture` static), Matter body, sensor.
-- `_body.gameObject = this` so collision callback can call `onNearMiss()`.
+- `_body.hazardRef = this` (NOT `.gameObject`) so collision callback can call `onNearMiss()`.
+  - ⚠️ `.gameObject` is RESERVED by Phaser — Phaser calls `.gameObject.emit()` on every colliding body.
+    Plain JS classes don't have `.emit()`, causing `TypeError: i.gameObject.emit is not a function`.
+    Always use `.hazardRef` for hazard-to-body back-references. (Fixed commit 76c6b25)
 - Cleanup in `destroy()`: off update listener, `matter.world.remove()`, sprite.destroy().
 - Register `scene.events.once('shutdown', this.destroy, this)` in constructor.
 
