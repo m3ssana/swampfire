@@ -246,7 +246,7 @@ export default class HazardManager {
             break;
 
           case 'rattlesnake_warn': {
-            const snake = bodyB.gameObject;
+            const snake = bodyB.hazardRef;
             snake?.onNearMiss?.();
             break;
           }
@@ -256,7 +256,7 @@ export default class HazardManager {
             break;
 
           case 'looter_warn': {
-            const looter = bodyB.gameObject;
+            const looter = bodyB.hazardRef;
             looter?.onNearMiss?.();
             break;
           }
@@ -266,7 +266,7 @@ export default class HazardManager {
             break;
 
           case 'powerline_warn': {
-            const line = bodyB.gameObject;
+            const line = bodyB.hazardRef;
             line?.onNearMiss?.();
             break;
           }
