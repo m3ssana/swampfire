@@ -171,11 +171,11 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 5 -- Feedback + Polish
 
-- ⏳ **5.1 XP popup system** [#9](https://github.com/m3ssana/swampfire/issues/9)
-  - `FeedbackSystem` class for floating XP numbers
-  - Color-coded per action type (white/gold/cyan/orange/red/green/purple)
-  - Overlapping popups merge into single number
-  - Screen effects: flash, shake, edge glow per spec table
+- ✅ **5.1 XP popup system** [#9](https://github.com/m3ssana/swampfire/issues/9) — commit 95f5c32, PR #44
+  - `showXPGain()` in GameScene: 18px color-coded popups (loot=green, craft=gold, install=cyan)
+  - 400ms same-context merge window accumulates rapid XP grants into one popup
+  - Scale pop-in (1.3→1.0) + straight upward rise (Quad.Out 1.5s)
+  - 80ms player white-flash on loot + craft moments
 
 - ⏳ **5.2 Combo streak system** [#10](https://github.com/m3ssana/swampfire/issues/10)
   - `ComboTracker`: items within 3s build multiplier (2x-5x cap)

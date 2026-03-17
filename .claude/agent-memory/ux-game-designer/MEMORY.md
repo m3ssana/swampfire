@@ -153,6 +153,15 @@ static _ensureTexture(scene) {
 ```
 This avoids re-generating on every spawn (idempotent, cheap).
 
+### Hazard destroy() — matter.world teardown order (REQUIRED PATTERN)
+Phaser nulls `matter.world` BEFORE emitting the `shutdown` event. Any hazard `destroy()` that
+calls `this.scene.matter.world.remove(body)` will throw during win/lose scene transitions.
+**Always use optional chaining:**
+```js
+this.scene.matter.world?.remove(this._body);
+```
+Apply to every body removal in every hazard class. (Fixed 2026-03-17 in rattlesnake, looter, power_line)
+
 ### Near-miss sensor pattern (dual body)
 - Inner body (e.g. radius=10): `label: 'hazard_hit'`, `isSensor: false` — causes damage
 - Outer body (e.g. radius=20): `label: 'hazard_warn'`, `isSensor: true` — triggers warning
