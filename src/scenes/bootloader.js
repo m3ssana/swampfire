@@ -98,13 +98,6 @@ export default class Bootloader extends Phaser.Scene {
       this
     );
 
-    // Silently skip missing audio files (Suno tracks not generated yet)
-    this.load.on('loaderror', (file) => {
-      if (file.type === 'audio') {
-        console.warn(`[Bootloader] Skipping missing audio: "${file.key}"`);
-      }
-    });
-
     this.load.on(
       "complete",
       () => {
@@ -155,38 +148,25 @@ export default class Bootloader extends Phaser.Scene {
   }
 
   /*
-    Audio loading: legacy SFX (kept until Phase 5.3b replaces them) +
-    new Suno music tracks. Missing files are silently skipped via the
-    loaderror handler in setLoadEvents().
+    This loads the audio files: music and sound effects.
     */
   loadAudios() {
-    // ── Legacy SFX (kept for backward compat) ──────────────────────────────
-    this.load.audio("crash",    "assets/sounds/crash.mp3");
-    this.load.audio("death",    "assets/sounds/death.mp3");
-    this.load.audio("start",    "assets/sounds/start.mp3");  // mapped as 'coin' in game.js
+    Array(5)
+      .fill(0)
+      .forEach((_, i) => {
+        this.load.audio(`climb${i}`, `assets/sounds/climb${i}.mp3`);
+      });
 
-    // ── Legacy menu/transition music (fallback until Suno tracks exist) ────
-    this.load.audio("splash",   "assets/sounds/splash.mp3");
-    this.load.audio("music",    "assets/sounds/music.mp3");
-
-    // ── Zone base tracks (120s loops, generated via Suno — SPEC §8.1.2) ────
-    this.load.audio("zone_cypress", "assets/music/zone0_cypress.mp3");
-    this.load.audio("zone_us41",    "assets/music/zone1_us41.mp3");
-    this.load.audio("zone_collier", "assets/music/zone2_collier.mp3");
-    this.load.audio("zone_conner",  "assets/music/zone3_conner.mp3");
-    this.load.audio("zone_lolhs",   "assets/music/zone4_lolhs.mp3");
-
-    // ── Storm intensity layers (60s loops — SPEC §8.1.3) ───────────────────
-    this.load.audio("storm_phase1", "assets/music/storm_phase1.mp3");
-    this.load.audio("storm_phase2", "assets/music/storm_phase2.mp3");
-    this.load.audio("storm_phase3", "assets/music/storm_phase3.mp3");
-    this.load.audio("storm_phase4", "assets/music/storm_phase4.mp3");
-
-    // ── One-shot stings (SPEC §8.1.4) ──────────────────────────────────────
-    this.load.audio("menu_theme",    "assets/music/menu_theme.mp3");
-    this.load.audio("sting_install", "assets/music/sting_install.mp3");
-    this.load.audio("sting_launch",  "assets/music/sting_launch.mp3");
-    this.load.audio("sting_failure", "assets/music/sting_failure.mp3");
+    this.load.audio("splash", "assets/sounds/splash.mp3");
+    this.load.audio("music", "assets/sounds/music.mp3");
+    this.load.audio("jump", "assets/sounds/jump.mp3");
+    this.load.audio("bubble", "assets/sounds/bubble.mp3");
+    this.load.audio("trap", "assets/sounds/trap.mp3");
+    this.load.audio("crash", "assets/sounds/crash.mp3");
+    this.load.audio("fireball", "assets/sounds/fireball.mp3");
+    this.load.audio("win", "assets/sounds/win.mp3");
+    this.load.audio("start", "assets/sounds/start.mp3");
+    this.load.audio("death", "assets/sounds/death.mp3");
   }
 
   /*

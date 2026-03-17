@@ -137,7 +137,7 @@ export default class Looter {
       label: 'looter',
       isSensor: false,
     });
-    this._body.hazardRef = this;
+    this._body.gameObject = this;
     this.scene.matter.world.add(this._body);
 
     this._sensor = Bodies.circle(x, y, SENSOR_RADIUS, {
@@ -145,7 +145,7 @@ export default class Looter {
       isStatic: false,
       label: 'looter_warn',
     });
-    this._sensor.hazardRef = this;
+    this._sensor.gameObject = this;
     this.scene.matter.world.add(this._sensor);
   }
 

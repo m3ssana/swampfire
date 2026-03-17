@@ -155,11 +155,8 @@ export default class Splash extends Phaser.Scene {
     });
   }
 
-  playMusic() {
-    // Prefer the new Suno menu theme; fall back to legacy splash if not yet generated
-    const key = this.cache.audio.exists('menu_theme') ? 'menu_theme' : 'splash';
-    if (!this.cache.audio.exists(key)) return; // no audio at all — skip silently
-    this.theme = this.sound.add(key);
+  playMusic(theme = "splash") {
+    this.theme = this.sound.add(theme);
     this.theme.stop();
     this.theme.play({
       mute: false,

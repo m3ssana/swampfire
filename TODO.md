@@ -169,7 +169,7 @@ Each task is small enough to fit in a single Claude Code session.
 
 ---
 
-## Phase 5 -- Feedback + Polish _(5.3a music reprioritized ahead of 4.3 per player feedback)_
+## Phase 5 -- Feedback + Polish
 
 - ⏳ **5.1 XP popup system** [#9](https://github.com/m3ssana/swampfire/issues/9)
   - `FeedbackSystem` class for floating XP numbers
@@ -183,20 +183,12 @@ Each task is small enough to fit in a single Claude Code session.
   - FRENZY (5x) triggers particle burst + distorted SFX
   - Combo breaks after 3s without pickup
 
-- ⏳ **5.3a Suno music generation + integration** [#11](https://github.com/m3ssana/swampfire/issues/11) ⚡ **PRIORITY — early feedback says music doesn't match theme**
-  - **Human task:** Generate 13 tracks via Suno AI using prompts in SPEC.md §8.1.2–8.1.4
-  - 5 zone base tracks (120s loops), 4 storm intensity layers (60s loops), 4 one-shot stings
-  - Trim/loop in Audacity, export MP3, commit to `public/assets/music/`
-  - **Dev task:** Build `AudioManager` with zone crossfade (500ms) + storm layer crossfade (2000ms)
-  - Replace dungeon audio in bootloader.js (`climb0-4.mp3`, `splash.mp3`, `bubble.mp3`, etc.)
-  - Wire zone base tracks to ZoneManager transitions, storm layers to StormManager phase changes
-  - Respect `localStorage.musicMuted` toggle
-
-- ⏳ **5.3b SFX overhaul** [#42](https://github.com/m3ssana/swampfire/issues/42)
-  - Replace remaining dungeon SFX with swamp/hurricane audio
+- ⏳ **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11)
+  - Replace dungeon SFX with swamp/hurricane audio
   - Ambient layers per zone (cypress canopy, strip mall, wind)
-  - Pickup/craft/install SFX per spec §8.3 feedback table
-  - Footstep variants per terrain tile type
+  - Storm audio intensifies per phase
+  - Pickup/craft/install SFX per spec feedback table
+  - Music: calm acoustic at Zone 0, tense elsewhere
 
 - ⏳ **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
   - Simple NPC game object: sprite + dialog box on E press

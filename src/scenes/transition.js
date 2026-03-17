@@ -292,8 +292,6 @@ export default class Transition extends Phaser.Scene {
     this.registry.set("stormPhase", 1);
     this.registry.set("hudToast", "");
 
-    // Stop transition music before handing off — AudioManager owns music from here
-    this.sound.stopAll();
     this.cameras.main.fade(300, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => {
       this.scene.start("game", { name: "ZONE 0", number: 0 });
@@ -301,7 +299,6 @@ export default class Transition extends Phaser.Scene {
   }
 
   playMusic(theme = "music") {
-    if (!this.cache.audio.exists(theme)) return; // guard missing audio
     this.theme = this.sound.add(theme);
     this.theme.stop();
     this.theme.play({
