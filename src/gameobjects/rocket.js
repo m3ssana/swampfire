@@ -48,6 +48,7 @@ export default class Rocket {
 
     // All systems installed — launch!
     if (n >= 4) {
+      this.scene.audioManager?.playSting('sting_launch');
       this.scene.finishScene();
       return;
     }
@@ -89,6 +90,7 @@ export default class Rocket {
     );
     this.scene.cameras.main.shake(180, 0.008);
     this.scene.playAudio('coin');
+    this.scene.audioManager?.playSting('sting_install');
   }
 
   // ── Visual state ─────────────────────────────────────────────────────────────

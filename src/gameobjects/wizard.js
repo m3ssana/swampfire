@@ -59,7 +59,7 @@ This will be called when the bubble hits the wizard. We "load" the wizard inside
 The wizard will try to shoot directly at the player. It will shoot a fireball and then turn around.
   */
   directShot() {
-    this.scene.playAudio("fireball");
+    this.scene.playAudio("crash"); // legacy placeholder SFX (fireball.mp3 removed)
     const distance = Phaser.Math.Distance.BetweenPoints(
       this.scene.player,
       this

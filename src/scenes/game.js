@@ -2,6 +2,7 @@ import Player                         from "../gameobjects/player";
 import ZoneManager, { isZoneDefined } from "../gameobjects/zone_manager";
 import StormManager                   from "../gameobjects/storm_manager";
 import HazardManager                  from "../gameobjects/hazard_manager";
+import AudioManager                   from "../audio_manager";
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -33,10 +34,10 @@ export default class Game extends Phaser.Scene {
     this.addInteractPrompt();
     this.addInputHandlers();
     this.launchHUD();
-    this.loadAudios();
     this.listenForGameOver();
     this.stormManager   = new StormManager(this);
     this.hazardManager  = new HazardManager(this);
+    this.audioManager   = new AudioManager(this);
     // Wire hazard collision handlers now that both player and hazardManager exist
     this.hazardManager.addCollisions(this);
   }
@@ -179,6 +180,9 @@ export default class Game extends Phaser.Scene {
     Stop the HUD and transition to the end-run screen with the given state.
   */
   endRun(state) {
+    if (state === 'death' || state === 'timeout') {
+      this.audioManager?.playSting('sting_failure');
+    }
     this.scene.stop("hud");
     this.scene.start("outro", { state });
   }
@@ -311,17 +315,16 @@ export default class Game extends Phaser.Scene {
 
   // ─── Audio ─────────────────────────────────────────────────────────────────
 
-  loadAudios() {
-    this.audios = {
-      crash:    this.sound.add("crash"),
-      fireball: this.sound.add("fireball"),
-      death:    this.sound.add("death"),
-      coin:     this.sound.add("start"),
-    };
-  }
-
+  /**
+   * Legacy playAudio interface — delegates to AudioManager.playSFX().
+   * Kept as a thin wrapper so workbench.js, rocket.js, searchable_container.js
+   * can still call `this.scene.playAudio(key)` without changes.
+   *
+   * Maps the old 'coin' key to the legacy 'start' audio file.
+   */
   playAudio(key) {
-    this.audios[key].play();
+    const mapped = key === 'coin' ? 'start' : key;
+    this.audioManager?.playSFX(mapped);
   }
 
   // ─── Scene transitions ─────────────────────────────────────────────────────
