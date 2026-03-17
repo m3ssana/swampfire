@@ -88,17 +88,22 @@ export default class PowerLine {
     g.fillCircle(29, 22, 3);
 
     // Downed cable — droops from insulator toward ground contact (live end)
+    // Phaser Graphics has no quadraticBezierTo; approximate with line segments.
     g.lineStyle(2, 0x444444, 1);
     g.beginPath();
-    g.moveTo(29, 13);     // starts at insulator
-    g.quadraticBezierTo(70, 40, 104, 68);  // droops down-right
+    g.moveTo(29, 13);
+    g.lineTo(50, 28);
+    g.lineTo(75, 48);
+    g.lineTo(104, 68);
     g.strokePath();
 
     // Second cable (slightly offset)
     g.lineStyle(2, 0x555555, 1);
     g.beginPath();
     g.moveTo(29, 22);
-    g.quadraticBezierTo(68, 44, 102, 70);
+    g.lineTo(48, 34);
+    g.lineTo(73, 52);
+    g.lineTo(102, 70);
     g.strokePath();
 
     // Live-end glow circle (bright yellow) at bottom-right
@@ -142,7 +147,7 @@ export default class PowerLine {
       isSensor: true,
       label: 'powerline_hit',
     });
-    this._hitBody.gameObject = this;
+    this._hitBody.hazardRef = this;
     this.scene.matter.world.add(this._hitBody);
 
     // Near-miss warning sensor — slightly larger, centred at same point
@@ -151,7 +156,7 @@ export default class PowerLine {
       isSensor: true,
       label: 'powerline_warn',
     });
-    this._warnBody.gameObject = this;
+    this._warnBody.hazardRef = this;
     this.scene.matter.world.add(this._warnBody);
 
     // Pole obstacle — the fallen concrete cylinder blocks passage
@@ -164,7 +169,7 @@ export default class PowerLine {
       label: 'powerline_pole',
       angle: 0.6,  // slight diagonal matches the falling pole orientation
     });
-    this._poleBody.gameObject = this;
+    this._poleBody.hazardRef = this;
     this.scene.matter.world.add(this._poleBody);
   }
 
@@ -252,9 +257,9 @@ export default class PowerLine {
     this._sparkEmitter?.destroy();
     this._sparkEmitter = null;
 
-    if (this._hitBody)  this.scene.matter.world.remove(this._hitBody);
-    if (this._warnBody) this.scene.matter.world.remove(this._warnBody);
-    if (this._poleBody) this.scene.matter.world.remove(this._poleBody);
+    if (this._hitBody)  this.scene.matter.world?.remove(this._hitBody);
+    if (this._warnBody) this.scene.matter.world?.remove(this._warnBody);
+    if (this._poleBody) this.scene.matter.world?.remove(this._poleBody);
     this._hitBody  = null;
     this._warnBody = null;
     this._poleBody = null;

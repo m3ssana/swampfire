@@ -139,17 +139,14 @@ export default class SearchableContainer {
     // Pick loot
     const item = this.pickLoot();
 
-    // Floating XP popup — reuses game.showPoints()
-    const popupLabel = item.xp > 0
-      ? `${item.label}  +${item.xp} XP`
-      : item.label;
+    // Item name floater — always shown (even for Empty containers)
+    this.scene.showPoints(this.sprite.x, this.sprite.y, item.label, item.tint);
 
-    this.scene.showPoints(this.sprite.x, this.sprite.y, popupLabel, item.tint);
-
-    // Award XP to registry (HUD redraws automatically)
+    // Award XP to registry (HUD redraws automatically) + separate XP popup
     if (item.xp > 0) {
       const current = this.scene.registry.get("xp") ?? 0;
       this.scene.registry.set("xp", current + item.xp);
+      this.scene.showXPGain(this.sprite.x, this.sprite.y, item.xp, 'loot');
     }
 
     // Spawn a pickupable DroppedItem at the player's feet (guaranteed reachable).

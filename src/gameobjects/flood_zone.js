@@ -94,15 +94,15 @@ export default class FloodZone {
     for (let i = 1; i <= waveCount; i++) {
       const wy = y + (i / (waveCount + 1)) * height;
       g.beginPath();
-      // Simple sine-approximated wave using quadratic bezier segments
+      // Simple wave using line segments (Phaser Graphics has no quadraticBezierTo)
       const segments = Math.max(2, Math.floor(width / 64));
       g.moveTo(x, wy);
       for (let s = 0; s < segments; s++) {
-        const sx = x + (s / segments) * width;
         const ex = x + ((s + 1) / segments) * width;
-        const mx = (sx + ex) / 2;
+        const mx = x + ((s + 0.5) / segments) * width;
         const dir = (s % 2 === 0) ? -5 : 5;
-        g.quadraticBezierTo(mx, wy + dir, ex, wy);
+        g.lineTo(mx, wy + dir);
+        g.lineTo(ex, wy);
       }
       g.strokePath();
     }
