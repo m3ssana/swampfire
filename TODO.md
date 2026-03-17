@@ -177,11 +177,11 @@ Each task is small enough to fit in a single Claude Code session.
   - Scale pop-in (1.3→1.0) + straight upward rise (Quad.Out 1.5s)
   - 80ms player white-flash on loot + craft moments
 
-- ⏳ **5.2 Combo streak system** [#10](https://github.com/m3ssana/swampfire/issues/10)
-  - `ComboTracker`: items within 3s build multiplier (2x-5x cap)
-  - Large center-screen text: DOUBLE / TRIPLE / QUAD / FRENZY
-  - FRENZY (5x) triggers particle burst + distorted SFX
-  - Combo breaks after 3s without pickup
+- ✅ **5.2 Combo streak system** [#10](https://github.com/m3ssana/swampfire/issues/10) — commit 669cd6c, PR #45
+  - `ComboTracker`: 3s rolling window, DOUBLE/TRIPLE/QUAD/FRENZY thresholds
+  - Centre-screen bitmap text (depth 60, scroll-factor 0) with scale pop-in
+  - FRENZY (5+): shake 0.018, red screen flash, 1.5× XP for 5s
+  - Streak resets on death; survives zone transitions
 
 - ⏳ **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11)
   - Replace dungeon SFX with swamp/hurricane audio
