@@ -90,6 +90,8 @@ to see where commits actually landed.
 
 ## ⚠️ GitHub Workflow — HUMAN-IN-THE-LOOP (enforced 2026-03-08)
 **ALL changes** (features, bug fixes, docs) go through a branch + PR. Nothing direct to main.
+**EVEN WHEN the user says "commit and push"** — ALWAYS create a branch + PR first. Never push to main.
+**Violation on 2026-03-16:** 3 commits pushed directly to main (hazardRef fix, spec update, AudioManager). Do not repeat.
 - Features: `git checkout -b feature/issue-X-description`
 - Bugs:     `git checkout -b fix/issue-X-description`
 - Docs:     `git checkout -b docs/issue-X-description`
