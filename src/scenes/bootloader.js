@@ -156,8 +156,14 @@ export default class Bootloader extends Phaser.Scene {
 
   /*
     Audio loading: legacy SFX (kept until Phase 5.3b replaces them) +
-    new Suno music tracks. Missing files are silently skipped via the
-    loaderror handler in setLoadEvents().
+    new Suno music tracks.
+
+    IMPORTANT: Only load audio files that actually exist on disk. Vite's dev
+    server returns HTML for missing paths (SPA fallback) which Phaser tries
+    to decode as audio, flooding the console with decode errors.
+
+    When you generate a new Suno track, uncomment the matching line below.
+    OGG preferred (gapless looping). MP3 fallback for Safari.
     */
   loadAudios() {
     // ── Legacy SFX (kept for backward compat) ──────────────────────────────
@@ -169,27 +175,26 @@ export default class Bootloader extends Phaser.Scene {
     this.load.audio("splash",   "assets/sounds/splash.mp3");
     this.load.audio("music",    "assets/sounds/music.mp3");
 
-    // ── Zone base tracks (generated via Suno — SPEC §8.1.2) ─────────────────
-    // OGG preferred (gapless looping, no encoder padding). MP3 fallback for
-    // Safari which lacks OGG support. Phaser picks the first format the
-    // browser can decode.
+    // ── Zone base tracks (generated via Suno — SPEC §8.1.2) ────────────────
     this.load.audio("zone_cypress", ["assets/music/zone0_cypress.ogg", "assets/music/zone0_cypress.mp3"]);
     this.load.audio("zone_us41",    ["assets/music/zone1_us41.ogg",    "assets/music/zone1_us41.mp3"]);
     this.load.audio("zone_collier", ["assets/music/zone2_collier.ogg", "assets/music/zone2_collier.mp3"]);
     this.load.audio("zone_conner",  ["assets/music/zone3_conner.ogg",  "assets/music/zone3_conner.mp3"]);
     this.load.audio("zone_lolhs",   ["assets/music/zone4_lolhs.ogg",   "assets/music/zone4_lolhs.mp3"]);
 
-    // ── Storm intensity layers (SPEC §8.1.3) ──────────────────────────────
-    this.load.audio("storm_phase1", ["assets/music/storm_phase1.ogg", "assets/music/storm_phase1.mp3"]);
-    this.load.audio("storm_phase2", ["assets/music/storm_phase2.ogg", "assets/music/storm_phase2.mp3"]);
-    this.load.audio("storm_phase3", ["assets/music/storm_phase3.ogg", "assets/music/storm_phase3.mp3"]);
-    this.load.audio("storm_phase4", ["assets/music/storm_phase4.ogg", "assets/music/storm_phase4.mp3"]);
+    // ── Storm intensity layers (SPEC §8.1.3) ───────────────────────────────
+    // Uncomment each line after generating the track and placing it in public/assets/music/
+    // this.load.audio("storm_phase1", ["assets/music/storm_phase1.ogg", "assets/music/storm_phase1.mp3"]);
+    // this.load.audio("storm_phase2", ["assets/music/storm_phase2.ogg", "assets/music/storm_phase2.mp3"]);
+    // this.load.audio("storm_phase3", ["assets/music/storm_phase3.ogg", "assets/music/storm_phase3.mp3"]);
+    // this.load.audio("storm_phase4", ["assets/music/storm_phase4.ogg", "assets/music/storm_phase4.mp3"]);
 
-    // ── One-shot stings (SPEC §8.1.4) — MP3 fine here, no looping needed ──
-    this.load.audio("menu_theme",    ["assets/music/menu_theme.ogg",    "assets/music/menu_theme.mp3"]);
-    this.load.audio("sting_install", ["assets/music/sting_install.ogg", "assets/music/sting_install.mp3"]);
-    this.load.audio("sting_launch",  ["assets/music/sting_launch.ogg",  "assets/music/sting_launch.mp3"]);
-    this.load.audio("sting_failure", ["assets/music/sting_failure.ogg", "assets/music/sting_failure.mp3"]);
+    // ── One-shot stings (SPEC §8.1.4) ──────────────────────────────────────
+    // Uncomment each line after generating the track and placing it in public/assets/music/
+    // this.load.audio("menu_theme",    ["assets/music/menu_theme.ogg",    "assets/music/menu_theme.mp3"]);
+    // this.load.audio("sting_install", ["assets/music/sting_install.ogg", "assets/music/sting_install.mp3"]);
+    // this.load.audio("sting_launch",  ["assets/music/sting_launch.ogg",  "assets/music/sting_launch.mp3"]);
+    // this.load.audio("sting_failure", ["assets/music/sting_failure.ogg", "assets/music/sting_failure.mp3"]);
   }
 
   /*
