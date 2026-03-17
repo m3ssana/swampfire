@@ -95,15 +95,20 @@ to see where commits actually landed.
 - Docs:     `git checkout -b docs/issue-X-description`
 
 ### Required issue update cadence (MANDATORY — see AGENT_INSTRUCTIONS.md)
-1. **Start work** → `gh issue comment N --body "🚧 Starting work..."` immediately
+1. **Start work** → `gh issue comment N --body "🚧 Starting work..."` immediately — BEFORE writing any code
 2. **During work** → comment on meaningful progress milestones (scripts created, tests passing, etc.)
-3. **PR ready** → `gh issue comment N --body "📋 PR #N ready for review"`
-4. **STOP** — wait for human to approve + merge
-5. **After merge** → final `gh issue comment N` with evidence + `gh issue close N --reason completed`
+3. **Work complete** → comment with full summary of what was done + QA result
+4. **PR ready** → `gh issue comment N --body "📋 PR #N ready for review"`
+5. **STOP** — wait for human to approve + merge
+6. **After merge** → final `gh issue comment N` with evidence + `gh issue close N --reason completed`
 
 **NEVER skip step 1.** The issue is the paper trail. No silent work.
+**NEVER skip step 3.** Even if no PR exists yet, always comment when work is done.
 **NEVER run `gh pr merge`**. A human approves + merges.
 Branch protection on main requires 1 approving review — GitHub blocks self-merge.
+
+⚠️ **Violation 2026-03-17:** Completed XP Popup System (#9) without a single issue comment until reminded.
+Always comment on the issue at the START of work, not just at the end.
 
 ### TODO.md update rule (MANDATORY — learned 2026-03-08)
 **TODO.md must be committed inside the feature PR — not as a separate step after merge.**
@@ -273,6 +278,35 @@ Weights are relative (not %). Higher-reward: toolbox/crate. Lower-reward: cooler
   - Load from Tiled object layer in `zone_manager.js` (type=`"container"`, property `table`)
   - Remove `addWorldObjects()` from `game.js`
   - Target: ~15–20 containers for Zone 0
+
+## XP Popup System — Phase 5.1 (confirmed patterns)
+
+### Two-popup split (as of 2026-03-17)
+Every XP-granting action fires TWO popups — keep them separate:
+1. `showPoints(x, y, label, tint)` — item label / action label, 14px, depth 40, drifts ±20px
+2. `showXPGain(x, y, amount, context)` — XP number, 18px, depth 50, rises straight with scale pop-in
+
+### `showXPGain` design
+- Color map (module-level constants in game.js): `loot=0x44ff88`, `craft=0xffdd00`, `install=0x00eeff`
+- Merge window: `XP_MERGE_MS = 400` — same-context rapid grants update the existing popup's text
+- `_xpPending` initialized as `{}` in `create()` (not lazily)
+- Animation: scale 1.3→1.0 (Back.Out 200ms) + rise y-80 (Quad.Out 1500ms) + fade (500ms delay 1000ms)
+- Player flash (`_flashPlayer`, 80ms white tint): fires on `'loot'` and `'craft'` only — install already has heavy shake
+
+### Depth convention
+- World objects: 0 (default)
+- Item name / error / label popups: 40
+- XP number popups: 50
+- HUD: top (separate scene)
+
+### `onComplete` guard (REQUIRED)
+Always use `if (text?.active) text.destroy()` — Phaser kills sprites on scene restart before tweens fire.
+(This was a pre-existing bug in `showPoints` that QA caught; fixed 2026-03-17)
+
+### Callers
+- `workbench.js`: `showPoints(label+" crafted!", tint)` + `showXPGain(x, y, recipe.xp, 'craft')`
+- `searchable_container.js`: `showPoints(item.label, item.tint)` + `showXPGain(x, y, item.xp, 'loot')` (if xp > 0)
+- `rocket.js`: `showPoints(label+" installed", tint)` + `showXPGain(x, y, 20, 'install')`
 
 ## Phase 2.3+2.4 — Workbench + Rocket (confirmed patterns)
 

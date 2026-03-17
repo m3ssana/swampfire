@@ -3,6 +3,15 @@ import ZoneManager, { isZoneDefined } from "../gameobjects/zone_manager";
 import StormManager                   from "../gameobjects/storm_manager";
 import HazardManager                  from "../gameobjects/hazard_manager";
 
+// ── XP Popup tuning ───────────────────────────────────────────────────────────
+const XP_COLORS = {
+  loot:    0x44ff88,  // green  — item found in container
+  craft:   0xffdd00,  // gold   — rocket component crafted
+  install: 0x00eeff,  // cyan   — component installed on rocket
+};
+/** ms window in which rapid same-context XP grants merge into one popup */
+const XP_MERGE_MS = 400;
+
 export default class Game extends Phaser.Scene {
   constructor() {
     super({ key: "game" });
@@ -25,6 +34,10 @@ export default class Game extends Phaser.Scene {
 
     // Lock flag — true while a zone-transition fade is in progress
     this._transitioning = false;
+
+    // Pending XP popup map — keyed by context ('loot'|'craft'|'install')
+    // Used by showXPGain() to merge rapid same-context grants into one popup
+    this._xpPending = {};
 
     this.addMap();
     this.addPlayer();
@@ -266,28 +279,113 @@ export default class Game extends Phaser.Scene {
     this.restartScene();
   }
 
-  // ─── Floating XP popup ─────────────────────────────────────────────────────
+  // ─── Floating popups ───────────────────────────────────────────────────────
 
   /*
-    Spawns a floating text label at world coordinates (x, y).
-    Used for XP gains, pickups, and future combat feedback.
+    Spawns a floating label at world coordinates (x, y).
+    Used for item names, error messages, and system status text.
+    For XP numbers use showXPGain() instead.
   */
   showPoints(x, y, label, tint = 0xffffff) {
     const text = this.add
-      .bitmapText(x + 20, y - 80, "default", String(label), 10)
-      .setDropShadow(2, 3, tint, 0.7)
-      .setOrigin(0.5);
+      .bitmapText(x, y - 48, "default", String(label), 14)
+      .setDropShadow(1, 2, 0x000000, 0.7)
+      .setTint(tint)
+      .setOrigin(0.5)
+      .setDepth(40);
 
     this.tweens.add({
       targets:  text,
       duration: 1000,
       alpha:    { from: 1, to: 0 },
       x: {
-        from: text.x + Phaser.Math.Between(-10, 10),
-        to:   text.x + Phaser.Math.Between(-40, 40),
+        from: text.x + Phaser.Math.Between(-4, 4),
+        to:   text.x + Phaser.Math.Between(-20, 20),
       },
-      y: { from: text.y - 10, to: text.y - 60 },
-      onComplete: () => text.destroy(),
+      y: { from: text.y, to: text.y - 50 },
+      onComplete: () => { if (text?.active) text.destroy(); },
+    });
+  }
+
+  /*
+    Spawns a large, color-coded XP number popup at world coordinates (x, y).
+
+    Merges with any active same-context popup within XP_MERGE_MS:
+    rapid container loots within 400 ms show one accumulating "+25 XP" rather
+    than two overlapping "+10 XP" / "+15 XP" labels.
+
+    Plays a brief white-flash on the player sprite for loot and craft moments
+    to reinforce the "I got something" feeling without needing audio.
+
+    @param {number} x       - World X of the event source
+    @param {number} y       - World Y of the event source
+    @param {number} amount  - XP amount gained (ignored if ≤ 0)
+    @param {string} context - 'loot' | 'craft' | 'install'
+  */
+  showXPGain(x, y, amount, context = 'loot') {
+    if (amount <= 0) return;
+
+    // Merge with an active same-context popup within the merge window
+    const pending = this._xpPending[context];
+    if (pending?.text?.active) {
+      pending.amount += amount;
+      pending.text.setText(`+${pending.amount} XP`);
+      pending.timer?.remove();
+      pending.timer = this.time.delayedCall(XP_MERGE_MS, () => {
+        delete this._xpPending[context];
+      });
+      return;
+    }
+
+    const color = XP_COLORS[context] ?? 0xffffff;
+    const popY  = y - 48;
+
+    const text = this.add
+      .bitmapText(x, popY, 'default', `+${amount} XP`, 18)
+      .setOrigin(0.5)
+      .setTint(color)
+      .setDropShadow(1, 2, 0x000000, 0.9)
+      .setDepth(50)
+      .setScale(1.3);
+
+    // Scale pop-in: 1.3 → 1.0 over 200 ms (punchy arrival feel)
+    this.tweens.add({
+      targets: text, scaleX: 1.0, scaleY: 1.0,
+      duration: 200, ease: 'Back.Out',
+    });
+
+    // Rise over 1.5 s — ease-out keeps it readable before it escapes upward
+    this.tweens.add({
+      targets: text, y: popY - 80,
+      duration: 1500, ease: 'Quad.Out',
+    });
+
+    // Fade out in the final 500 ms (holds full alpha for 1 s first)
+    this.tweens.add({
+      targets: text, alpha: 0,
+      duration: 500, delay: 1000,
+      onComplete: () => { if (text?.active) text.destroy(); },
+    });
+
+    // White flash on the player for loot and craft — confirms "I got something"
+    if (context === 'loot' || context === 'craft') this._flashPlayer();
+
+    // Register as pending so the next rapid grant can merge into this popup
+    this._xpPending[context] = {
+      amount,
+      text,
+      timer: this.time.delayedCall(XP_MERGE_MS, () => {
+        delete this._xpPending[context];
+      }),
+    };
+  }
+
+  /** Briefly tints the player sprite white (80 ms) to signal XP received. */
+  _flashPlayer() {
+    if (!this.player?.sprite?.active) return;
+    this.player.sprite.setTint(0xffffff);
+    this.time.delayedCall(80, () => {
+      if (this.player?.sprite?.active) this.player.sprite.clearTint();
     });
   }
 

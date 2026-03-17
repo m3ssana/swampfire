@@ -74,11 +74,12 @@ export default class Workbench {
     const xp = this.scene.registry.get('xp') ?? 0;
     this.scene.registry.set('xp', xp + recipe.xp);
 
-    // Feedback
+    // Feedback — label popup + separate XP popup
     this.scene.showPoints(
       this.sprite.x, this.sprite.y - 20,
-      `${recipe.label}  +${recipe.xp} XP`, recipe.tint
+      `${recipe.label} crafted!`, recipe.tint
     );
+    this.scene.showXPGain(this.sprite.x, this.sprite.y - 20, recipe.xp, 'craft');
     this.scene.cameras.main.shake(120, 0.006);
     this.scene.playAudio('coin');
   }

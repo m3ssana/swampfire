@@ -82,11 +82,12 @@ export default class Rocket {
     const xp = this.scene.registry.get('xp') ?? 0;
     this.scene.registry.set('xp', xp + 20);
 
-    // Feedback
+    // Feedback — label popup + separate XP popup
     this.scene.showPoints(
       this.sprite.x, this.sprite.y - 40,
-      `${component.label} installed  +20 XP`, component.tint ?? 0x4fffaa
+      `${component.label} installed`, component.tint ?? 0x4fffaa
     );
+    this.scene.showXPGain(this.sprite.x, this.sprite.y - 40, 20, 'install');
     this.scene.cameras.main.shake(180, 0.008);
     this.scene.playAudio('coin');
   }
