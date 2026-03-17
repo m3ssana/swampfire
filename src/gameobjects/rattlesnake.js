@@ -235,8 +235,8 @@ export default class Rattlesnake {
     this._wanderTimer?.remove(false);
     this._idleTween?.stop();
 
-    this.scene.matter.world.remove(this._body);
-    this.scene.matter.world.remove(this._sensor);
+    this.scene.matter.world?.remove(this._body);
+    this.scene.matter.world?.remove(this._sensor);
     this.sprite?.destroy();
 
     this.sprite  = null;

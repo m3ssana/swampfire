@@ -239,8 +239,8 @@ export default class Looter {
     this._pauseTimer?.remove(false);
     this._walkTween?.stop();
 
-    if (this._body)   this.scene.matter.world.remove(this._body);
-    if (this._sensor) this.scene.matter.world.remove(this._sensor);
+    if (this._body)   this.scene.matter.world?.remove(this._body);
+    if (this._sensor) this.scene.matter.world?.remove(this._sensor);
     this._body   = null;
     this._sensor = null;
 
