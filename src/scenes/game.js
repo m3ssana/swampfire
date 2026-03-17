@@ -2,6 +2,7 @@ import Player                         from "../gameobjects/player";
 import ZoneManager, { isZoneDefined } from "../gameobjects/zone_manager";
 import StormManager                   from "../gameobjects/storm_manager";
 import HazardManager                  from "../gameobjects/hazard_manager";
+import ComboTracker                   from "../gameobjects/combo_tracker";
 
 // ── XP Popup tuning ───────────────────────────────────────────────────────────
 const XP_COLORS = {
@@ -50,6 +51,7 @@ export default class Game extends Phaser.Scene {
     this.listenForGameOver();
     this.stormManager   = new StormManager(this);
     this.hazardManager  = new HazardManager(this);
+    this.comboTracker   = new ComboTracker(this);
     // Wire hazard collision handlers now that both player and hazardManager exist
     this.hazardManager.addCollisions(this);
   }
@@ -431,6 +433,9 @@ export default class Game extends Phaser.Scene {
   restartScene() {
     const hp = Math.max(0, (this.registry.get("hp") ?? 1) - 1);
     this.registry.set("hp", hp);
+
+    // Death breaks the combo — streak does not carry into the respawn
+    this.comboTracker?.reset();
 
     this.player.sprite.visible = false;
     this.cameras.main.shake(100);

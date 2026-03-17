@@ -142,11 +142,17 @@ export default class SearchableContainer {
     // Item name floater — always shown (even for Empty containers)
     this.scene.showPoints(this.sprite.x, this.sprite.y, item.label, item.tint);
 
-    // Award XP to registry (HUD redraws automatically) + separate XP popup
+    // Award XP to registry (HUD redraws automatically) + separate XP popup.
+    // Multiplier is read BEFORE onLoot() increments the count, so a prior
+    // FRENZY bonus applies to this hit and the new count (potentially
+    // activating FRENZY) applies to the NEXT hit.
     if (item.xp > 0) {
+      const mult    = this.scene.comboTracker?.getMultiplier() ?? 1.0;
+      const earned  = Math.round(item.xp * mult);
       const current = this.scene.registry.get("xp") ?? 0;
-      this.scene.registry.set("xp", current + item.xp);
-      this.scene.showXPGain(this.sprite.x, this.sprite.y, item.xp, 'loot');
+      this.scene.registry.set("xp", current + earned);
+      this.scene.showXPGain(this.sprite.x, this.sprite.y, earned, 'loot');
+      this.scene.comboTracker?.onLoot(this.sprite.x, this.sprite.y);
     }
 
     // Spawn a pickupable DroppedItem at the player's feet (guaranteed reachable).
