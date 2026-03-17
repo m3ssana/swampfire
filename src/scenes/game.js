@@ -230,12 +230,7 @@ export default class Game extends Phaser.Scene {
 
   onPlayerCollide({ gameObjectA, gameObjectB }) {
     if (!gameObjectB) return;
-    if (gameObjectB.label === "coin")     this.playerPicksCoin(gameObjectB);
-    if (gameObjectB.label === "keys")     this.playerPicksKey(gameObjectB);
-    if (gameObjectB.label === "item")     this.playerPicksItem(gameObjectB);
-    if (gameObjectB.label === "bat")      this.playerHitsFoe(gameObjectB);
-    if (gameObjectB.label === "wizard")   this.playerHitsFoe(gameObjectB);
-    if (gameObjectB.label === "fireball") this.playerHitsFoe(gameObjectB);
+    if (gameObjectB.label === "item") this.playerPicksItem(gameObjectB);
     if (!(gameObjectB instanceof Phaser.Tilemaps.Tile)) return;
 
     const tile = gameObjectB;
@@ -246,17 +241,6 @@ export default class Game extends Phaser.Scene {
   }
 
   // ─── Pickup handlers ───────────────────────────────────────────────────────
-
-  playerPicksCoin(coin) {
-    this.showPoints(coin.x, coin.y, "+1 XP");
-    coin.destroy();
-    this.playAudio("coin");
-  }
-
-  playerPicksKey(key) {
-    this.showPoints(key.x, key.y, "+KEY");
-    key.destroy();
-  }
 
   playerPicksItem(itemSprite) {
     const { itemDef } = itemSprite;
@@ -413,10 +397,9 @@ export default class Game extends Phaser.Scene {
 
   loadAudios() {
     this.audios = {
-      crash:    this.sound.add("crash"),
-      fireball: this.sound.add("fireball"),
-      death:    this.sound.add("death"),
-      coin:     this.sound.add("start"),
+      crash: this.sound.add("crash"),
+      death: this.sound.add("death"),
+      coin:  this.sound.add("start"),
     };
   }
 

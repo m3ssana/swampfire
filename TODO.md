@@ -283,8 +283,6 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ## Cleanup (do anytime)
 
-- ⏳ Remove unused assets: `pello_ok.png`, dungeon tiles, `block.png`, `platform.png` [#16](https://github.com/m3ssana/swampfire/issues/16)
-- ⏳ Remove unused game objects: `fireball.js`, `coin.js`, `key.js`, `bat.js`, `wizard.js`, `seesaw.js` [#17](https://github.com/m3ssana/swampfire/issues/17)
-  (only after their replacements exist)
-- ⏳ Remove `@mikewesthad/dungeon` from package.json [#18](https://github.com/m3ssana/swampfire/issues/18)
-  (only after Zone system replaces it)
+- ✅ Remove unused assets: `pello_ok.png`, dungeon tiles, `block.png`, `platform.png`, et al. [#16](https://github.com/m3ssana/swampfire/issues/16) — PR #46
+- ✅ Remove unused game objects: `fireball.js`, `coin.js`, `key.js`, `bat.js`, `wizard.js`, `seesaw.js` [#17](https://github.com/m3ssana/swampfire/issues/17) — PR #46
+- ✅ Remove `@mikewesthad/dungeon` from package.json [#18](https://github.com/m3ssana/swampfire/issues/18) — already absent pre-cleanup

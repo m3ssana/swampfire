@@ -122,15 +122,9 @@ export default class Bootloader extends Phaser.Scene {
     This one loads the static images.
     */
   loadImages() {
-    this.load.image("pello",       "assets/images/pello_ok.png");
-    this.load.image("fireball",    "assets/images/fireball.png");
-    this.load.image("block",       "assets/images/block.png");
-    this.load.image("seesaw",      "assets/images/seesaw.png");
-    this.load.image("bubble",      "assets/images/bubble.png");
-    this.load.image("platform",    "assets/images/platform.png");
     // Zone tilesets
-    this.load.image("swamp-tiles", "assets/images/swamp-tiles.png"); // Zone 0
-    this.load.image("us41-tiles",  "assets/images/us41-tiles.png");  // Zone 1
+    this.load.image("swamp-tiles",   "assets/images/swamp-tiles.png");   // Zone 0
+    this.load.image("us41-tiles",    "assets/images/us41-tiles.png");    // Zone 1
     this.load.image('collier-tiles', 'assets/images/collier-tiles.png'); // Zone 2
     this.load.image('conner-tiles',  'assets/images/conner-tiles.png');  // Zone 3
     this.load.image('lolhs-tiles',   'assets/images/lolhs-tiles.png');   // Zone 4
@@ -180,22 +174,6 @@ export default class Bootloader extends Phaser.Scene {
     this.load.spritesheet("dust", "assets/images/dust.png", {
       frameWidth: 32,
       frameHeight: 32,
-    });
-    this.load.spritesheet("coin", "assets/images/coin.png", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet("keys", "assets/images/keys.png", {
-      frameWidth: 48,
-      frameHeight: 48,
-    });
-    this.load.spritesheet("bat", "assets/images/bat.png", {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-    this.load.spritesheet("wizard", "assets/images/wizard.png", {
-      frameWidth: 48,
-      frameHeight: 48,
     });
     this.load.spritesheet("container", "assets/images/container.png", {
       frameWidth: 48,
