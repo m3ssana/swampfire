@@ -88,17 +88,22 @@ export default class PowerLine {
     g.fillCircle(29, 22, 3);
 
     // Downed cable — droops from insulator toward ground contact (live end)
+    // Phaser Graphics has no quadraticBezierTo; approximate with line segments.
     g.lineStyle(2, 0x444444, 1);
     g.beginPath();
-    g.moveTo(29, 13);     // starts at insulator
-    g.quadraticBezierTo(70, 40, 104, 68);  // droops down-right
+    g.moveTo(29, 13);
+    g.lineTo(50, 28);
+    g.lineTo(75, 48);
+    g.lineTo(104, 68);
     g.strokePath();
 
     // Second cable (slightly offset)
     g.lineStyle(2, 0x555555, 1);
     g.beginPath();
     g.moveTo(29, 22);
-    g.quadraticBezierTo(68, 44, 102, 70);
+    g.lineTo(48, 34);
+    g.lineTo(73, 52);
+    g.lineTo(102, 70);
     g.strokePath();
 
     // Live-end glow circle (bright yellow) at bottom-right
