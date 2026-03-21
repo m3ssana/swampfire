@@ -233,33 +233,26 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
   - Root cause: `deploy.yml` never calls `npx playwright install` or `npm run test:e2e`; browsers not installed locally either
   - Fix: add browser install + E2E run step to build job in `deploy.yml`; document `npx playwright install` in README setup
 
-- ⏳ **`keyboard.press` doesn't hold keys — player never moves in E2E tests** [#30](https://github.com/m3ssana/swampfire/issues/30)
-  - Root cause: `keyboard.press` dispatches instantaneous keydown+keyup; Phaser requires `isDown` held across multiple update ticks
-  - Fix: replace with `keyboard.down(key)` + `waitForTimeout(duration)` + `keyboard.up(key)` in `movePlayer` helper
+- ✅ **`keyboard.press` doesn't hold keys — player never moves in E2E tests** [#30](https://github.com/m3ssana/swampfire/issues/30) — PR #48 (c765eac)
+  - Replaced with `keyboard.down(key)` + `waitForTimeout(duration)` + `keyboard.up(key)` in `movePlayer` helper
 
-- ⏳ **`getGameState` uses hardcoded `scenes[3]` index — breaks if scene order changes** [#31](https://github.com/m3ssana/swampfire/issues/31)
-  - Root cause: array index access instead of Phaser's public `game.scene.getScene('game')` API
-  - Fix: replace all `scenes[3]` references with `game.scene.getScene('game')`
+- ✅ **`getGameState` uses hardcoded `scenes[3]` index — breaks if scene order changes** [#31](https://github.com/m3ssana/swampfire/issues/31) — PR #48 (c765eac)
+  - Replaced all `scenes[3]` references with `game.scene.getScene('game')`
 
-- ⏳ **`waitForGameReady` uses 500ms magic delay — flaky under CI load** [#32](https://github.com/m3ssana/swampfire/issues/32)
-  - Root cause: `waitForTimeout(500)` added after `window.game` check; not a real scene-readiness signal
-  - Fix: poll `waitForFunction` on scene active state + registry populated condition
+- ✅ **`waitForGameReady` uses 500ms magic delay — flaky under CI load** [#32](https://github.com/m3ssana/swampfire/issues/32) — PR #48 (c765eac)
+  - Replaced `waitForTimeout(500)` with `waitForFunction` polling on Splash then GameScene active state
 
-- ⏳ **Scenarios 3 & 4 manipulate registry directly — not real combat/timer testing** [#33](https://github.com/m3ssana/swampfire/issues/33)
-  - Root cause: both scenarios use `page.evaluate()` to write registry keys instead of triggering actual game mechanics
-  - Fix: Scenario 3 should trigger damage via collision/event; Scenario 4 should observe real timer tick to zero
+- ✅ **Scenarios 3 & 4 manipulate registry directly — not real combat/timer testing** [#33](https://github.com/m3ssana/swampfire/issues/33) — PR #48 (c765eac)
+  - Scenario 3 triggers damage via real `restartScene()`; Scenario 4 calls `hud.tick()` directly and reads state in same `evaluate()` to avoid post-gameOver registry reset race
 
-- ⏳ **HUD tests use CSS class selectors on a Canvas game — always silently pass** [#34](https://github.com/m3ssana/swampfire/issues/34)
-  - Root cause: `[class*="timer"]` / `[class*="heart"]` find no DOM nodes; Phaser renders to `<canvas>`; tests pass vacuously
-  - Fix: access HUD text objects via `game.scene.getScene('hud')` in `page.evaluate`; expose HUD properties for testability
+- ✅ **HUD tests use CSS class selectors on a Canvas game — always silently pass** [#34](https://github.com/m3ssana/swampfire/issues/34) — PR #48 (c765eac)
+  - HUD tests now access text objects via `game.scene.getScene('hud')` in `page.evaluate()`
 
-- ⏳ **30-second stability test always times out — loop duration equals global timeout** [#35](https://github.com/m3ssana/swampfire/issues/35)
-  - Root cause: `endTime = Date.now() + 30000` consumes entire 30s global timeout; setup overhead guarantees timeout
-  - Fix: reduce loop to 20s and add `test.setTimeout(35000)` inside the test
+- ✅ **30-second stability test always times out — loop duration equals global timeout** [#35](https://github.com/m3ssana/swampfire/issues/35) — PR #48 (c765eac)
+  - Reduced loop to 20s and added `test.setTimeout(35000)` inside the test
 
-- ⏳ **Playwright config missing retries and WebGL launch args for headless game testing** [#36](https://github.com/m3ssana/swampfire/issues/36)
-  - Root cause: default config has 0 retries and no `--use-gl=swiftshader` for Chromium; WebGL unreliable in headless CI
-  - Fix: add `retries: process.env.CI ? 2 : 0` and `launchOptions: { args: ['--use-gl=swiftshader'] }` to Chromium project
+- ✅ **Playwright config missing retries and WebGL launch args for headless game testing** [#36](https://github.com/m3ssana/swampfire/issues/36) — PR #48 (c765eac)
+  - Added `retries: process.env.CI ? 2 : 0` and `--use-gl=swiftshader`; removed Firefox (no headless WebGL equivalent)
 
 ### Game Bugs
 
