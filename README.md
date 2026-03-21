@@ -30,6 +30,20 @@ npm install        # install dependencies (not rocket parts, sadly)
 npm run dev        # launch dev server (not the actual rocket, that's Juan's job)
 ```
 
+To run E2E tests locally, install Playwright browser binaries once:
+
+```bash
+npx playwright install chromium
+```
+
+Then run tests with:
+
+```bash
+npm test           # unit tests
+npm run test:e2e   # E2E tests (Playwright)
+npm run test:all   # both unit and E2E
+```
+
 ## Build
 
 ```bash

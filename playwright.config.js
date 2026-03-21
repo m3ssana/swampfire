@@ -12,6 +12,9 @@ export default defineConfig({
     timeout: 5 * 1000,
   },
 
+  // Bug #36 fix: retry flaky tests in CI; no retries locally
+  retries: process.env.CI ? 2 : 0,
+
   // Parallel execution: 2 workers for local, 1 for CI
   fullyParallel: true,
   workers: process.env.CI ? 1 : 2,
@@ -46,7 +49,8 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      // Bug #36 fix: enable swiftshader software WebGL for reliable headless CI rendering
+      use: { ...devices['Desktop Chrome'], launchOptions: { args: ['--use-gl=swiftshader'] } },
     },
     {
       name: 'firefox',
