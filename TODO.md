@@ -273,6 +273,10 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ### Game Bugs
 
+- ⏳ **Game locks up after rocket launch** [#59](https://github.com/m3ssana/swampfire/issues/59)
+  - Root cause: `camerafadeoutcomplete` event silently dropped after chaining flash → shake → pan → zoom → shake in `finishScene()` — `endRun()` never called, game locked on black
+  - Fix: replace camera event listener with `time.delayedCall(3200 + 750)` timed to fire after the 700ms fade completes
+
 - ✅ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27)
   - Root cause: `Tilemap.destroy()` does NOT remove Matter.js bodies from `convertTilemapLayer()` — Zone 0's static obstacle bodies persist as invisible colliders in Zone 1, blocking the north corridor
   - Fix: added `_removeTileBodies()` to `destroyCurrentZone()` — explicitly calls `MatterTileBody.destroy()` on every tile before map teardown
