@@ -15,3 +15,17 @@ export function getPhaseForTimeLeft(seconds) {
   if (seconds >= 900)  return 3;
   return 4;
 }
+
+/**
+ * Returns the X-axis velocity offset (pixels/frame) caused by hurricane wind.
+ * Wind blows east (+X direction).
+ *
+ *   Phase 1–2: no wind
+ *   Phase 3:   +0.8  (noticeable but manageable)
+ *   Phase 4:   +1.5  (strong, requires active counter-steering)
+ */
+export function getWindDrift(phase) {
+  if (phase === 3) return 0.8;
+  if (phase === 4) return 1.5;
+  return 0;
+}
