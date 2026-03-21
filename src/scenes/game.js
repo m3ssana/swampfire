@@ -148,10 +148,18 @@ export default class Game extends Phaser.Scene {
     const { x: px, y: py } = this.player.sprite;
     const RANGE = 72;
 
+    const npcQuests  = this.registry.get('npcQuests') ?? {};
+    const activeNpcs = (this.zone.npcs ?? []).filter(npc => {
+      // NPC is interactive if their quest isn't done yet
+      const config = npc._config;
+      return config && !npcQuests[npc._npcId];
+    });
+
     const candidates = [
       ...(this.zone.containers ?? []).filter(c => !c.searched),
       this.zone.workbench,
       this.zone.rocket,
+      ...activeNpcs,
     ].filter(Boolean);
 
     let found = null;

@@ -23,6 +23,7 @@
 import SearchableContainer from './searchable_container';
 import Workbench           from './workbench';
 import Rocket              from './rocket';
+import NPC                 from './npc';
 
 // ── Zone catalogue ─────────────────────────────────────────────────────────────
 //
@@ -166,6 +167,8 @@ export default class ZoneManager {
     this.containers.forEach(c => c.destroy());
     this.workbench?.destroy();
     this.rocket?.destroy();
+    for (const npc of this.npcs ?? []) npc.destroy?.();
+    this.npcs = [];
 
     // Phaser's Tilemap.destroy() removes TilemapLayer game objects but does
     // NOT call MatterTileBody.destroy() on individual tiles. The static
@@ -179,6 +182,7 @@ export default class ZoneManager {
     this.containers = [];
     this.workbench  = null;
     this.rocket     = null;
+    this.npcs       = [];
     this.exits      = [];
     this.map        = null;
   }
@@ -231,6 +235,7 @@ export default class ZoneManager {
     this.containers  = [];
     this.workbench   = null;
     this.rocket      = null;
+    this.npcs        = [];
     this.exits       = [];
     this._spawnPoint = null;
 
@@ -267,6 +272,15 @@ export default class ZoneManager {
             targetZone: this._getProp(obj, 'targetZone'),
           });
           break;
+
+        case 'npc': {
+          const npcId = this._getProp(obj, 'npcId');
+          if (npcId) {
+            if (!this.npcs) this.npcs = [];
+            this.npcs.push(new NPC(this.scene, cx, cy, npcId));
+          }
+          break;
+        }
 
         case 'entry':
           // Entry points are handled via ZONES.entryPoints; object is informational only.
