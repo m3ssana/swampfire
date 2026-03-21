@@ -200,7 +200,7 @@ Each task is small enough to fit in a single Claude Code session.
 
 ## Phase 6 -- Endgame + Meta
 
-- ✅ **6.1 Launch sequence** [#13](https://github.com/m3ssana/swampfire/issues/13) _(cinematic: ignition flash → engine particles → camera pan/zoom → rocket ascent → under-the-wire toast → fade to outro)_
+- ✅ **6.1 Launch sequence** [#13](https://github.com/m3ssana/swampfire/issues/13) _(cinematic: ignition flash → engine particles → camera pan/zoom → rocket ascent → under-the-wire toast → fade to outro)_ (ac416ec)
   - When all 4 systems installed and player interacts with rocket
   - Cinematic: camera pulls back, rocket ignites, lifts off
   - Screen fades to EndRunScreen with WIN state
