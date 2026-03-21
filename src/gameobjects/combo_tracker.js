@@ -57,6 +57,10 @@ export default class ComboTracker {
     this._frenzyActive = false;
     this._comboText    = null;
 
+    // Run-lifetime stats — survive reset() so they persist to the end-of-run share card
+    this._peakCombo   = 0;
+    this._frenzyCount = 0;
+
     scene.events.once('shutdown', this.destroy, this);
   }
 
@@ -73,6 +77,7 @@ export default class ComboTracker {
    */
   onLoot(x, y) {
     this._count++;
+    if (this._count > this._peakCombo) this._peakCombo = this._count;
     this._restartWindowTimer();
 
     const level = LEVELS[Math.min(this._count, LEVELS.length - 1)];
@@ -92,6 +97,12 @@ export default class ComboTracker {
   getMultiplier() {
     return this._frenzyActive ? FRENZY_MULT : 1.0;
   }
+
+  /** Returns the highest loot streak count reached during this run. */
+  getPeakCombo() { return this._peakCombo; }
+
+  /** Returns the number of distinct FRENZY activations during this run. */
+  getFrenzyCount() { return this._frenzyCount; }
 
   /**
    * Hard-resets all streak state. Call on player death so the combo does
@@ -172,6 +183,7 @@ export default class ComboTracker {
    */
   _triggerFrenzy() {
     this._frenzyActive = true;
+    this._frenzyCount++;
 
     // Shake: heavier than install (0.008) and death (0.012)
     this.scene.cameras.main.shake(400, 0.018);

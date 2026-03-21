@@ -29,8 +29,14 @@ export default class Outro extends Phaser.Scene {
   }
 
   init(data) {
-    this.state = data.state || "death"; // "death" | "timeout" | "victory"
+    this.state        = data.state        || "death"; // "death" | "timeout" | "victory"
     this.underTheWire = data.underTheWire ?? false;
+    this.peakCombo    = data.peakCombo    ?? 0;
+    this.frenzyCount  = data.frenzyCount  ?? 0;
+    this.zonesVisited = data.zonesVisited ?? 1;
+    this.itemsFound   = data.itemsFound   ?? 0;
+    this.deathMsg     = null; // set by showDeathScreen() for use in share card
+    this._feedbackText = null;
   }
 
   create() {
@@ -79,10 +85,10 @@ export default class Outro extends Phaser.Scene {
       .setOrigin(0.5)
       .setTint(0x888888);
 
-    // Random Florida Man headline
-    const msg = Phaser.Utils.Array.GetRandom(DEATH_MESSAGES);
+    // Random Florida Man headline — stored for share card
+    this.deathMsg = Phaser.Utils.Array.GetRandom(DEATH_MESSAGES);
     this.add
-      .bitmapText(this.cx, 128, "default", msg, 16)
+      .bitmapText(this.cx, 128, "default", this.deathMsg, 16)
       .setOrigin(0.5, 0)
       .setTint(0xffffff)
       .setCenterAlign();
@@ -226,10 +232,191 @@ export default class Outro extends Phaser.Scene {
       .setTint(0xdddddd)
       .setCenterAlign();
 
+    // Share buttons — [C] COPY IMAGE only when Clipboard API is available
+    const canCopy = typeof ClipboardItem !== 'undefined';
+    const btnY = cardY + 82;
+
+    if (canCopy) {
+      this.add
+        .bitmapText(this.cx - 80, btnY, "default", "[C] COPY IMAGE", 10)
+        .setOrigin(0.5)
+        .setTint(0x4fffaa);
+      this.input.keyboard.on("keydown-C", this._copyCard, this);
+    }
+
     this.add
-      .bitmapText(this.cx, cardY + 68, "default", "[ SHARE CARD -- COPY / DOWNLOAD IN PHASE 6 ]", 10)
+      .bitmapText(canCopy ? this.cx + 80 : this.cx, btnY, "default", "[D] SAVE IMAGE", 10)
       .setOrigin(0.5)
-      .setTint(0x444444);
+      .setTint(0x4fffaa);
+
+    this.input.keyboard.on("keydown-D", this._downloadCard, this);
+  }
+
+  // ─── Share card implementation ───────────────────────────────────────────────
+
+  /*
+    Captures the current Phaser frame via renderer.snapshotArea(), then draws a
+    640×360 styled card on an offscreen Canvas2D element. Delivers the canvas to
+    the callback — called once the snapshot is ready (next frame).
+  */
+  _buildShareCanvas(callback) {
+    const { width, height } = this.sys.game.config;
+
+    this.sys.game.renderer.snapshotArea(0, 0, width, height, (phaserImage) => {
+      const W = 640, H = 360;
+      const canvas  = document.createElement('canvas');
+      canvas.width  = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Background: dark solid matching end state
+      ctx.fillStyle = this.state === 'victory' ? '#051a05'
+                    : this.state === 'timeout'  ? '#05050a'
+                    : '#1a0505';
+      ctx.fillRect(0, 0, W, H);
+
+      // Phaser frame composited at reduced opacity for context
+      ctx.globalAlpha = 0.45;
+      ctx.drawImage(phaserImage, 0, 0, W, H);
+      ctx.globalAlpha = 1.0;
+
+      // Dark overlay for text readability
+      ctx.fillStyle = 'rgba(0,0,0,0.60)';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'top';
+
+      // ── Header ──
+      ctx.font      = 'bold 18px monospace';
+      ctx.fillStyle = '#4fffaa';
+      ctx.fillText('SWAMPFIRE PROTOCOL', W / 2, 16);
+
+      // ── State line ──
+      const stateStr = this.state === 'victory' ? 'JUAN ESCAPES'
+                     : this.state === 'timeout'  ? 'HURRICANE KENDRA LANDS'
+                     : 'JUAN IS DOWN';
+      ctx.font      = 'bold 26px monospace';
+      ctx.fillStyle = this.state === 'victory' ? '#4fffaa'
+                    : this.state === 'timeout'  ? '#ff6633'
+                    : '#ff3333';
+      ctx.fillText(stateStr, W / 2, 44);
+
+      // ── Death headline (death state only) ──
+      if (this.state === 'death' && this.deathMsg) {
+        ctx.font      = '12px monospace';
+        ctx.fillStyle = '#dddddd';
+        const lines = this.deathMsg.split('\n');
+        lines.forEach((line, i) => ctx.fillText(line.trim(), W / 2, 86 + i * 16));
+      }
+
+      // ── Divider ──
+      ctx.strokeStyle = '#333333';
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.moveTo(60, 136);
+      ctx.lineTo(W - 60, 136);
+      ctx.stroke();
+
+      // ── Primary stats row ──
+      const statsY = 148;
+      const statCols = [
+        { x: 160, label: 'TIME SURVIVED', value: this.formatTime(this.elapsed) },
+        { x: 320, label: 'XP EARNED',     value: String(this.xp) },
+        { x: 480, label: 'HP REMAINING',  value: `${this.hp} / 3` },
+      ];
+      ctx.font      = '10px monospace';
+      ctx.fillStyle = '#888888';
+      statCols.forEach(({ x, label }) => ctx.fillText(label, x, statsY));
+      ctx.font      = 'bold 20px monospace';
+      ctx.fillStyle = '#ffffff';
+      statCols.forEach(({ x, value }) => ctx.fillText(value, x, statsY + 14));
+
+      // ── Extra stats row ──
+      const extY = 218;
+      const extraCols = [
+        { x: 120, label: 'ITEMS FOUND',              value: String(this.itemsFound) },
+        { x: 270, label: 'PEAK COMBO',               value: String(this.peakCombo) },
+        { x: 410, label: `FRENZY ×${this.frenzyCount}`, value: String(this.frenzyCount) },
+        { x: 550, label: 'ZONES',                    value: `${this.zonesVisited} / 5` },
+      ];
+      ctx.font      = '10px monospace';
+      ctx.fillStyle = '#888888';
+      extraCols.forEach(({ x, label }) => ctx.fillText(label, x, extY));
+      ctx.font      = 'bold 16px monospace';
+      ctx.fillStyle = '#ffffff';
+      extraCols.forEach(({ x, value }) => ctx.fillText(value, x, extY + 14));
+
+      // ── Footer ──
+      ctx.font      = '11px monospace';
+      ctx.fillStyle = '#4fffaa';
+      ctx.fillText('#SwampfireProtocol', W / 2, H - 20);
+
+      callback(canvas);
+    });
+  }
+
+  /*
+    Copies the share card to the system clipboard as a PNG image.
+    Requires user gesture (keyboard press) and HTTPS.
+    Shows "COPIED!" or "COPY FAILED" feedback.
+  */
+  _copyCard() {
+    this._buildShareCanvas((canvas) => {
+      canvas.toBlob(async (blob) => {
+        if (!blob) { this._showShareFeedback('EXPORT FAILED'); return; }
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          this._showShareFeedback('COPIED!');
+        } catch (_err) {
+          this._showShareFeedback('COPY FAILED');
+        }
+      }, 'image/png');
+    });
+  }
+
+  /*
+    Downloads the share card as swampfire-run.png.
+    Uses canvas.toBlob() + a temporary anchor element.
+  */
+  _downloadCard() {
+    this._buildShareCanvas((canvas) => {
+      canvas.toBlob((blob) => {
+        if (!blob) { this._showShareFeedback('EXPORT FAILED'); return; }
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = 'swampfire-run.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }, 'image/png');
+    });
+  }
+
+  /*
+    Shows brief feedback text that fades out after 1.5s.
+    Destroys any prior feedback text before creating a new one.
+  */
+  _showShareFeedback(msg) {
+    this._feedbackText?.destroy();
+    const text = this.add
+      .bitmapText(this.cx, 358, "default", msg, 14)
+      .setOrigin(0.5)
+      .setTint(0x4fffaa);
+    this._feedbackText = text;
+
+    this.tweens.add({
+      targets:  text,
+      alpha:    { from: 1, to: 0 },
+      duration: 300,
+      delay:    1200,
+      onComplete: () => {
+        if (text?.active) text.destroy();
+        if (this._feedbackText === text) this._feedbackText = null;
+      },
+    });
   }
 
   addRestartPrompt() {

@@ -206,7 +206,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Screen fades to EndRunScreen with WIN state
   - "Under-the-Wire" achievement if < 2 min remaining
 
-- ⏳ **6.2 End-of-run share card** [#14](https://github.com/m3ssana/swampfire/issues/14)
+- ✅ **6.2 End-of-run share card** [#14](https://github.com/m3ssana/swampfire/issues/14)
   - Styled canvas overlay with run stats
   - Time remaining, XP total, items found, combos hit, zones visited
   - "Copy to clipboard" or "Download as image" button
