@@ -22,8 +22,21 @@ async function waitForGameReady(page) {
     timeout: 10000,
   });
 
-  // Brief delay to ensure scene is fully created
-  await page.waitForTimeout(500);
+  // Poll until GameScene is genuinely active and registry is populated
+  // Bug #32 fix: replaced waitForTimeout(500) magic delay with a real readiness signal
+  await page.waitForFunction(
+    () => {
+      const g = window.game;
+      return (
+        g &&
+        g.scene &&
+        g.scene.isActive('game') &&
+        g.registry &&
+        g.registry.get('timeLeft') > 0
+      );
+    },
+    { timeout: 10000 }
+  );
 }
 
 /**
@@ -32,9 +45,10 @@ async function waitForGameReady(page) {
 async function getGameState(page) {
   return page.evaluate(() => {
     const game = window.game;
-    if (!game || !game.scene.scenes[3]) return null;
+    // Bug #31 fix: use named scene key via getScene() instead of hardcoded scenes[3]
+    if (!game || !game.scene.getScene('game')) return null;
 
-    const registry = game.scene.scenes[3].registry;
+    const registry = game.scene.getScene('game').registry;
     return {
       hp: registry.get('hp'),
       inventory: registry.get('inventory') || [],
@@ -62,10 +76,12 @@ async function movePlayer(page, direction, duration = 100) {
   };
 
   const key = keyMap[direction.toLowerCase()] || direction;
-  await page.keyboard.press(key, { delay: 10 });
-
-  // Let physics process the input
+  // Bug #30 fix: use keyboard.down + hold + keyboard.up so Phaser's isDown
+  // registers across multiple update ticks, instead of instantaneous press.
+  // Duration raised to 300ms to give the engine several ticks of movement.
+  await page.keyboard.down(key);
   await page.waitForTimeout(duration);
+  await page.keyboard.up(key);
 }
 
 // ── Test Suite ───────────────────────────────────────────────────────────
@@ -94,10 +110,10 @@ test.describe('Swampfire Game E2E Tests', () => {
 
     // Move around a bit to find containers (in real game, this triggers searches)
     for (let i = 0; i < 3; i++) {
-      await movePlayer(page, 'right', 200);
+      await movePlayer(page, 'right', 300);
     }
     for (let i = 0; i < 3; i++) {
-      await movePlayer(page, 'down', 200);
+      await movePlayer(page, 'down', 300);
     }
 
     // Check that game is still responsive
@@ -112,12 +128,13 @@ test.describe('Swampfire Game E2E Tests', () => {
     const initialXp = state.xp;
 
     // Add test items to inventory
+    // Bug #31 fix: use getScene('game') instead of scenes[3]
     await page.evaluate(() => {
       const game = window.game;
       const inventory = [
         { label: 'Test Item', type: 'ingredient' },
       ];
-      game.scene.scenes[3].registry.set('inventory', inventory);
+      game.scene.getScene('game').registry.set('inventory', inventory);
     });
 
     state = await getGameState(page);
@@ -125,7 +142,7 @@ test.describe('Swampfire Game E2E Tests', () => {
 
     // Move around the zone
     for (let i = 0; i < 2; i++) {
-      await movePlayer(page, 'down', 100);
+      await movePlayer(page, 'down', 300);
     }
 
     // Verify inventory still present
@@ -141,25 +158,26 @@ test.describe('Swampfire Game E2E Tests', () => {
     const initialHp = state.hp;
     expect(initialHp).toBeGreaterThan(0);
 
-    // Simulate enemy contact by decrementing HP
+    // Bug #33 fix: trigger damage via the game's real restartScene() method,
+    // which decrements HP through registry.set('hp', ...) — actual game code,
+    // not a test-side registry write.
     await page.evaluate(() => {
-      const game = window.game;
-      const currentHp = game.scene.scenes[3].registry.get('hp');
-      if (currentHp > 0) {
-        game.scene.scenes[3].registry.set('hp', currentHp - 1);
-      }
+      window.game.scene.getScene('game').restartScene();
     });
 
-    // Verify HP decreased
+    // Brief wait for the scene restart to propagate registry changes
+    await page.waitForTimeout(200);
+
+    // Verify HP decreased via real game logic
     state = await getGameState(page);
     expect(state.hp).toBe(initialHp - 1);
 
-    // HP should not go below 0
+    // HP should not go below 0 — trigger another damage event
     await page.evaluate(() => {
-      const game = window.game;
-      const currentHp = game.scene.scenes[3].registry.get('hp');
-      game.scene.scenes[3].registry.set('hp', Math.max(0, currentHp - 1));
+      window.game.scene.getScene('game').restartScene();
     });
+
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state.hp).toBeGreaterThanOrEqual(0);
@@ -171,27 +189,19 @@ test.describe('Swampfire Game E2E Tests', () => {
     let state = await getGameState(page);
     expect(state.timeLeft).toBe(3600); // 60:00
 
-    // Simulate 10 seconds of timer ticks
-    for (let i = 0; i < 10; i++) {
-      await page.evaluate(() => {
-        const game = window.game;
-        const currentTime = game.scene.scenes[3].registry.get('timeLeft');
-        if (currentTime > 0) {
-          game.scene.scenes[3].registry.set('timeLeft', currentTime - 1);
-        }
-      });
-    }
-
-    state = await getGameState(page);
-    expect(state.timeLeft).toBe(3590);
-    expect(state.timeLeft).toBeLessThan(3600);
-
-    // Simulate timer reaching zero
+    // Bug #33 fix: set timeLeft to a small value via registry (acceptable shortcut
+    // since we can't wait 60 real minutes), then wait for the HUD's real countdown
+    // tick to fire timerExpired = true — instead of setting timerExpired manually.
     await page.evaluate(() => {
-      const game = window.game;
-      game.scene.scenes[3].registry.set('timeLeft', 0);
-      game.scene.scenes[3].registry.set('timerExpired', true);
+      window.game.registry.set('timeLeft', 5);
     });
+
+    // Wait up to 8 seconds for the real HUD countdown to decrement timeLeft to 0
+    // and set timerExpired via the actual tick() method in HUDScene.
+    await page.waitForFunction(
+      () => window.game.registry.get('timerExpired') === true,
+      { timeout: 8000 }
+    );
 
     state = await getGameState(page);
     expect(state.timeLeft).toBe(0);
@@ -201,27 +211,32 @@ test.describe('Swampfire Game E2E Tests', () => {
   // ── HUD Display Verification ─────────────────────────────────────────────
 
   test('HUD displays timer in MM:SS format', async ({ page }) => {
-    // Get HUD timer text from DOM
-    const timerText = await page.textContent('[class*="timer"]', {
-      timeout: 2000,
-    }).catch(() => null);
+    // Bug #34 fix: access real HUD scene properties via evaluate() instead of
+    // CSS class selectors — Phaser renders to <canvas>, no DOM elements exist.
+    const hudState = await page.evaluate(() => {
+      const hud = window.game.scene.getScene('hud');
+      return {
+        timerText: hud?.timerText?.text ?? null,
+      };
+    });
 
-    // If HUD timer exists, verify format
-    if (timerText) {
-      // Expected format: "HH:MM" or "MM:SS"
-      expect(timerText).toMatch(/\d+:\d{2}/);
+    // If HUD timer text object is present, verify MM:SS format
+    if (hudState.timerText) {
+      expect(hudState.timerText).toMatch(/\d+:\d{2}/);
     }
   });
 
   test('HUD displays HP with hearts', async ({ page }) => {
-    // Look for HP indicator in HUD
-    const hpIndicator = await page.locator('[class*="heart"]').count().catch(() => 0);
+    // Bug #34 fix: read HP from game registry instead of querying DOM
+    // for [class*="heart"] elements that never exist in a Canvas game.
+    const hudState = await page.evaluate(() => {
+      return {
+        hp: window.game.registry.get('hp'),
+      };
+    });
 
-    // Game may not have hearts visible in initial state
-    // Just verify the page loads without errors
-    const state = await getGameState(page);
-    expect(state.hp).toBeGreaterThanOrEqual(0);
-    expect(state.hp).toBeLessThanOrEqual(3);
+    expect(hudState.hp).toBeGreaterThanOrEqual(0);
+    expect(hudState.hp).toBeLessThanOrEqual(3);
   });
 
   test('HUD displays XP counter', async ({ page }) => {
@@ -234,10 +249,10 @@ test.describe('Swampfire Game E2E Tests', () => {
   // ── State Persistence ────────────────────────────────────────────────────
 
   test('game state persists across rapid interactions', async ({ page }) => {
-    // Set initial state
+    // Bug #31 fix: use getScene('game') instead of scenes[3]
     await page.evaluate(() => {
       const game = window.game;
-      const scene = game.scene.scenes[3];
+      const scene = game.scene.getScene('game');
       scene.registry.set('xp', 50);
       scene.registry.set('inventory', [
         { label: 'Item1', type: 'ingredient' },
@@ -249,7 +264,7 @@ test.describe('Swampfire Game E2E Tests', () => {
 
     // Simulate rapid interactions
     for (let i = 0; i < 5; i++) {
-      await movePlayer(page, 'right', 50);
+      await movePlayer(page, 'right', 300);
     }
 
     // Verify state still intact
@@ -266,7 +281,7 @@ test.describe('Swampfire Game E2E Tests', () => {
 
     // Move continuously
     for (let i = 0; i < 10; i++) {
-      await movePlayer(page, 'down', 50);
+      await movePlayer(page, 'down', 300);
     }
 
     const endState = await getGameState(page);
@@ -277,12 +292,12 @@ test.describe('Swampfire Game E2E Tests', () => {
   // ── Error Handling ───────────────────────────────────────────────────────
 
   test('handles missing registry keys gracefully', async ({ page }) => {
-    // Try to access non-existent registry value
+    // Bug #31 fix: use getScene('game') instead of scenes[3]
     const result = await page.evaluate(() => {
       const game = window.game;
       return {
-        exists: game && game.scene.scenes[3] ? true : false,
-        registry: game?.scene.scenes[3]?.registry ? true : false,
+        exists: game && game.scene.getScene('game') ? true : false,
+        registry: game?.scene.getScene('game')?.registry ? true : false,
       };
     });
 
@@ -310,15 +325,20 @@ test.describe('Swampfire Game E2E Tests', () => {
     expect(loadTime).toBeLessThan(5000);
   });
 
-  test('game remains stable for 30 seconds of gameplay', async ({ page }) => {
+  test('game remains stable for 20 seconds of gameplay', async ({ page }) => {
+    // Bug #35 fix: reduced from 30s to 20s loop to avoid consuming the full
+    // global timeout, and added test.setTimeout(35000) to give the test
+    // enough headroom for setup overhead plus the 20s loop.
+    test.setTimeout(35000);
+
     const startTime = Date.now();
-    const endTime = startTime + 30000; // 30 seconds
+    const endTime = startTime + 20000; // 20 seconds
 
     while (Date.now() < endTime) {
       // Simulate random movement
       const directions = ['up', 'down', 'left', 'right'];
       const randomDir = directions[Math.floor(Math.random() * directions.length)];
-      await movePlayer(page, randomDir, 50);
+      await movePlayer(page, randomDir, 300);
 
       // Check state is still valid
       const state = await getGameState(page);
@@ -359,7 +379,7 @@ test.describe('Post-Deployment Verification', () => {
 
       // Simulate basic gameplay
       for (let i = 0; i < 5; i++) {
-        await movePlayer(page, 'down', 100);
+        await movePlayer(page, 'down', 300);
       }
 
       const state = await getGameState(page);
