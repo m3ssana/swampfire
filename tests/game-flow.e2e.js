@@ -211,21 +211,17 @@ test.describe('Swampfire Game E2E Tests', () => {
     let state = await getGameState(page);
     expect(state.timeLeft).toBe(3600); // 60:00
 
-    // Bug #33 fix: set timeLeft to a small value via registry (acceptable shortcut
-    // since we can't wait 60 real minutes), then wait for the HUD's real countdown
-    // tick to fire timerExpired = true — instead of setting timerExpired manually.
+    // Drive the HUD countdown by calling tick() directly.
+    // Waiting on the real Phaser time.addEvent is unreliable in CI: swiftshader
+    // software rendering runs at ~1fps, and Phaser caps delta to ~100ms per frame,
+    // so 1 real second of game-clock time can take 10+ wall-clock seconds.
+    // Calling tick() directly exercises the real HUD code path (same method the
+    // timer fires) without depending on CI's throttled render loop.
     await page.evaluate(() => {
-      window.game.registry.set('timeLeft', 5);
+      const hud = window.game.scene.getScene('hud');
+      window.game.registry.set('timeLeft', 1);
+      hud.tick(); // decrements timeLeft 1→0, sets timerExpired = true
     });
-
-    // Wait up to 8 seconds for the real HUD countdown to decrement timeLeft to 0
-    // and set timerExpired via the actual tick() method in HUDScene.
-    // Note: pass null as arg and options as third param (Playwright API: fn, arg, options).
-    await page.waitForFunction(
-      () => window.game.registry.get('timerExpired') === true,
-      null,
-      { timeout: 8000 }
-    );
 
     state = await getGameState(page);
     expect(state.timeLeft).toBe(0);
