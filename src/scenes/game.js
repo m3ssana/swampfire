@@ -646,14 +646,21 @@ export default class Game extends Phaser.Scene {
     });
 
     // ── Step 8 — Fade to black + transition (t=3200ms) ───────────────────────
+    //
+    // Use a delayedCall timed to the fade duration rather than the
+    // 'camerafadeoutcomplete' event. After chaining flash → shake → pan →
+    // zoom → shake, Phaser's camera effect pipeline can silently drop the
+    // event, leaving endRun() unreachable and the game locked on black.
     this.time.delayedCall(3200, () => {
       if (!this.scene?.isActive()) return;
       this.cameras.main.fade(700, 0, 0, 0);
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this._launchEmitter?.destroy();
-        this._launchEmitter = null;
-        this.endRun('victory', { underTheWire });
-      });
+    });
+
+    this.time.delayedCall(3200 + 750, () => {
+      if (!this.scene?.isActive()) return;
+      this._launchEmitter?.destroy();
+      this._launchEmitter = null;
+      this.endRun('victory', { underTheWire });
     });
   }
 }
