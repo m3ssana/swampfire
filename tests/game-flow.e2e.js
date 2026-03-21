@@ -15,26 +15,37 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Helper: Wait for game to be fully loaded and ready
+ *
+ * The game flows: Bootloader → Splash → Transition (4 SPACE-gated phases) → Game.
+ * E2E tests can't drive through the 4-phase cinematic, so we wait for assets to
+ * finish loading (Splash becomes active), then programmatically jump to GameScene.
  */
 async function waitForGameReady(page) {
-  // Wait for window.game to be defined (set in main.js)
-  await page.waitForFunction(() => typeof window.game !== 'undefined', {
-    timeout: 10000,
-  });
-
-  // Poll until GameScene is genuinely active and registry is populated
-  // Bug #32 fix: replaced waitForTimeout(500) magic delay with a real readiness signal
+  // Wait for Bootloader to finish — Splash becoming active proves assets are loaded.
+  // Note: pass null as arg and options as third param (Playwright API: fn, arg, options).
   await page.waitForFunction(
     () => {
       const g = window.game;
-      return (
-        g &&
-        g.scene &&
-        g.scene.isActive('game') &&
-        g.registry &&
-        g.registry.get('timeLeft') > 0
-      );
+      return g && g.scene && g.scene.isActive('splash');
     },
+    null,
+    { timeout: 15000 }
+  );
+
+  // Skip the 4-phase Transition cinematic — jump straight to GameScene.
+  // HUD auto-launches from GameScene.create() via launchHUD(), so no need to start it separately.
+  await page.evaluate(() => {
+    window.game.scene.start('game');
+  });
+
+  // Wait for GameScene to be active. timeLeft is set lazily by HUD on first tick,
+  // so we only check scene activation — not registry state — to avoid a race.
+  await page.waitForFunction(
+    () => {
+      const g = window.game;
+      return g && g.scene && g.scene.isActive('game');
+    },
+    null,
     { timeout: 10000 }
   );
 }
