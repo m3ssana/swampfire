@@ -189,11 +189,10 @@ Each task is small enough to fit in a single Claude Code session.
   - Streak resets on death; survives zone transitions
 
 - ⏳ **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11)
-  - Replace dungeon SFX with swamp/hurricane audio
-  - Ambient layers per zone (cypress canopy, strip mall, wind)
-  - Storm audio intensifies per phase
-  - Pickup/craft/install SFX per spec feedback table
-  - Music: calm acoustic at Zone 0, tense elsewhere
+  - ✅ **5.3a Zone music playback** — Load + loop 5 zone tracks, auto-switch on transition (c2cee61)
+  - ⏳ **5.3b Storm phase audio layers** — Add 4 storm intensity overlays (Phase 1-4)
+  - ⏳ **5.3c Menu + SFX wiring** — Menu theme on splash, pickup/craft/install SFX
+  - ⏳ **5.3d Ambient sound design** — Cypress canopy, strip mall, wind per zone
 
 - ✅ **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
   - Simple NPC game object: sprite + dialog box on E press
