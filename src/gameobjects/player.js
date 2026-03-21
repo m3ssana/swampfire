@@ -1,4 +1,5 @@
 import Dust from "./particle";
+import { getWindDrift } from "./storm_phase_logic";
 
 const WALK_SPEED = 3;
 const SPRINT_SPEED = 6;
@@ -130,7 +131,11 @@ export default class Player {
       vy *= Math.SQRT1_2;
     }
 
-    this.sprite.setVelocity(vx * speed, vy * speed);
+    // Add hurricane wind drift on top of player input (wind blows east, +X)
+    const stormPhase = this.scene.registry.get('stormPhase');
+    const windDrift = getWindDrift(stormPhase);
+
+    this.sprite.setVelocity(vx * speed + windDrift, vy * speed);
 
     const moving = vx !== 0 || vy !== 0;
     if (moving) {

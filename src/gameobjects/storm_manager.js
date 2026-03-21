@@ -8,8 +8,8 @@
  * Phase thresholds (timeLeft in seconds):
  *   Phase 1  3600 – 2700  Warning      light rain
  *   Phase 2  2699 – 1800  Evacuation   moderate rain
- *   Phase 3  1799 – 900   Storm Surge  heavy rain, darkness
- *   Phase 4   899 – 0     Landfall     intense + lightning
+ *   Phase 3  1799 – 900   Storm Surge  heavy rain, darkness, angled rain, debris
+ *   Phase 4   899 – 0     Landfall     intense + lightning, strong wind angle
  */
 
 // ── Pure phase logic (re-exported for unit tests) ──────────────────────────
@@ -17,10 +17,16 @@ export { getPhaseForTimeLeft } from './storm_phase_logic.js';
 
 // ── Per-phase rain config ──────────────────────────────────────────────────
 const RAIN_CONFIG = {
-  1: { quantity: 1,  freq: 120, speedY: { min: 280, max: 360 }, alpha: { start: 0.25, end: 0 }, lifespan: 900 },
-  2: { quantity: 2,  freq:  80, speedY: { min: 320, max: 440 }, alpha: { start: 0.40, end: 0 }, lifespan: 900 },
-  3: { quantity: 4,  freq:  40, speedY: { min: 380, max: 520 }, alpha: { start: 0.55, end: 0 }, lifespan: 900 },
-  4: { quantity: 8,  freq:  20, speedY: { min: 460, max: 640 }, alpha: { start: 0.70, end: 0 }, lifespan: 900 },
+  1: { quantity: 1,  freq: 120, speedX: 0,                        speedY: { min: 280, max: 360 }, alpha: { start: 0.25, end: 0 }, lifespan: 900 },
+  2: { quantity: 2,  freq:  80, speedX: 0,                        speedY: { min: 320, max: 440 }, alpha: { start: 0.40, end: 0 }, lifespan: 900 },
+  3: { quantity: 4,  freq:  40, speedX: { min:  40, max:  80 },   speedY: { min: 380, max: 520 }, alpha: { start: 0.55, end: 0 }, lifespan: 900 },
+  4: { quantity: 8,  freq:  20, speedX: { min:  80, max: 140 },   speedY: { min: 460, max: 640 }, alpha: { start: 0.70, end: 0 }, lifespan: 900 },
+};
+
+// ── Per-phase debris config (Phase 3+ only) ────────────────────────────────
+const DEBRIS_CONFIG = {
+  3: { tint: 0x88aa44 },  // olive/leaf — storm surge
+  4: { tint: 0xaa8844 },  // brown/dirt — landfall
 };
 
 // ── Phase transition toasts ────────────────────────────────────────────────
@@ -56,6 +62,8 @@ export default class StormManager {
     this._shakeTimer   = null;
     this._lightningTimer = null;
 
+    this._debrisEmitter = null;
+
     this._buildOverlay();
     this._buildRainEmitter(1);
     this._listenForTimeLeft();
@@ -83,7 +91,7 @@ export default class StormManager {
 
     this._emitter = this._scene.add.particles(0, -10, 'rain-drop', {
       x:        { min: 0, max: width },
-      speedX:   0,
+      speedX:   cfg.speedX,
       speedY:   cfg.speedY,
       quantity:  cfg.quantity,
       lifespan:  cfg.lifespan,
@@ -94,6 +102,37 @@ export default class StormManager {
 
     this._emitter.setScrollFactor(0);
     this._emitter.setDepth(86);
+  }
+
+  _buildDebrisEmitter(phase) {
+    // Destroy any existing debris emitter first (defensive re-entry guard)
+    if (this._debrisEmitter) {
+      this._debrisEmitter.destroy();
+      this._debrisEmitter = null;
+    }
+
+    const cfg    = DEBRIS_CONFIG[phase];
+    const height = this._scene.sys.game.config.height;
+
+    // Spawn from the left edge, random Y across full screen height.
+    // Depth 84 — below the darkness overlay (85) and rain (86) so debris
+    // reads as ground-level litter swept past the camera, not airborne above rain.
+    this._debrisEmitter = this._scene.add.particles(0, 0, 'rain-drop', {
+      x:        0,
+      y:        { min: 0, max: height },
+      speedX:   { min: 120, max: 220 },
+      speedY:   { min: -40, max:  40 },
+      scaleX:   { min: 2, max: 4 },
+      scaleY:   { min: 2, max: 4 },
+      quantity:  1,
+      lifespan:  1200,
+      alpha:     { start: 0.6, end: 0 },
+      frequency: 400,
+      tint:      cfg.tint,
+    });
+
+    this._debrisEmitter.setScrollFactor(0);
+    this._debrisEmitter.setDepth(84);
   }
 
   // ── Registry listener ────────────────────────────────────────────────────
@@ -115,6 +154,14 @@ export default class StormManager {
   _applyPhase(phase) {
     // Rain
     this._buildRainEmitter(phase);
+
+    // Debris (Phase 3+); destroy if somehow dropping back below Phase 3
+    if (phase >= 3) {
+      this._buildDebrisEmitter(phase);
+    } else if (this._debrisEmitter) {
+      this._debrisEmitter.destroy();
+      this._debrisEmitter = null;
+    }
 
     // Darkness tween
     this._scene.tweens.add({
@@ -158,7 +205,7 @@ export default class StormManager {
   _startLightning() {
     const scheduleNext = () => {
       if (this._destroyed) return;
-      const delay = Phaser.Math.Between(8000, 20000);
+      const delay = Phaser.Math.Between(5000, 15000);
       this._lightningTimer = this._scene.time.delayedCall(delay, () => {
         if (this._destroyed) return;
         this._scene.cameras.main.flash(80, 255, 255, 255);
@@ -181,6 +228,9 @@ export default class StormManager {
 
     this._emitter?.destroy();
     this._emitter = null;
+
+    this._debrisEmitter?.destroy();
+    this._debrisEmitter = null;
 
     this._overlay?.destroy();
     this._overlay = null;

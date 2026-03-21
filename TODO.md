@@ -161,11 +161,11 @@ Each task is small enough to fit in a single Claude Code session.
   - HazardManager orchestrates all spawns, routing, and zone-transition cleanup
   - 34 unit tests (161 total): spawn timing, AABB overlap, patrol AI, debounce, table integrity
 
-- ⏳ **4.3 Wind + environmental effects** [#8](https://github.com/m3ssana/swampfire/issues/8)
-  - Wind force pushes player sideways (Phase 3+)
-  - Screen shake from thunder (Phase 4 = constant)
-  - Lightning flashes (Phase 4, every 5-15s)
-  - Visibility reduction (camera tint darkening per phase)
+- ✅ **4.3 Wind + environmental effects** [#8](https://github.com/m3ssana/swampfire/issues/8)
+  - Rain angled eastward in Phase 3 (`speedX` 40–80) and Phase 4 (`speedX` 80–140)
+  - Debris particle emitter (Phase 3+): olive tint Phase 3, brown Phase 4; 1 particle/400ms; depth 84 (below overlay); spawns from left edge, horizontal sweep
+  - Lightning timing corrected to 5–15s (was 8–20s)
+  - Visibility reduction via existing `DARK_ALPHA` overlay (already in place from 4.1)
 
 ---
 
