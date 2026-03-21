@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swampfire Gazette - March 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Georgia, serif;
+            background: #f5f1e8;
+            color: #1a1a1a;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border: 3px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .masthead {
+            background: linear-gradient(to bottom, #1a472a 0%, #0a2415 100%);
+            color: #4fffaa;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 4px double #4fffaa;
+            position: relative;
+        }
+
+        .masthead::before {
+            content: "⚡ 🌪️ 🚀 ⚡";
+            display: block;
+            font-size: 24px;
+            letter-spacing: 15px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .masthead h1 {
+            font-size: 4em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 5px;
+        }
+
+        .masthead .tagline {
+            font-size: 1.3em;
+            font-style: italic;
+            margin-bottom: 10px;
+            color: #90ee90;
+            letter-spacing: 2px;
+        }
+
+        .masthead .date {
+            font-size: 0.95em;
+            color: #aaa;
+            border-top: 1px solid #4fffaa;
+            border-bottom: 1px solid #4fffaa;
+            padding: 8px 0;
+            display: inline-block;
+        }
+
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        .main-article {
+            grid-column: 1 / 2;
+            border: 2px solid #333;
+            padding: 20px;
+            background: #fafaf8;
+        }
+
+        .main-article h2 {
+            font-size: 2.2em;
+            color: #8b0000;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            line-height: 1.2;
+            border-bottom: 3px solid #8b0000;
+            padding-bottom: 10px;
+        }
+
+        .byline {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 15px;
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 10px;
+        }
+
+        .main-article p {
+            margin-bottom: 12px;
+            text-align: justify;
+            font-size: 0.95em;
+        }
+
+        .main-article .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            font-weight: bold;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .article-box {
+            border: 2px solid #333;
+            padding: 15px;
+            background: #fafaf8;
+        }
+
+        .article-box h3 {
+            font-size: 1.3em;
+            color: #8b0000;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #8b0000;
+            padding-bottom: 6px;
+        }
+
+        .article-box p {
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            text-align: justify;
+            line-height: 1.4;
+        }
+
+        .article-box .stat {
+            display: flex;
+            justify-content: space-between;
+            background: #f0f0f0;
+            padding: 8px 10px;
+            margin: 8px 0;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .footer-section {
+            grid-column: 1 / -1;
+            border-top: 3px double #333;
+            padding-top: 20px;
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .footer-box {
+            padding: 15px;
+            background: #f0f0f0;
+            border: 1px solid #999;
+        }
+
+        .footer-box h4 {
+            font-size: 0.95em;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a472a;
+        }
+
+        .footer-box p {
+            font-size: 0.8em;
+            line-height: 1.5;
+        }
+
+        .weather-box {
+            background: linear-gradient(135deg, #1a472a, #0a2415);
+            color: #4fffaa;
+            padding: 20px;
+            border: 2px solid #4fffaa;
+            text-align: center;
+        }
+
+        .weather-box h4 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #ff6b6b;
+            text-transform: uppercase;
+        }
+
+        .weather-box .condition {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffaa00;
+        }
+
+        .weather-box .time {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #ff6b6b;
+            font-family: monospace;
+        }
+
+        .photo-caption {
+            font-size: 0.75em;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .quote-box {
+            border-left: 4px solid #8b0000;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .main-article {
+                grid-column: 1;
+            }
+
+            .footer-section {
+                grid-template-columns: 1fr;
+            }
+
+            .masthead h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="masthead">
+            <div class="tagline">Florida's Foremost Hurricane Survival Gazette</div>
+            <h1>Swampfire Gazette</h1>
+            <div class="date">Friday, March 21, 2026 | EDITION 1</div>
+        </div>
+
+        <div class="content">
+            <!-- MAIN ARTICLE -->
+            <div class="main-article">
+                <h2>JUAN BREAKS ALL RECORDS: Player Now Has 8 Achievements to Aspire To</h2>
+                <div class="byline">By Reporter Rita Stormborn | Swampfire Correspondent</div>
+
+                <p>
+                    In a stunning development that has left game developers scrambling to implement even MORE motivational systems,
+                    <span class="highlight">Juan's achievement system has reached unprecedented levels of milestone-mania</span>. The
+                    bespectacled protagonist can now unlock a staggering eight distinct achievements, ranging from "First Loot" to the
+                    coveted "Globe Trotter" designation.
+                </p>
+
+                <p>
+                    "We wanted players to feel constantly rewarded," said an anonymous developer, who was last seen muttering about
+                    localStorage and localStorage about persistent state tracking. "Now every action—whether it's picking up a rusty wrench
+                    or achieving combo nirvana—triggers a beautiful cyan toast notification."
+                </p>
+
+                <p>
+                    The achievement system, which suspiciously tracks player activity via the registry, has already resulted in:
+                </p>
+                <ul style="margin: 10px 0 10px 30px; font-size: 0.95em;">
+                    <li>Increased XP grinding addiction (reported by 100% of test subjects)</li>
+                    <li>A new category of "Frenzy Chasers" obsessed with 5+ combo streaks</li>
+                    <li>Toast notification overload in Zone 4 (more toasts than a bakery)</li>
+                </ul>
+
+                <p>
+                    <span class="highlight">Achievement persistence across browser sessions</span> is now permanent, thanks to
+                    localStorage magic. Players report feeling compelled to beat their previous records, suggesting the system is
+                    working exactly as intended—or the developers have discovered a loophole in human psychology.
+                </p>
+
+                <div class="quote-box">
+                    "I just want to know: is SURVIVOR supposed to be harder than GLOBE TROTTER? Asking for a friend who has survived
+                    20 runs but only visited 3 zones." — Concerned Player
+                </div>
+            </div>
+
+            <!-- SIDEBAR ARTICLES -->
+            <div class="sidebar">
+                <div class="weather-box">
+                    <h4>HURRICANE KENDRA STATUS</h4>
+                    <div class="condition">CATEGORY 6 - LANDFALL IMMINENT</div>
+                    <div class="time">60:00</div>
+                    <p style="font-size: 0.9em; margin-top: 15px; color: #ccc;">Time until total system collapse</p>
+                </div>
+
+                <div class="article-box">
+                    <h3>🚀 ROCKET LAUNCH SPECTACULAR</h3>
+                    <p>
+                        In a dramatic sequence that had testers glued to their screens, Juan successfully launched a fully-assembled
+                        rocket in real-time cinematic glory. Complete with ignition flash, engine particles, and dramatic camera work.
+                    </p>
+                    <div class="stat">
+                        <span>Cinematic Duration:</span>
+                        <span>8 seconds of pure drama</span>
+                    </div>
+                    <p style="margin-top: 10px;">
+                        The "Under-the-Wire" achievement now rewards players who launch with less than 2 minutes to spare.
+                        Stress levels rising.
+                    </p>
+                </div>
+
+                <div class="article-box">
+                    <h3>⚡ FRENZY MODE GOES VIRAL</h3>
+                    <p>
+                        The combo streak system has reached critical mass. FRENZY mode (5+ combos) now triggers screen shake,
+                        red flash, AND 1.5x XP multiplier for 5 seconds.
+                    </p>
+                    <div class="stat">
+                        <span>Screen Shake Intensity:</span>
+                        <span>0.018 (gamer heaven)</span>
+                    </div>
+                    <p style="margin-top: 10px;">
+                        Players report "uncontrollable urge to chain more pickups." Addiction specialists are monitoring the situation.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FOOTER ARTICLES -->
+            <div class="footer-section">
+                <div class="footer-box">
+                    <h4>🧑 NPC INTEGRATION SUCCESS</h4>
+                    <p>
+                        Harvey from the Hardware store, Maria at the Commons, Old Dale by the tower, and Coach Reeves at the school
+                        have all opened their doors—both literally and figuratively—to offer side quests. Each NPC now provides unique
+                        challenges and rewards, with dialog boxes appearing upon (E) interaction.
+                    </p>
+                    <p style="margin-top: 10px;">
+                        <strong>Impact:</strong> Loot tables now themed by zone. Quest completion unlocks special recipes and area
+                        access.
+                    </p>
+                </div>
+
+                <div class="footer-box">
+                    <h4>🌬️ WIND EFFECTS & ENVIRONMENTAL CHAOS</h4>
+                    <p>
+                        Rain now angles eastward with particle speeds reaching 80-140 pixels per second in Phase 4. Debris emitter
+                        spawns olive-tinted particles in Phase 3, brown in Phase 4—one every 400ms for maximum swamp authenticity.
+                    </p>
+                    <p style="margin-top: 10px;">
+                        <strong>Visibility:</strong> 50% darkness overlay applied during peak storm conditions. Players report feeling
+                        appropriately panicked.
+                    </p>
+                </div>
+
+                <div class="footer-box">
+                    <h4>🧪 E2E TEST OVERHAUL COMPLETE</h4>
+                    <p>
+                        Seven critical Playwright bugs have been obliterated. Fixes include proper keyboard.down/up handling,
+                        scene lookup via getScene() instead of hardcoded indices, and WebGL compatibility with --use-gl=swiftshader.
+                    </p>
+                    <p style="margin-top: 10px;">
+                        <strong>Result:</strong> CI/CD pipeline no longer flaky. Testers rejoice.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br><br>
+
+    <!-- BONUS SECTION -->
+    <div class="container" style="margin-top: 20px;">
+        <div style="background: #fafaf8; padding: 20px; border: 2px solid #333;">
+            <h3 style="color: #8b0000; text-transform: uppercase; border-bottom: 2px solid #8b0000; padding-bottom: 10px; margin-bottom: 15px;">
+                DEVELOPER NOTES & STATISTICS
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9em;">
+                <div>
+                    <strong>Commits This Month:</strong> 16 feature/fix commits<br>
+                    <strong>Issues Closed:</strong> 15 (including 7 E2E test bugs)<br>
+                    <strong>New Game Objects:</strong> NPCs, AchievementManager, ComboTracker<br>
+                    <strong>Zones Complete:</strong> 5/5 (all procedurally generated)<br>
+                </div>
+                <div>
+                    <strong>Phase Status:</strong> Phase 6 (Endgame) COMPLETE ✅<br>
+                    <strong>Phase 7 Status:</strong> UI Polish IN PROGRESS ⏳<br>
+                    <strong>Audio Overhaul:</strong> Pending (Issue #11)<br>
+                    <strong>Total Unit Tests:</strong> 161+ (integration + e2e)<br>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

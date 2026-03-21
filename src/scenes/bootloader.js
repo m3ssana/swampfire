@@ -145,6 +145,23 @@ export default class Bootloader extends Phaser.Scene {
     This loads the audio files: music and sound effects.
     */
   loadAudios() {
+    // ── Zone base music tracks (120s loops) ──────────────────────────────────
+    const zones = ['cypress', 'us41', 'collier', 'conner', 'lolhs'];
+    zones.forEach((zone, i) => {
+      this.load.audio(`zone${i}_${zone}`, `assets/music/zone${i}_${zone}.ogg`);
+    });
+
+    // ── Storm intensity layers (60s loops) ────────────────────────────────────
+    Array(4)
+      .fill(0)
+      .forEach((_, i) => {
+        this.load.audio(`storm_phase${i + 1}`, `assets/music/storm_phase${i + 1}.ogg`);
+      });
+
+    // ── Menu theme ─────────────────────────────────────────────────────────────
+    this.load.audio("menu_theme", "assets/music/menu_theme.ogg");
+
+    // ── Legacy SFX (old dungeon crawler sounds) ────────────────────────────────
     Array(5)
       .fill(0)
       .forEach((_, i) => {
