@@ -11,128 +11,33 @@
 <body>
     <div id="arcade-cabinet">
 
-        <!-- ── Header: mission control title + status lights + ad slot ── -->
         <header class="cabinet-header">
-            <div class="header-left">
-                <h1 class="cabinet-title">SWAMPFIRE <span>PROTOCOL</span></h1>
-                <div class="header-divider"></div>
-                <div class="status-row">
-                    <div class="status-item">
-                        <span class="status-dot online"></span>
-                        <span class="status-text">Systems</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-dot warning"></span>
-                        <span class="status-text">Storm</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-dot danger"></span>
-                        <span class="status-text">Landfall</span>
-                    </div>
-                </div>
-            </div>
-
+            <h1 class="cabinet-title">SWAMPFIRE <span>PROTOCOL</span></h1>
             <div class="ad-leaderboard">advertisement · 728×90</div>
-
-            <div class="header-time">COLLIER COUNTY · T−60:00</div>
         </header>
 
-        <!-- ── Left panel: zone data + skyscraper ad ── -->
         <aside class="cabinet-panel left" aria-hidden="true">
-            <div class="panel-trace"></div>
-            <div class="panel-trace"></div>
-            <div class="panel-trace"></div>
-
-            <div class="data-card">
-                <div class="data-label">Zone Status</div>
-                <div class="data-value">Cypress Creek</div>
-                <div class="data-bar-wrap"><div class="data-bar" style="width:100%"></div></div>
-            </div>
-
-            <div class="data-card">
-                <div class="data-label">Wind Speed</div>
-                <div class="data-value amber">87 mph</div>
-                <div class="data-bar-wrap"><div class="data-bar amber" style="width:58%"></div></div>
-            </div>
-
-            <div class="data-card">
-                <div class="data-label">Barometric</div>
-                <div class="data-value red">946 mb</div>
-                <div class="data-bar-wrap"><div class="data-bar red" style="width:34%"></div></div>
-            </div>
-
             <div class="ad-skyscraper">advertisement · 160×600</div>
         </aside>
 
-        <!-- ── CRT screen: game canvas with scanline overlay ── -->
         <main class="cabinet-screen">
             <div class="crt-frame">
                 <div id="game-container"></div>
             </div>
         </main>
 
-        <!-- ── Right panel: craft data + skyscraper ad ── -->
         <aside class="cabinet-panel right" aria-hidden="true">
-            <div class="panel-trace"></div>
-            <div class="panel-trace"></div>
-            <div class="panel-trace"></div>
-
-            <div class="data-card">
-                <div class="data-label">Systems Built</div>
-                <div class="data-value">0 / 4</div>
-                <div class="data-bar-wrap"><div class="data-bar" style="width:0%"></div></div>
-            </div>
-
-            <div class="data-card">
-                <div class="data-label">Inventory</div>
-                <div class="data-value">0 items</div>
-                <div class="data-bar-wrap"><div class="data-bar" style="width:0%"></div></div>
-            </div>
-
-            <div class="data-card">
-                <div class="data-label">XP Earned</div>
-                <div class="data-value">0</div>
-                <div class="data-bar-wrap"><div class="data-bar" style="width:0%"></div></div>
-            </div>
-
             <div class="ad-skyscraper">advertisement · 160×600</div>
         </aside>
 
-        <!-- ── Footer: mission stats strip ── -->
         <footer class="cabinet-footer">
-            <div class="footer-stat primary">
-                <span>Zone</span>
-                <strong>Cypress Creek</strong>
-            </div>
+            <span class="footer-text">Land O' Lakes, FL</span>
             <div class="footer-sep"></div>
-            <div class="footer-stat">
-                <span>Lat</span>
-                <strong>28.15°N</strong>
-            </div>
-            <div class="footer-sep"></div>
-            <div class="footer-stat">
-                <span>Lon</span>
-                <strong>82.46°W</strong>
-            </div>
-
             <div class="footer-center">
-                <div class="ad-footer-mini">advertisement · 360×28</div>
-            </div>
-
-            <div class="footer-stat warn">
-                <span>Storm Cat</span>
-                <strong>CAT 4</strong>
+                <div class="ad-footer-mini">advertisement · 468×60</div>
             </div>
             <div class="footer-sep"></div>
-            <div class="footer-stat danger">
-                <span>Landfall</span>
-                <strong>T−60:00</strong>
-            </div>
-            <div class="footer-sep"></div>
-            <div class="footer-stat primary">
-                <span>Mission</span>
-                <strong>LAUNCH</strong>
-            </div>
+            <span class="footer-text">swampfireprotocol.com</span>
         </footer>
 
     </div>
