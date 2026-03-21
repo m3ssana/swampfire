@@ -5,27 +5,43 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swampfire Protocol</title>
-
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            background-color: #0a0f0a; /* near-black swamp green */
-            overflow: hidden;          /* prevent scrollbars */
-        }
-
-        #game-container {
-            border: 1px solid rgba(79, 255, 170, 0.15);    /* faint cyan accent border */
-            border-radius: 2px;
-            box-shadow: 0 0 40px rgba(79, 255, 170, 0.06); /* subtle cyan glow */
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
 
 <body>
-    <div id="app">
-        <div id="game-container"></div>
+    <div id="arcade-cabinet">
+
+        <header class="cabinet-header">
+            <h1 class="cabinet-title">SWAMPFIRE <span>PROTOCOL</span></h1>
+            <div class="ad-leaderboard">advertisement · 728×90</div>
+        </header>
+
+        <aside class="cabinet-panel left" aria-hidden="true">
+            <div class="ad-skyscraper">advertisement · 160×600</div>
+        </aside>
+
+        <main class="cabinet-screen">
+            <div class="crt-frame">
+                <div id="game-container"></div>
+            </div>
+        </main>
+
+        <aside class="cabinet-panel right" aria-hidden="true">
+            <div class="ad-skyscraper">advertisement · 160×600</div>
+        </aside>
+
+        <footer class="cabinet-footer">
+            <span class="footer-text">Land O' Lakes, FL</span>
+            <div class="footer-sep"></div>
+            <div class="footer-center">
+                <div class="ad-footer-mini">advertisement · 468×60</div>
+            </div>
+            <div class="footer-sep"></div>
+            <span class="footer-text">swampfireprotocol.com</span>
+        </footer>
+
     </div>
+
     <script type="module" src="src/main.js"></script>
 </body>
 </html>

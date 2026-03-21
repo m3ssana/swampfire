@@ -1,0 +1,231 @@
+/* =============================================================================
+   SWAMPFIRE PROTOCOL — Minimal Surround UI
+   Clean, modern layout with ad slots. Game canvas is the hero.
+   ============================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+/* ── Reset + base ──────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: #0a0a0a;
+  color: #999;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Design tokens ─────────────────────────────────────────────────────────── */
+
+:root {
+  --accent:     #4fffaa;
+  --accent-dim: rgba(79, 255, 170, 0.08);
+  --surface:    #111111;
+  --surface-2:  #161616;
+  --border:     rgba(255, 255, 255, 0.06);
+  --border-2:   rgba(255, 255, 255, 0.10);
+  --text:       #e0e0e0;
+  --text-muted: rgba(255, 255, 255, 0.40);
+  --text-dim:   rgba(255, 255, 255, 0.18);
+}
+
+/* ── Layout grid ───────────────────────────────────────────────────────────── */
+
+#arcade-cabinet {
+  display: grid;
+  grid-template-columns: 180px 1fr 180px;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header  header  header"
+    "left    screen  right"
+    "footer  footer  footer";
+  min-height: 100vh;
+  background: #0a0a0a;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+
+.cabinet-header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.cabinet-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.cabinet-title span {
+  color: var(--accent);
+}
+
+/* Leaderboard ad */
+.ad-leaderboard {
+  flex: 1;
+  max-width: 728px;
+  height: 32px;
+  margin: 0 24px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── Side panels ───────────────────────────────────────────────────────────── */
+
+.cabinet-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+}
+
+.cabinet-panel.left {
+  grid-area: left;
+  border-right: 1px solid var(--border);
+}
+
+.cabinet-panel.right {
+  grid-area: right;
+  border-left: 1px solid var(--border);
+}
+
+/* Skyscraper ad */
+.ad-skyscraper {
+  width: 160px;
+  height: 600px;
+  max-height: 80%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── Game screen ───────────────────────────────────────────────────────────── */
+
+.cabinet-screen {
+  grid-area: screen;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: #0a0a0a;
+}
+
+.crt-frame {
+  position: relative;
+  border-radius: 4px;
+  border: 1px solid var(--border-2);
+  background: #000;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+#game-container { display: block; }
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+
+.cabinet-footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  height: 40px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  gap: 16px;
+}
+
+.footer-text {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.footer-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.footer-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.ad-footer-mini {
+  height: 24px;
+  width: min(468px, 90%);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1400px) {
+  #arcade-cabinet { grid-template-columns: 160px 1fr 160px; }
+}
+
+@media (max-width: 1100px) {
+  #arcade-cabinet {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "header"
+      "screen"
+      "footer";
+  }
+  .cabinet-panel { display: none; }
+}
+
+@media (max-width: 700px) {
+  body { overflow: auto; }
+  #arcade-cabinet { min-height: 100svh; }
+  .cabinet-title { font-size: 11px; }
+  .cabinet-header { padding: 0 12px; height: 42px; }
+  .cabinet-footer { padding: 0 12px; height: 36px; }
+  .ad-leaderboard { display: none; }
+  .cabinet-screen { padding: 4px; }
+}
