@@ -84,7 +84,6 @@ export default class Game extends Phaser.Scene {
 
   addPlayer() {
     const spawn = this.zone.getSpawnPoint();
-    this.trailLayer = this.add.layer();
     this.player = new Player(this, spawn.x, spawn.y, 100);
   }
 
@@ -293,7 +292,6 @@ export default class Game extends Phaser.Scene {
 
   playerHitsFoe(foe) {
     if (this.player.invincible) return;
-    this.player.explosion();
     foe.destroy();
     this.restartScene();
   }

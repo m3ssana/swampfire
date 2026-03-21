@@ -1,4 +1,3 @@
-import Dust from "./particle";
 import { getWindDrift } from "./storm_phase_logic";
 
 const WALK_SPEED = 3;
@@ -144,7 +143,6 @@ export default class Player {
       // the last facing direction, which feels natural.
       if (vx < 0) this.sprite.setFlipX(false);
       else if (vx > 0) this.sprite.setFlipX(true);
-      this.step();
     } else {
       this.sprite.anims.play("playeridle", true);
     }
@@ -164,34 +162,4 @@ export default class Player {
     this.sprite.destroy();
   }
 
-  /*
-    Occasional dust puff while moving -- keeps movement feeling physical.
-    Spread randomly around the sprite center for top-down perspective.
-  */
-  step() {
-    if (Phaser.Math.Between(0, 5) > 4) {
-      this.scene.trailLayer.add(
-        new Dust(
-          this.scene,
-          this.sprite.x + Phaser.Math.Between(-8, 8),
-          this.sprite.y + Phaser.Math.Between(-8, 8)
-        )
-      );
-    }
-  }
-
-  /*
-    Death burst -- scatter dust particles in all directions.
-  */
-  explosion() {
-    Array(Phaser.Math.Between(10, 15))
-      .fill(0)
-      .forEach(() => {
-        new Dust(
-          this.scene,
-          this.sprite.x + Phaser.Math.Between(-32, 32),
-          this.sprite.y + Phaser.Math.Between(-32, 32)
-        );
-      });
-  }
 }
