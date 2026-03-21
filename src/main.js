@@ -8,8 +8,8 @@ import HUD from "./scenes/hud";
 import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
 
 const config = {
-  width: 960,
-  height: 640,
+  width: 1280,
+  height: 720,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

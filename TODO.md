@@ -220,6 +220,23 @@ Each task is small enough to fit in a single Claude Code session.
 
 ---
 
+## Phase 7 -- Polish + Presentation
+
+- ✅ **7.1 Dark page background + canvas framing** [#55](https://github.com/m3ssana/swampfire/issues/55)
+  - Replace white page background with near-black swamp green (`#0a0f0a`)
+  - Add subtle cyan border/glow on `#game-container` matching HUD accent (`0x4fffaa`)
+  - Set `overflow: hidden` on body to prevent scrollbars
+  - All styling inline in `index.html` — delete unused `public/assets/css/styles.css`
+
+- ✅ **7.2 Upgrade resolution to 1280×720** [#56](https://github.com/m3ssana/swampfire/issues/56)
+  - Changed `width: 960, height: 640` → `width: 1280, height: 720` in `src/main.js`
+  - 16:9 fills widescreen monitors with minimal letterboxing
+
+- ✅ **7.3 Delete unused styles.css** [#57](https://github.com/m3ssana/swampfire/issues/57)
+  - `public/assets/css/styles.css` was never linked in `index.html` — removed
+
+---
+
 ## Bugs
 
 Bugs are tracked here alongside their GitHub issue. When a bug is reported:
