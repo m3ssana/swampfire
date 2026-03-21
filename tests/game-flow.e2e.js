@@ -211,21 +211,30 @@ test.describe('Swampfire Game E2E Tests', () => {
     let state = await getGameState(page);
     expect(state.timeLeft).toBe(3600); // 60:00
 
-    // Drive the HUD countdown by calling tick() directly.
-    // Waiting on the real Phaser time.addEvent is unreliable in CI: swiftshader
-    // software rendering runs at ~1fps, and Phaser caps delta to ~100ms per frame,
-    // so 1 real second of game-clock time can take 10+ wall-clock seconds.
-    // Calling tick() directly exercises the real HUD code path (same method the
-    // timer fires) without depending on CI's throttled render loop.
-    await page.evaluate(() => {
-      const hud = window.game.scene.getScene('hud');
-      window.game.registry.set('timeLeft', 1);
-      hud.tick(); // decrements timeLeft 1→0, sets timerExpired = true
+    // Drive the HUD countdown by calling tick() directly and reading state
+    // synchronously in the same evaluate() call.
+    //
+    // Why direct tick() call: swiftshader in CI runs at ~1fps with Phaser delta
+    // capped to ~100ms, so real Phaser timers run 10x slower than wall time.
+    //
+    // Why read inside evaluate: tick() → timerExpired=true fires gameOver()
+    // synchronously (Phaser registry events are sync), which queues Outro to
+    // start. Between evaluate() resolving and a subsequent getGameState() call,
+    // Phaser ticks fire, Outro starts, and resets the registry. Reading the
+    // result immediately inside the same evaluate() avoids the race.
+    const timerResult = await page.evaluate(() => {
+      const g = window.game;
+      const hud = g.scene.getScene('hud');
+      g.registry.set('timeLeft', 1);
+      hud.tick(); // decrements timeLeft 1→0 and sets timerExpired=true
+      return {
+        timeLeft: g.registry.get('timeLeft'),
+        timerExpired: g.registry.get('timerExpired'),
+      };
     });
 
-    state = await getGameState(page);
-    expect(state.timeLeft).toBe(0);
-    expect(state.timerExpired).toBe(true);
+    expect(timerResult.timeLeft).toBe(0);
+    expect(timerResult.timerExpired).toBe(true);
   });
 
   // ── HUD Display Verification ─────────────────────────────────────────────
