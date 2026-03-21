@@ -652,14 +652,14 @@ export default class Game extends Phaser.Scene {
       if (!this.scene?.isActive()) return;
       this.cameras.main.stopFollow();
       if (rocket) {
-        this.cameras.main.pan(rocket.x, rocket.y, 500, 'Quad.InOut');
+        this.cameras.main.pan(rocket.x, rocket.y, 500, Phaser.Math.Easing.Quad.InOut);
       }
     });
 
     // ── Step 5 — Zoom out + rocket ascent (t=700ms) ──────────────────────────
     this.time.delayedCall(700, () => {
       if (!this.scene?.isActive()) return;
-      this.cameras.main.zoomTo(0.6, 1800, 'Quad.Out');
+      this.cameras.main.zoomTo(0.6, 1800, Phaser.Math.Easing.Quad.Out);
 
       if (rocket) {
         this.tweens.add({
