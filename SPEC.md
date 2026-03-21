@@ -68,7 +68,7 @@ The map is divided into **5 interconnected zones** (reduced from 7 for pacing). 
 
 #### ZONE 0 -- CYPRESS CREEK PRESERVE (Home Base)
 - **Real location:** 8,720 Pump Station Rd, 7,400-acre preserve
-- **In-game:** Juan's rocket clearing. The hub. Small, intimate -- campfire, workbench, the rocket scaffold. The player returns here to install parts. Each visit shows the rocket progressing visually.
+- **In-game:** Juan's rocket clearing. The hub. Small, intimate -- campfire, workbench, the rocket scaffold. The rocket is the dominant visual landmark -- towering over Juan and the surrounding trees (see cover art for proportions). The player returns here to install parts. Each visit shows the rocket progressing visually.
 - **Features:** Workbench (instant crafting station), the rocket (visual progress model), supply stash (unlimited storage)
 - **Ambient:** Cypress canopy, standing water, Spanish moss, fireflies, distant thunder growing louder every visit
 - **Hazards:** Flooded trails (worsen over time), pygmy rattlesnakes near the edges
@@ -1013,7 +1013,7 @@ Buttons: RETRY (last checkpoint), NEW RUN, SHARE.
 
 ### 12.1 Style
 
-- **Pixel art**, 16x16 tile base, character sprites at 32x32 or 48x48
+- **Pixel art**, 16x16 tile base, character sprites at 32x32 or 48x48, rocket sprite at 96x216 (3x scale of 32x72 base — towering landmark visible from across the zone, matching the cover art proportions)
 - **Color palette:** Muted swamp tones (greens, browns, dark blues, amber) with HIGH CONTRAST accent colors for game-critical elements:
   - Gold: rocket components and XP popups
   - Red: timer (final phase), damage, hazard indicators

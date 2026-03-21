@@ -105,6 +105,11 @@ Each task is small enough to fit in a single Claude Code session.
   - `systemsInstalled` registry key persists across deaths; reset in `transition.loadNext()`
   - When all 4 installed: E at rocket calls `finishScene()` → outro "victory"
 
+- ⏳ **2.5 Scale up rocket sprite to match cover art** [#77](https://github.com/m3ssana/swampfire/issues/77)
+  - Current rocket is 32×72px (1× scale) — barely bigger than Juan
+  - Scale to ~3× (96×216px on screen) so it towers over the player and trees
+  - Update physics body, interaction range, and verify tint states + launch cinematic still work
+
 ---
 
 ## Phase 3 -- World Building
@@ -276,13 +281,16 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 - ✅ **White smoke particle trail follows Juan in Zone 0** [#72](https://github.com/m3ssana/swampfire/issues/72)
   - Removed Dust particle class and all references (step trail + death explosion) from player
 
-- ⏳ **HUD/UI elements cropped on smaller screens** [#73](https://github.com/m3ssana/swampfire/issues/73)
-  - At smaller viewport sizes, HUD elements (timer, hearts, XP, rocket panel) get cropped or cut off
-  - May be HUD absolute pixel positioning or CSS surround layout breakpoint issue
+- ✅ **HUD/UI elements cropped on smaller screens** [#73](https://github.com/m3ssana/swampfire/issues/73) — PR #75 (41a766c)
+  - Added consistent `EDGE_PAD = 20` replacing tight 6-16px margins on all HUD elements
 
 - ✅ **Game locks up after rocket launch** [#59](https://github.com/m3ssana/swampfire/issues/59) — PR #61 (0b83739)
   - Root cause: `camerafadeoutcomplete` event silently dropped after chaining flash → shake → pan → zoom → shake in `finishScene()` — `endRun()` never called, game locked on black
   - Fix: replaced camera event listener with `time.delayedCall(3200 + 750)` timed to fire after the 700ms fade completes
+
+- ⏳ **Game freezes after 4/4 rocket systems installed — outro never reached** [#76](https://github.com/m3ssana/swampfire/issues/76)
+  - Despite #59 fix, the game still freezes after installing all 4 systems and pressing E to launch
+  - Root cause may differ from #59 or the fix may not cover all code paths in `finishScene()`
 
 - ✅ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27)
   - Root cause: `Tilemap.destroy()` does NOT remove Matter.js bodies from `convertTilemapLayer()` — Zone 0's static obstacle bodies persist as invisible colliders in Zone 1, blocking the north corridor
