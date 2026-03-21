@@ -472,12 +472,14 @@ export default class Game extends Phaser.Scene {
       this.zoneMusic[this.currentZoneMusicId].stop();
     }
 
-    // Start new zone music
+    // Start new zone music (only if the sound object exists)
     const music = this.zoneMusic[zoneId];
-    music.loop = true;
-    music.volume = 0.6;
-    music.play();
-    this.currentZoneMusicId = zoneId;
+    if (music && music.isPlaying !== undefined) {
+      music.loop = true;
+      music.volume = 0.6;
+      music.play();
+      this.currentZoneMusicId = zoneId;
+    }
   }
 
   playAudio(key) {

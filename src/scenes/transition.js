@@ -28,7 +28,7 @@ export default class Transition extends Phaser.Scene {
       .setAlpha(1)
       .setDepth(100);
 
-    this.playMusic();
+    // Music playback removed — now handled by GameScene zone music system
 
     // Reveal phase 1 from black
     this.tweens.add({
