@@ -10217,6 +10217,24 @@
               "value": "toolbox"
             }
           ]
+        },
+        {
+          "id": 31,
+          "name": "npc_harvey",
+          "type": "npc",
+          "x": 624,
+          "y": 1200,
+          "width": 32,
+          "height": 48,
+          "rotation": 0,
+          "visible": true,
+          "properties": [
+            {
+              "name": "npcId",
+              "type": "string",
+              "value": "harvey"
+            }
+          ]
         }
       ]
     }

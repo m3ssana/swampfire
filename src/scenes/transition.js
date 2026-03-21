@@ -291,6 +291,7 @@ export default class Transition extends Phaser.Scene {
     this.registry.set("systemsInstalled", 0); // reset rocket progress each run
     this.registry.set("stormPhase", 1);
     this.registry.set("hudToast", "");
+    this.registry.set('npcQuests', { harvey: false, maria: false, dale: false, reeves: false });
 
     this.cameras.main.fade(300, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => {

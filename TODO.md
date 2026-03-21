@@ -190,7 +190,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Pickup/craft/install SFX per spec feedback table
   - Music: calm acoustic at Zone 0, tense elsewhere
 
-- ⏳ **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
+- ✅ **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
   - Simple NPC game object: sprite + dialog box on E press
   - Harvey (Zone 1), Maria (Zone 2), Old Dale (Zone 3), Coach Reeves (Zone 4)
   - Each gives one side quest (fetch item, return for reward)
