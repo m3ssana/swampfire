@@ -295,6 +295,22 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ---
 
+## Phase 8 — Arcade Cabinet Surround UI
+
+Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS changes.
+
+- ✅ **Base grid layout + CSS file** [#62](https://github.com/m3ssana/swampfire/issues/62) — `#arcade-cabinet` CSS Grid (3-col: panels + screen), new `styles.css`
+- ✅ **CRT frame + neon glow border** [#63](https://github.com/m3ssana/swampfire/issues/63) — `.crt-frame` with layered box-shadows + `border-pulse` animation
+- ✅ **CRT scanline overlay** [#64](https://github.com/m3ssana/swampfire/issues/64) — `.crt-frame::after` repeating-linear-gradient, pointer-events: none
+- ✅ **Neon title header + status lights** [#65](https://github.com/m3ssana/swampfire/issues/65) — "SWAMPFIRE PROTOCOL" with `neon-pulse` + 3 staggered blink dots
+- ✅ **Animated circuit board side panels** [#66](https://github.com/m3ssana/swampfire/issues/66) — CSS grid-line background + `trace-flow` animated data traces
+- ✅ **Ad slot placeholders** [#67](https://github.com/m3ssana/swampfire/issues/67) — 2× skyscraper (160×600), 1× leaderboard (728×90)
+- ✅ **Footer control panel strip** [#68](https://github.com/m3ssana/swampfire/issues/68) — metallic gradient, 4 arcade buttons, 2 joysticks, "INSERT COIN" blink
+- ✅ **Responsive breakpoints** [#69](https://github.com/m3ssana/swampfire/issues/69) — 1600px / 1100px (hide panels) / 800px + prefers-reduced-motion
+- ✅ **Polish + performance audit** [#70](https://github.com/m3ssana/swampfire/issues/70) — `will-change` on all animated elements, GPU-composited traces
+
+---
+
 ## Cleanup (do anytime)
 
 - ✅ Remove unused assets: `pello_ok.png`, dungeon tiles, `block.png`, `platform.png`, et al. [#16](https://github.com/m3ssana/swampfire/issues/16) — PR #46

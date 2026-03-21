@@ -5,27 +5,93 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swampfire Protocol</title>
-
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            background-color: #0a0f0a; /* near-black swamp green */
-            overflow: hidden;          /* prevent scrollbars */
-        }
-
-        #game-container {
-            border: 1px solid rgba(79, 255, 170, 0.15);    /* faint cyan accent border */
-            border-radius: 2px;
-            box-shadow: 0 0 40px rgba(79, 255, 170, 0.06); /* subtle cyan glow */
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
 
 <body>
-    <div id="app">
-        <div id="game-container"></div>
+    <div id="arcade-cabinet">
+
+        <!-- ── Header: neon title + status lights + leaderboard ad (#65, #67) ── -->
+        <header class="cabinet-header">
+            <h1 class="cabinet-title">SWAMPFIRE <span>PROTOCOL</span></h1>
+            <div class="status-lights">
+                <span class="status-dot green"></span>
+                <span class="status-label">SYSTEMS</span>
+                <span class="status-dot orange"></span>
+                <span class="status-label">STORM</span>
+                <span class="status-dot red"></span>
+                <span class="status-label">ALERT</span>
+            </div>
+            <div class="ad-leaderboard">advertisement · 728×90</div>
+        </header>
+
+        <!-- ── Left panel: circuit board + skyscraper ad (#66, #67) ── -->
+        <aside class="cabinet-panel left" aria-hidden="true">
+            <div class="panel-trace"></div>
+            <div class="panel-trace"></div>
+            <div class="panel-trace"></div>
+            <div class="panel-node"></div>
+            <div class="ad-skyscraper">advertisement · 160×600</div>
+            <div class="panel-node"></div>
+        </aside>
+
+        <!-- ── CRT screen: game canvas with scanline overlay (#63, #64) ── -->
+        <main class="cabinet-screen">
+            <div class="crt-frame">
+                <div id="game-container"></div>
+            </div>
+        </main>
+
+        <!-- ── Right panel: circuit board + skyscraper ad (#66, #67) ── -->
+        <aside class="cabinet-panel right" aria-hidden="true">
+            <div class="panel-trace"></div>
+            <div class="panel-trace"></div>
+            <div class="panel-trace"></div>
+            <div class="panel-node"></div>
+            <div class="ad-skyscraper">advertisement · 160×600</div>
+            <div class="panel-node"></div>
+        </aside>
+
+        <!-- ── Footer: control panel strip (#68) ── -->
+        <footer class="cabinet-footer">
+            <div class="arcade-buttons">
+                <div class="arcade-joystick">
+                    <div class="joystick-stick"><div class="joystick-ball"></div></div>
+                    <div class="joystick-base"></div>
+                </div>
+            </div>
+
+            <div class="arcade-buttons">
+                <div class="arcade-btn green"></div>
+                <div class="arcade-btn red"></div>
+                <div class="arcade-btn blue"></div>
+                <div class="arcade-btn yellow"></div>
+            </div>
+
+            <div class="footer-info">
+                Land O' Lakes, FL 34639<br>
+                60 minutes before landfall
+            </div>
+
+            <div class="footer-coin">INSERT COIN</div>
+
+            <div class="arcade-buttons">
+                <div class="arcade-btn red"></div>
+                <div class="arcade-btn blue"></div>
+                <div class="arcade-btn green"></div>
+                <div class="arcade-btn yellow"></div>
+            </div>
+
+            <div class="arcade-buttons">
+                <div class="arcade-joystick">
+                    <div class="joystick-stick"><div class="joystick-ball"></div></div>
+                    <div class="joystick-base"></div>
+                </div>
+            </div>
+        </footer>
+
     </div>
+
     <script type="module" src="src/main.js"></script>
 </body>
 </html>
