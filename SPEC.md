@@ -9,7 +9,7 @@
 **Title:** Swampfire Protocol
 **Engine:** Phaser 3.80+ (Matter.js physics)
 **Platform:** Desktop browser (Chrome, Firefox, Edge), mobile-responsive
-**Resolution:** 960x640, Phaser.Scale.FIT with CENTER_BOTH
+**Resolution:** 1280x720 (16:9 widescreen), Phaser.Scale.FIT with CENTER_BOTH
 **Genre:** Top-down speed scavenger / countdown action
 **Tone:** Urgent, humid, desperate. Florida swamp noir meets speedrun thriller.
 **Target Session Length:** 55-65 minutes (one sitting, one shot, one hour)
@@ -417,8 +417,8 @@ src/
 ```javascript
 const config = {
   type: Phaser.WEBGL,              // Required for shader pipeline + Light2D
-  width: 960,
-  height: 640,
+  width: 1280,
+  height: 720,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -451,6 +451,27 @@ const config = {
   ],
 };
 ```
+
+### 5.2.1 Page Layout
+
+The game canvas is embedded in a dark-themed HTML page that reinforces the swamp atmosphere:
+
+```css
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #0a0f0a;  /* near-black swamp green */
+  overflow: hidden;            /* prevent scrollbars */
+}
+
+#game-container {
+  border: 1px solid rgba(79, 255, 170, 0.15);   /* faint cyan accent border */
+  border-radius: 2px;
+  box-shadow: 0 0 40px rgba(79, 255, 170, 0.06); /* subtle cyan glow */
+}
+```
+
+**Design rationale:** The dark background (`#0a0f0a`) is near-black with a green undertone that blends with the game's internal background (`0x1a2e1a`). The faint border and glow use the game's cyan HUD accent (`0x4fffaa`) at very low opacity so the canvas feels embedded in the world rather than floating on a blank page. No external CSS file — all styling lives inline in `index.html` for zero-dependency simplicity.
 
 ### 5.3 Scene Management
 
@@ -1229,6 +1250,6 @@ The game is designed to produce moments players naturally want to capture and sh
 1. **Difficulty toggle:** Should there be a "Tourist Mode" with 90-minute timer for accessibility? Current spec is 60 minutes only. Playtesting will determine if this is needed.
 2. **Procedural vs. fixed loot:** Key rocket components have fixed primary locations with randomized backup locations. Consumables (food, medkits) are fully randomized. This balance ensures reliability for speedrunning while maintaining variety.
 3. **Online leaderboard scope:** Local-only leaderboard for v1. Online requires backend infrastructure. Deferred to post-launch.
-4. **Mobile portrait mode:** The spec targets landscape 960x640. Portrait mode (one-handed play) is a stretch goal that requires significant UI reorganization.
+4. **Mobile portrait mode:** The spec targets landscape 1280x720 (16:9). Portrait mode (one-handed play) is a stretch goal that requires significant UI reorganization.
 5. **Accessibility:** Colorblind mode for the progress ring and item borders. Screen reader support for death messages. Remappable controls. These should be prioritized before launch.
 6. **Monetization:** Not in scope for v1. The game is free. If monetization is needed: cosmetic skins for Juan (Florida Man costume, NASA jumpsuit, gator hunter outfit) or alternate death message packs.
