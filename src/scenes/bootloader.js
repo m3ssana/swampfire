@@ -169,6 +169,9 @@ export default class Bootloader extends Phaser.Scene {
     zoneNames.forEach((name, i) => {
       this.load.audio(`zone${i}_${name}`, `assets/music/zone${i}_${name}.ogg`);
     });
+
+    // ── Menu theme (Splash scene)
+    this.load.audio("menu_theme", "assets/music/menu_theme.ogg");
   }
 
   /*
