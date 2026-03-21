@@ -273,6 +273,13 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ### Game Bugs
 
+- ⏳ **White smoke particle trail follows Juan in Zone 0** [#72](https://github.com/m3ssana/swampfire/issues/72)
+  - Leftover dragon bubble particle emitter from original codebase — remove the emitter from the player
+
+- ⏳ **HUD/UI elements cropped on smaller screens** [#73](https://github.com/m3ssana/swampfire/issues/73)
+  - At smaller viewport sizes, HUD elements (timer, hearts, XP, rocket panel) get cropped or cut off
+  - May be HUD absolute pixel positioning or CSS surround layout breakpoint issue
+
 - ⏳ **Game locks up after rocket launch** [#59](https://github.com/m3ssana/swampfire/issues/59)
   - Root cause: `camerafadeoutcomplete` event silently dropped after chaining flash → shake → pan → zoom → shake in `finishScene()` — `endRun()` never called, game locked on black
   - Fix: replace camera event listener with `time.delayedCall(3200 + 750)` timed to fire after the 700ms fade completes
