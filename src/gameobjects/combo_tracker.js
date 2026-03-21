@@ -185,6 +185,9 @@ export default class ComboTracker {
     this._frenzyActive = true;
     this._frenzyCount++;
 
+    // Signal AchievementManager — first_frenzy milestone
+    this.scene.registry.set('frenzyCount', this._frenzyCount);
+
     // Shake: heavier than install (0.008) and death (0.012)
     this.scene.cameras.main.shake(400, 0.018);
     // Red flash: r=255, g=30, b=0, intensity=0.55

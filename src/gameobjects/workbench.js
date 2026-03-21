@@ -74,6 +74,10 @@ export default class Workbench {
     const xp = this.scene.registry.get('xp') ?? 0;
     this.scene.registry.set('xp', xp + recipe.xp);
 
+    // Signal AchievementManager — first_craft and subsequent craft milestones
+    const cc = (this.scene.registry.get('craftCount') ?? 0) + 1;
+    this.scene.registry.set('craftCount', cc);
+
     // Feedback — label popup + separate XP popup
     this.scene.showPoints(
       this.sprite.x, this.sprite.y - 20,

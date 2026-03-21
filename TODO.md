@@ -212,11 +212,11 @@ Each task is small enough to fit in a single Claude Code session.
   - "Copy to clipboard" or "Download as image" button
   - Florida Man-style death headline if player lost
 
-- ⏳ **6.3 Achievement toasts** [#15](https://github.com/m3ssana/swampfire/issues/15)
-  - `AchievementManager` with predefined milestones
-  - Toast notification slides in from top-right
-  - Examples: first craft, first zone discovered, FRENZY, fire tower panoramic
-  - Stored in localStorage for persistence
+- ✅ **6.3 Achievement toasts** [#15](https://github.com/m3ssana/swampfire/issues/15)
+  - `AchievementManager` with 8 predefined milestones (first_loot, first_craft, first_install, all_systems, explorer, globe_trotter, first_frenzy, survivor)
+  - Toast slides in from top-right, cyan, holds 2.8s, slides back out — distinct from orange storm toast
+  - Stored in localStorage (`swampfire_achievements`) — unlocks are permanent across sessions
+  - Hooks via registry changedata events: `craftCount` (Workbench), `frenzyCount` (ComboTracker), `inventory`, `systemsInstalled`, `visitedZones`, `hp`
 
 ---
 

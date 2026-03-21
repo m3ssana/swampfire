@@ -156,7 +156,8 @@ export default class HUD extends Phaser.Scene {
       case "xp":              this.updateXP(value);           break;
       case "systemsInstalled": this.updateSystems(value);     break;
       case "stormPhase":      this.updatePhase(value);        break;
-      case "hudToast":        this.showStormToast(value);     break;
+      case "hudToast":         this.showStormToast(value);       break;
+      case "achievementToast": this.showAchievementToast(value); break;
     }
   }
 
@@ -224,6 +225,55 @@ export default class HUD extends Phaser.Scene {
     });
   }
 
+  /**
+   * Achievement toast — slides in from the right edge, holds, then slides back out.
+   * Cyan (0x4fffaa) and right-aligned to distinguish from the orange storm toast.
+   */
+  showAchievementToast(raw) {
+    if (!raw) return;
+    const label = raw.split('|')[0].trim();
+    if (!label) return;
+
+    this._achievementToast?.destroy();
+    this._achievementToast = null;
+
+    const offscreenX = this.w + 200;
+    const targetX    = this.w - 10;
+
+    const text = this.add
+      .bitmapText(offscreenX, 80, 'default', label, 14)
+      .setOrigin(1, 0.5)
+      .setTint(0x4fffaa)
+      .setDropShadow(1, 2, 0x000000, 0.8)
+      .setScrollFactor(0)
+      .setDepth(25);  // above storm toast (20), below combo text (60)
+
+    this._achievementToast = text;
+
+    // Slide in
+    this.tweens.add({
+      targets: text,
+      x: targetX,
+      duration: 320,
+      ease: 'Back.Out',
+      onComplete: () => {
+        // Hold then slide back out
+        this.time.delayedCall(2800, () => {
+          this.tweens.add({
+            targets: text,
+            x: offscreenX,
+            duration: 260,
+            ease: 'Back.In',
+            onComplete: () => {
+              text?.destroy();
+              if (this._achievementToast === text) this._achievementToast = null;
+            },
+          });
+        });
+      },
+    });
+  }
+
   updateHearts(hp) {
     this.hearts.forEach((heart, i) => {
       heart.setFillStyle(i < hp ? 0xdd2222 : 0x2a2a2a);
@@ -245,5 +295,7 @@ export default class HUD extends Phaser.Scene {
     this.registry.events.off("changedata", this.onRegistryChange, this);
     this._toastText?.destroy();
     this._toastText = null;
+    this._achievementToast?.destroy();
+    this._achievementToast = null;
   }
 }
