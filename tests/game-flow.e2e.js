@@ -33,9 +33,20 @@ async function waitForGameReady(page) {
   );
 
   // Skip the 4-phase Transition cinematic — jump straight to GameScene.
-  // HUD auto-launches from GameScene.create() via launchHUD(), so no need to start it separately.
+  // Also seed the registry with the initial game state that TransitionScene normally
+  // sets at line 284-293 of transition.js (hp, xp, timeLeft, inventory, etc.).
+  // Without this, registry values are undefined and tests that read hp/xp will fail.
   await page.evaluate(() => {
-    window.game.scene.start('game');
+    const g = window.game;
+    g.registry.set('hp', 3);
+    g.registry.set('xp', 0);
+    g.registry.set('timeLeft', 3600);
+    g.registry.set('timerExpired', false);
+    g.registry.set('inventory', []);
+    g.registry.set('systemsInstalled', 0);
+    g.registry.set('stormPhase', 1);
+    g.registry.set('hudToast', '');
+    g.scene.start('game');
   });
 
   // Wait for GameScene to be active. timeLeft is set lazily by HUD on first tick,
@@ -209,8 +220,10 @@ test.describe('Swampfire Game E2E Tests', () => {
 
     // Wait up to 8 seconds for the real HUD countdown to decrement timeLeft to 0
     // and set timerExpired via the actual tick() method in HUDScene.
+    // Note: pass null as arg and options as third param (Playwright API: fn, arg, options).
     await page.waitForFunction(
       () => window.game.registry.get('timerExpired') === true,
+      null,
       { timeout: 8000 }
     );
 
