@@ -46,6 +46,10 @@ export default class Game extends Phaser.Scene {
     // Used by showXPGain() to merge rapid same-context grants into one popup
     this._xpPending = {};
 
+    // Zone visit tracking — persists across mid-run deaths via registry
+    const seededZones = this.registry.get('visitedZones') ?? [0];
+    this._visitedZones = new Set(seededZones);
+
     this.addMap();
     this.addPlayer();
     this.addCollisions();
@@ -209,8 +213,20 @@ export default class Game extends Phaser.Scene {
     Stop the HUD and transition to the end-run screen with the given state.
   */
   endRun(state, options = {}) {
+    const peakCombo    = this.comboTracker?.getPeakCombo()   ?? 0;
+    const frenzyCount  = this.comboTracker?.getFrenzyCount() ?? 0;
+    const zonesVisited = this._visitedZones?.size            ?? 1;
+    const itemsFound   = (this.registry.get('inventory') ?? []).length;
+
     this.scene.stop("hud");
-    this.scene.start("outro", { state, underTheWire: options.underTheWire ?? false });
+    this.scene.start("outro", {
+      state,
+      underTheWire: options.underTheWire ?? false,
+      peakCombo,
+      frenzyCount,
+      zonesVisited,
+      itemsFound,
+    });
   }
 
   // ─── HUD ───────────────────────────────────────────────────────────────────
@@ -508,6 +524,8 @@ export default class Game extends Phaser.Scene {
       // ── Swap zones ──────────────────────────────────────────────────────────
       this.zone.destroyCurrentZone();
       this.zone.loadZone(targetZoneId, sourceZoneId);
+      this._visitedZones.add(targetZoneId);
+      this.registry.set('visitedZones', [...this._visitedZones]);
 
       // ── Reposition player ───────────────────────────────────────────────────
       const entry = this.zone.getEntryPoint(sourceZoneId);
