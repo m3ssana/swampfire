@@ -273,16 +273,16 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ### Game Bugs
 
-- ⏳ **White smoke particle trail follows Juan in Zone 0** [#72](https://github.com/m3ssana/swampfire/issues/72)
-  - Leftover dragon bubble particle emitter from original codebase — remove the emitter from the player
+- ✅ **White smoke particle trail follows Juan in Zone 0** [#72](https://github.com/m3ssana/swampfire/issues/72)
+  - Removed Dust particle class and all references (step trail + death explosion) from player
 
 - ⏳ **HUD/UI elements cropped on smaller screens** [#73](https://github.com/m3ssana/swampfire/issues/73)
   - At smaller viewport sizes, HUD elements (timer, hearts, XP, rocket panel) get cropped or cut off
   - May be HUD absolute pixel positioning or CSS surround layout breakpoint issue
 
-- ⏳ **Game locks up after rocket launch** [#59](https://github.com/m3ssana/swampfire/issues/59)
+- ✅ **Game locks up after rocket launch** [#59](https://github.com/m3ssana/swampfire/issues/59) — PR #61 (0b83739)
   - Root cause: `camerafadeoutcomplete` event silently dropped after chaining flash → shake → pan → zoom → shake in `finishScene()` — `endRun()` never called, game locked on black
-  - Fix: replace camera event listener with `time.delayedCall(3200 + 750)` timed to fire after the 700ms fade completes
+  - Fix: replaced camera event listener with `time.delayedCall(3200 + 750)` timed to fire after the 700ms fade completes
 
 - ✅ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27)
   - Root cause: `Tilemap.destroy()` does NOT remove Matter.js bodies from `convertTilemapLayer()` — Zone 0's static obstacle bodies persist as invisible colliders in Zone 1, blocking the north corridor

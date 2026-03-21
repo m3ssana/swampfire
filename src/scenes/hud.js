@@ -21,6 +21,9 @@ const HEART_W = 16;
 const HEART_H = 14;
 const HEART_GAP = 5;
 
+// Safe margin from canvas edges to prevent cropping on smaller viewports
+const EDGE_PAD = 20;
+
 export default class HUD extends Phaser.Scene {
   constructor() {
     super({ key: "hud" });
@@ -67,39 +70,39 @@ export default class HUD extends Phaser.Scene {
   buildTimer() {
     // Small label
     this.add
-      .bitmapText(this.w / 2, 6, "default", "TIME REMAINING", 10)
+      .bitmapText(this.w / 2, 8, "default", "TIME REMAINING", 10)
       .setOrigin(0.5)
       .setTint(0x888888);
 
     // Large clock — the most important number in the game
     this.timerText = this.add
-      .bitmapText(this.w / 2, 16, "default", "60:00", 30)
+      .bitmapText(this.w / 2, 18, "default", "60:00", 30)
       .setOrigin(0.5)
       .setTint(0x4fffaa);
   }
 
   buildXP() {
     this.add
-      .bitmapText(16, 6, "default", "XP", 10)
+      .bitmapText(EDGE_PAD, 8, "default", "XP", 10)
       .setTint(0x888888);
 
     this.xpText = this.add
-      .bitmapText(16, 18, "default", "0", 22)
+      .bitmapText(EDGE_PAD, 20, "default", "0", 22)
       .setTint(0xffdd00);
   }
 
   buildHearts() {
     // Label
     this.add
-      .bitmapText(16, this.h - 38, "default", "HP", 10)
+      .bitmapText(EDGE_PAD, this.h - EDGE_PAD - 30, "default", "HP", 10)
       .setTint(0x888888);
 
     // 3 heart rectangles
     this.hearts = [];
     for (let i = 0; i < MAX_HP; i++) {
-      const x = 16 + i * (HEART_W + HEART_GAP);
+      const x = EDGE_PAD + i * (HEART_W + HEART_GAP);
       const heart = this.add
-        .rectangle(x + HEART_W / 2, this.h - 18, HEART_W, HEART_H, 0xdd2222)
+        .rectangle(x + HEART_W / 2, this.h - EDGE_PAD - 10, HEART_W, HEART_H, 0xdd2222)
         .setOrigin(0.5);
       this.hearts.push(heart);
     }
@@ -107,7 +110,7 @@ export default class HUD extends Phaser.Scene {
 
   buildMinimap() {
     const mw = 130, mh = 90;
-    const mx = this.w - mw / 2 - 8;
+    const mx = this.w - mw / 2 - EDGE_PAD;
     const my = mh / 2 + 60; // sits just below the top bar
 
     // Background fill
@@ -238,7 +241,7 @@ export default class HUD extends Phaser.Scene {
     this._achievementToast = null;
 
     const offscreenX = this.w + 200;
-    const targetX    = this.w - 10;
+    const targetX    = this.w - EDGE_PAD;
 
     const text = this.add
       .bitmapText(offscreenX, 80, 'default', label, 14)

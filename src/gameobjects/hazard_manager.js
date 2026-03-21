@@ -291,7 +291,6 @@ export default class HazardManager {
 
     scene.cameras.main.flash(120, 0xff, 0x00, 0x00);
     scene.cameras.main.shake(180, 0.012);
-    scene.player.explosion();
     scene.restartScene();
   }
 
