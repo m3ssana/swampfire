@@ -145,12 +145,14 @@ export default class Bootloader extends Phaser.Scene {
     This loads the audio files: music and sound effects.
     */
   loadAudios() {
+    // ── SFX (climb sounds)
     Array(5)
       .fill(0)
       .forEach((_, i) => {
         this.load.audio(`climb${i}`, `assets/sounds/climb${i}.mp3`);
       });
 
+    // ── SFX (events)
     this.load.audio("splash", "assets/sounds/splash.mp3");
     this.load.audio("music", "assets/sounds/music.mp3");
     this.load.audio("jump", "assets/sounds/jump.mp3");
@@ -161,6 +163,12 @@ export default class Bootloader extends Phaser.Scene {
     this.load.audio("win", "assets/sounds/win.mp3");
     this.load.audio("start", "assets/sounds/start.mp3");
     this.load.audio("death", "assets/sounds/death.mp3");
+
+    // ── Zone music (Phase 5.3a — simple direct playback)
+    const zoneNames = ["cypress", "us41", "collier", "conner", "lolhs"];
+    zoneNames.forEach((name, i) => {
+      this.load.audio(`zone${i}_${name}`, `assets/music/zone${i}_${name}.ogg`);
+    });
   }
 
   /*
