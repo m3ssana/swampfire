@@ -36,6 +36,12 @@ export default class Game extends Phaser.Scene {
     // Lock flag — true while a zone-transition fade is in progress
     this._transitioning = false;
 
+    // Lock flag — true while the rocket launch cinematic is playing
+    this._launching = false;
+
+    // Particle emitter created during the launch cinematic; cleaned up on fade-complete
+    this._launchEmitter = null;
+
     // Pending XP popup map — keyed by context ('loot'|'craft'|'install')
     // Used by showXPGain() to merge rapid same-context grants into one popup
     this._xpPending = {};
@@ -182,6 +188,7 @@ export default class Game extends Phaser.Scene {
   */
   listenForGameOver() {
     const onExpired = (parent, value) => {
+      if (this._launching) return;
       if (value === true) this.endRun("timeout");
     };
     this.registry.events.on("changedata-timerExpired", onExpired, this);
@@ -193,9 +200,9 @@ export default class Game extends Phaser.Scene {
   /*
     Stop the HUD and transition to the end-run screen with the given state.
   */
-  endRun(state) {
+  endRun(state, options = {}) {
     this.scene.stop("hud");
-    this.scene.start("outro", { state });
+    this.scene.start("outro", { state, underTheWire: options.underTheWire ?? false });
   }
 
   // ─── HUD ───────────────────────────────────────────────────────────────────
@@ -521,10 +528,104 @@ export default class Game extends Phaser.Scene {
   }
 
   /*
-    Player completed the run. Stop the HUD then hand off to the end screen.
-    Wired to actual win condition in task 1.4.
+    Player completed the run. Plays a ~4-second rocket launch cinematic before
+    handing off to the end screen via endRun('victory').
+
+    Sequence:
+      t=0      — guard flags, ignition flash + camera shake
+      t=100ms  — engine exhaust particle emitter starts
+      t=350ms  — camera detaches from player, pans to rocket
+      t=700ms  — camera zooms out, rocket ascent tween begins
+      t=1000ms — under-the-wire toast (only if timeLeft < 2 min)
+      t=2600ms — final rumble shake
+      t=3200ms — fade to black → endRun('victory')
   */
   finishScene() {
-    this.endRun("victory");
+    // ── Step 1 — Initiate ────────────────────────────────────────────────────
+    this._launching = true;
+    this.player.locked = true;
+    this.nearbyInteractable = null;
+    this.hideInteractPrompt();
+
+    const timeLeft = this.registry.get('timeLeft') ?? 0;
+    const underTheWire = timeLeft < 120; // < 2 min remaining
+
+    const rocket = this.zone?.rocket?.sprite;
+
+    // ── Step 2 — Ignition flash ──────────────────────────────────────────────
+    this.cameras.main.flash(350, 255, 140, 0); // orange ignition flash
+    this.cameras.main.shake(300, 0.014);
+
+    // ── Step 3 — Engine particles (t=100ms) ─────────────────────────────────
+    this.time.delayedCall(100, () => {
+      if (!this.scene?.isActive()) return;
+      if (rocket) {
+        this._launchEmitter = this.add.particles(rocket.x, rocket.y + 36, 'spark_pixel', {
+          speedX: { min: -35, max: 35 },
+          speedY: { min: 180, max: 380 },   // downward exhaust (positive Y = down)
+          quantity: 5,
+          frequency: 25,
+          lifespan: 550,
+          alpha: { start: 1, end: 0 },
+          scale: { start: 2.5, end: 0.4 },
+          tint: [0xff8800, 0xffdd00, 0xff4400, 0xffffff, 0xff6600],
+        }).setDepth(88);
+      }
+    });
+
+    // ── Step 4 — Camera detach + pan to rocket (t=350ms) ────────────────────
+    this.time.delayedCall(350, () => {
+      if (!this.scene?.isActive()) return;
+      this.cameras.main.stopFollow();
+      if (rocket) {
+        this.cameras.main.pan(rocket.x, rocket.y, 500, 'Quad.InOut');
+      }
+    });
+
+    // ── Step 5 — Zoom out + rocket ascent (t=700ms) ──────────────────────────
+    this.time.delayedCall(700, () => {
+      if (!this.scene?.isActive()) return;
+      this.cameras.main.zoomTo(0.6, 1800, 'Quad.Out');
+
+      if (rocket) {
+        this.tweens.add({
+          targets: rocket,
+          y: rocket.y - 580,
+          duration: 2200,
+          ease: 'Quad.In',
+          onUpdate: () => {
+            // Keep exhaust emitter attached to rocket bottom
+            if (this._launchEmitter && rocket.active) {
+              this._launchEmitter.setPosition(rocket.x, rocket.y + 36);
+            }
+          },
+        });
+      }
+    });
+
+    // ── Step 6 — Under-the-wire toast (t=1000ms) ─────────────────────────────
+    if (underTheWire) {
+      this.time.delayedCall(1000, () => {
+        if (!this.scene?.isActive()) return;
+        this.registry.set('hudToast', `UNDER THE WIRE|${Date.now()}`);
+      });
+    }
+
+    // ── Step 7 — Final shake (t=2600ms) ──────────────────────────────────────
+    this.time.delayedCall(2600, () => {
+      if (!this.scene?.isActive()) return;
+      this.cameras.main.shake(600, 0.02);
+    });
+
+    // ── Step 8 — Fade to black + transition (t=3200ms) ───────────────────────
+    this.time.delayedCall(3200, () => {
+      if (!this.scene?.isActive()) return;
+      this.cameras.main.fade(700, 0, 0, 0);
+      this.cameras.main.once('camerafadeoutcomplete', () => {
+        this._launchEmitter?.destroy();
+        this._launchEmitter = null;
+        this.endRun('victory', { underTheWire });
+      });
+    });
   }
 }

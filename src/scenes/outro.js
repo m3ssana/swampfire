@@ -30,6 +30,7 @@ export default class Outro extends Phaser.Scene {
 
   init(data) {
     this.state = data.state || "death"; // "death" | "timeout" | "victory"
+    this.underTheWire = data.underTheWire ?? false;
   }
 
   create() {
@@ -145,8 +146,26 @@ export default class Outro extends Phaser.Scene {
       .setTint(0x888888)
       .setCenterAlign();
 
-    this.addDivider(230);
-    this.addStatsRow(260);
+    if (this.underTheWire) {
+      this.add
+        .bitmapText(this.cx, 208, "default", "** UNDER THE WIRE -- < 2 MIN REMAINING **", 14)
+        .setOrigin(0.5)
+        .setTint(0xff4444)
+        .setCenterAlign();
+    }
+
+    const dividerY  = this.underTheWire ? 254 : 230;
+    const statsY    = this.underTheWire ? 284 : 260;
+
+    this.addDivider(dividerY);
+    this.addStatsRow(statsY);
+
+    // SYSTEMS INSTALLED — victory screen only
+    const systems = this.registry.get("systemsInstalled") ?? 0;
+    this.add
+      .bitmapText(this.cx, statsY + 55, "default", `SYSTEMS INSTALLED: ${systems} / 4`, 18)
+      .setOrigin(0.5)
+      .setTint(0x00eeff);
   }
 
   // ─── Shared layout helpers ──────────────────────────────────────────────────
@@ -196,7 +215,7 @@ export default class Outro extends Phaser.Scene {
       .setTint(0x4fffaa);
 
     const stateLabel = this.state === "victory"
-      ? `Escaped Hurricane Kendra in ${this.formatTime(this.elapsed)} with ${this.xp} XP.`
+      ? `Escaped Hurricane Kendra in ${this.formatTime(this.elapsed)} with ${this.xp} XP.${this.underTheWire ? ' Under the Wire!' : ''}`
       : this.state === "timeout"
         ? `Survived ${this.formatTime(this.elapsed)} before Hurricane Kendra made landfall.`
         : `Survived ${this.formatTime(this.elapsed)} and earned ${this.xp} XP before going down.`;
