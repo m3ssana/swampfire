@@ -472,14 +472,12 @@ export default class Game extends Phaser.Scene {
       this.zoneMusic[this.currentZoneMusicId].stop();
     }
 
-    // Start new zone music (only if the sound object exists)
+    // Start new zone music
     const music = this.zoneMusic[zoneId];
-    if (music && music.isPlaying !== undefined) {
-      music.loop = true;
-      music.volume = 0.6;
-      music.play();
-      this.currentZoneMusicId = zoneId;
-    }
+    music.loop = true;
+    music.volume = 0.6;
+    music.play();
+    this.currentZoneMusicId = zoneId;
   }
 
   playAudio(key) {
@@ -652,25 +650,14 @@ export default class Game extends Phaser.Scene {
       if (!this.scene?.isActive()) return;
       this.cameras.main.stopFollow();
       if (rocket) {
-        this.tweens.add({
-          targets: this.cameras.main,
-          scrollX: rocket.x - this.cameras.main.width / 2,
-          scrollY: rocket.y - this.cameras.main.height / 2,
-          duration: 500,
-          ease: 'Quad.InOut',
-        });
+        this.cameras.main.pan(rocket.x, rocket.y, 500, 'Quad.InOut');
       }
     });
 
     // ── Step 5 — Zoom out + rocket ascent (t=700ms) ──────────────────────────
     this.time.delayedCall(700, () => {
       if (!this.scene?.isActive()) return;
-      this.tweens.add({
-        targets: this.cameras.main,
-        zoom: 0.6,
-        duration: 1800,
-        ease: 'Quad.Out',
-      });
+      this.cameras.main.zoomTo(0.6, 1800, 'Quad.Out');
 
       if (rocket) {
         this.tweens.add({

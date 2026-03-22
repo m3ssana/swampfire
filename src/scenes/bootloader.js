@@ -154,9 +154,9 @@ export default class Bootloader extends Phaser.Scene {
 
     // ── SFX (events)
     this.load.audio("splash", "assets/sounds/splash.mp3");
-    // this.load.audio("music", "assets/sounds/music.mp3");  // Removed — use zone music instead
+    this.load.audio("music", "assets/sounds/music.mp3");
     this.load.audio("jump", "assets/sounds/jump.mp3");
-    // this.load.audio("bubble", "assets/sounds/bubble.mp3"); // Removed — old dungeon audio
+    this.load.audio("bubble", "assets/sounds/bubble.mp3");
     this.load.audio("trap", "assets/sounds/trap.mp3");
     this.load.audio("crash", "assets/sounds/crash.mp3");
     this.load.audio("fireball", "assets/sounds/fireball.mp3");
@@ -169,9 +169,6 @@ export default class Bootloader extends Phaser.Scene {
     zoneNames.forEach((name, i) => {
       this.load.audio(`zone${i}_${name}`, `assets/music/zone${i}_${name}.ogg`);
     });
-
-    // ── Menu theme (Splash scene)
-    this.load.audio("menu_theme", "assets/music/menu_theme.ogg");
   }
 
   /*

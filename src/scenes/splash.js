@@ -18,11 +18,7 @@ export default class Splash extends Phaser.Scene {
 
     this.input.keyboard.on("keydown-SPACE", () => this.startGame(), this);
     this.input.keyboard.on("keydown-ENTER", () => this.startGame(), this);
-
-    // Play menu theme if the audio file has been loaded (skip if missing)
-    if (this.cache.audio.exists("menu_theme")) {
-      this.playMusic("menu_theme");
-    }
+    this.playMusic();
   }
 
   startGame() {
