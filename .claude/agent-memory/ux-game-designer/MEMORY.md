@@ -205,6 +205,13 @@ player.sprite.setVelocity(vx, vy);
 ### Zone spatial constants
 Zone 0, 1, 2, 3, 4 are all 80×60 tiles × 48px = 3840×2880px world space.
 
+## Skills — Project-Local Discovery
+
+- Project-local skills live in `.claude/skills/<name>.md` — correct path, no settings.json config needed
+- `~/.claude/skills/` = user-global; `.claude/skills/` = project-scoped (committed to repo, shared with collaborators)
+- **GOTCHA:** If `.claude/skills/` is created as a **new directory mid-session**, the skills watcher won't pick it up — it only scans directories that existed at session start. User must **restart Claude Code** for newly created skill directories to be discovered.
+- Always create skill files in the right directory from the start; don't add them mid-session and expect hot-reload.
+
 ## Phase 3.1 — Zone 0 Tilemap (confirmed patterns)
 
 - **Tileset**: `public/assets/images/swamp-tiles.png` (288×48px, 6 tiles × 48px)
