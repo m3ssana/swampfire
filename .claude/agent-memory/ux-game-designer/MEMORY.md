@@ -124,12 +124,19 @@ Always comment on the issue at the START of work, not just at the end.
 - [ ] `gh issue close N --reason completed`
 - [ ] PR merged by human
 
-## TODO Progress (as of Phase 4.2 complete)
-All of Phase 0–4.2 done. Phase 4.3+ pending.
-- [x] 3.4 Zones 2, 3, 4 (commit ff78171)
-- [x] 4.1 StormManager (commit b74aa10)
-- [x] 4.2 Hazard game objects (commit a2bca80)
-- [ ] 4.3 Wind + environmental effects (#8)
+## Deployment
+- **Custom domain:** `swampfire.messana.ai` (GitHub Pages, HTTPS enforced, cert expires 2026-06-20)
+- **Live URL:** https://swampfire.messana.ai/
+- Raw GitHub Pages URL (`m3ssana.github.io/swampfire`) redirects — always use the custom domain in docs
+
+## TODO Progress (as of Phase 5.3a + Bug #76 complete)
+All of Phase 0–5.2, 5.3a, 5.4, 6.1–6.3, 7.1–7.3, 8 done. In progress: 5.3b–5.3d.
+- [x] 2.5 Rocket sprite 3× scale — PR #79 (9ea1631)
+- [x] 5.3a Zone music playback — simple direct playback, 5 OGG loop tracks (c2cee61)
+- [x] Bug #76 Launch freeze — camera.pan()/zoomTo() replaced with tweens.add() — PR #81 (53f6595)
+- [ ] 5.3b Storm phase audio layers (#11)
+- [ ] 5.3c Menu + SFX wiring (#11)
+- [ ] 5.3d Ambient sound design (#11)
 
 ## Phase 4.2 — Hazard Game Objects (confirmed patterns)
 
