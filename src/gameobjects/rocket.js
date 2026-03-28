@@ -47,9 +47,9 @@ export default class Rocket {
     const n   = this.scene.registry.get('systemsInstalled') ?? 0;
     const inv = this.scene.registry.get('inventory') ?? [];
 
-    // All systems installed — launch!
+    // All systems installed — launch! Guard against double-press during cinematic.
     if (n >= 4) {
-      this.scene.finishScene();
+      if (!this.scene._launching) this.scene.finishScene();
       return;
     }
 
