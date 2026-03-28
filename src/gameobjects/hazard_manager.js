@@ -74,11 +74,14 @@ const LOOTER_PATROLS = [
 ];
 
 // Power line drop positions in Zone 1 — live end coordinates.
-// Placed at road intersections and store fronts for maximum navigational impact.
+// All three points are on US-41 asphalt (ground layer GID 1, tile col 38,
+// which sits in the road band cols 33-44). Previous spawns used cols 22, 48,
+// and 62 — col 22 landed on store-floor tiles (GID 5, Harvey's Hardware
+// interior), causing the pole to render inside the building.
 const POWERLINE_SPAWNS = [
-  { x: 22 * 48, y: 28 * 48 },   // main highway north section
-  { x: 48 * 48, y: 35 * 48 },   // mid-corridor intersection
-  { x: 62 * 48, y: 22 * 48 },   // east parking lot
+  { x: 38 * 48, y: 15 * 48 },   // US-41 north section
+  { x: 38 * 48, y: 30 * 48 },   // US-41 centre
+  { x: 38 * 48, y: 45 * 48 },   // US-41 south section
 ];
 
 // Flood zones in Zone 1 — AABB rectangles (top-left x/y, width, height).
