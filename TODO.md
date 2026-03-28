@@ -276,10 +276,9 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ### Game Bugs
 
-- ⏳ **Legacy Dungeon Bobble music plays in Splash and Transition scenes** [#84](https://github.com/m3ssana/swampfire/issues/84) (bug #84)
-  - `splash.js` calls `playMusic("splash")` → resolves to legacy `splash.mp3` SFX, not the menu theme
-  - `transition.js` calls `playMusic("music")` → resolves to old Dungeon Bobble `music.mp3` background track
-  - Fix: point both scenes at `"menu_theme"` (already preloaded in bootloader); consider silence for Transition
+- ✅ **Legacy Dungeon Bobble music plays in Splash and Transition scenes** [#84](https://github.com/m3ssana/swampfire/issues/84) — PR #85 (5429059)
+  - `splash.js` default theme arg `"splash"` → `"menu_theme"` (was resolving to legacy water SFX)
+  - `transition.js` `playMusic()` call removed — emergency alert is intentionally silent
 
 - ✅ **Game canvas cropped at 1920×1080 — player cannot see full play area** [#82](https://github.com/m3ssana/swampfire/issues/82)
   - Root cause: `#game-container` had zero dimensions at startup; Phaser's Scale Manager fell back to `window.innerWidth/innerHeight` (1920×1080), producing a canvas wider than `.cabinet-screen`; `.crt-frame`'s `overflow:hidden` clipped it
