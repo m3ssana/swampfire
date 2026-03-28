@@ -5,29 +5,93 @@
 > "What do you mean the hurricane is in 60 minutes?! I haven't even found the fuel injector yet!"
 > — Juan, probably
 
-A hurricane hits in 60 minutes. Juan has a half-built rocket in the swamp. Scavenge the real streets of Land O' Lakes, FL 34639 for parts, slam them together, and launch before the storm erases everything -- in one breathless hour.
+A hurricane hits in 60 minutes. Juan has a half-built rocket in the swamp. Scavenge the real streets of Land O' Lakes, FL 34639 for parts, slam them together, and launch before the storm erases everything — in one breathless hour.
 
 No pressure. Well, actually, a lot of pressure. Like, hurricane-force pressure. Literally.
 
-**Play it now:** <a href="https://m3ssana.github.io/swampfire/" target="_blank">https://m3ssana.github.io/swampfire/</a>
+**Play it now:** <a href="https://swampfire.messana.ai/" target="_blank">https://swampfire.messana.ai/</a>
 
-*(Fair warning: if you fail, Juan gets hurricane'd. No pressure. Again, literally.)*
+*(Fair warning: if you fail, Juan gets hurricane'd.)*
 
-## Why Florida?
+---
 
-Because if you're going to build a rocket in a swamp with 60 minutes before a category-whatever hurricane, you're doing it in Florida. This is just how things work there. The alligators are used to it.
+## Gameplay
+
+You are Juan. Hurricane Kendra makes landfall in 60 minutes. Your only way out is a rocket — but it needs four systems you don't have yet.
+
+**The loop:**
+1. **Scavenge** — search toolboxes, coolers, crates, and backpacks across four zones for crafting ingredients
+2. **Craft** — bring ingredients to the workbench to build rocket components (Fuel Injector, Oxidizer Tank, Avionics Board, Battery Array)
+3. **Install** — carry each finished component to the rocket and press E
+4. **Launch** — once all four systems are installed, press E at the rocket to trigger the launch cinematic and escape
+
+Miss the window and Kendra wins. Juan's Florida Man death headline will be generated for you.
+
+---
+
+## The World
+
+Four zones based on real Land O' Lakes, FL geography — all connected and traversable:
+
+| Zone | Location | Vibe |
+|---|---|---|
+| **Zone 0** — Cypress Creek Preserve | Your starting area. The rocket is here. | Swamp, cypress trees, water hazards |
+| **Zone 1** — US-41 Corridor | Strip mall row: RaceTrac, Harvey's Hardware, NAPA, O'Reilly | Downed power lines, looters in Phase 3+ |
+| **Zone 2** — Collier Commons | Publix, Library/Foundry, Rec Center | Dense containers, NPC side quests |
+| **Zone 3** — Conner Preserve | RC Flying Field, Fire Tower | Rattlesnakes, remote wilderness |
+| **Zone 4** — LOLHS / SR-54 | High school, chem lab, Tractor Supply | Flooding, storm debris |
+
+---
+
+## The Storm
+
+Hurricane Kendra has four escalating phases tied to the countdown timer:
+
+| Phase | Time Remaining | Effects |
+|---|---|---|
+| 1 | 60–45 min | Light rain overlay, green HUD |
+| 2 | 45–30 min | Moderate rain, blue flash, yellow HUD, looters spawn |
+| 3 | 30–15 min | Heavy rain, screen shake, 28% darkness, power lines fall, flooding |
+| 4 | 15–0 min | Intense rain, looping shake, lightning, 50% darkness, red HUD |
+
+---
+
+## Controls
+
+| Key | Action |
+|---|---|
+| `WASD` | Move |
+| `Shift` | Sprint (unlimited) |
+| `E` | Interact (search containers, craft, install, launch) |
+
+---
+
+## Mechanics
+
+- **XP & Combos** — loot, craft, and install in quick succession to build combo streaks (DOUBLE → TRIPLE → QUAD → FRENZY). FRENZY gives 1.5× XP for 5 seconds and a screen flash
+- **Achievements** — 8 permanent milestones tracked in localStorage: first loot, first craft, first install, all systems, explorer, globe trotter, first frenzy, survivor
+- **NPCs** — Harvey, Maria, Old Dale, and Coach Reeves offer side quests that reward XP and unlock recipes
+- **End-of-run share card** — win or lose, you get a shareable stats card with your time, XP, combos, and zones visited
+- **Under-the-Wire** — launch with less than 2 minutes remaining for a bonus achievement
+
+---
 
 ## Tech Stack
 
-- [Phaser 3.80+](https://phaser.io/) with Matter.js physics — because Juan's rocket obeys the laws of physics (unlike Juan's life choices)
-- [Vite](https://vitejs.dev/) build system — fast like the wind, which is unfortunately also currently 120mph
-- Deployed to GitHub Pages — so Juan's story lives on even if Juan doesn't
+- [Phaser 3.80+](https://phaser.io/) with Matter.js physics (top-down, zero gravity)
+- [Vite](https://vitejs.dev/) build system
+- Zone music via [Suno AI](https://suno.com/) — five OGG loop tracks, one per zone
+- Arcade cabinet surround UI — pure HTML/CSS CRT frame with neon header and animated circuit panels
+- Deployed to GitHub Pages
+
+---
 
 ## Development
 
 ```bash
-npm install        # install dependencies (not rocket parts, sadly)
-npm run dev        # launch dev server (not the actual rocket, that's Juan's job)
+npm install
+npm run dev        # dev server at localhost:5173
+npm run build      # production build
 ```
 
 To run E2E tests locally, install Playwright browser binaries once:
@@ -36,30 +100,50 @@ To run E2E tests locally, install Playwright browser binaries once:
 npx playwright install chromium
 ```
 
-Then run tests with:
+Then run tests:
 
 ```bash
-npm test           # unit tests
+npm test           # unit tests (391 tests)
 npm run test:e2e   # E2E tests (Playwright)
-npm run test:all   # both unit and E2E
+npm run test:all   # both
 ```
 
-## Build
+---
 
-```bash
-npm run build      # build the project. Juan still has to build the rocket himself.
+## Project Structure
+
 ```
+src/
+  scenes/          # Phaser scenes: bootloader, splash, transition, game, hud, outro
+  gameobjects/     # Player, Rocket, Workbench, SearchableContainer, NPCs, hazards
+  zone_manager.js  # Loads Tiled JSON maps, manages zone transitions and cleanup
+public/
+  assets/
+    maps/          # zone0-4.json (Tiled tilemaps)
+    music/         # menu_theme.ogg + zone0-4 OGG loops
+    sounds/        # SFX (legacy dungeon sounds, being replaced in Phase 5.3c)
+    images/        # tilesets, player spritesheet, cover art
+```
+
+---
+
+## Why Florida?
+
+Because if you're going to build a rocket in a swamp with 60 minutes before a category-whatever hurricane, you're doing it in Florida. This is just how things work there. The alligators are used to it.
+
+---
 
 ## Origin
 
-Forked from the "Dungeon Bobble" example in [Phaser by Example](https://github.com/phaserjs/phaser-by-example) by Pello. Being incrementally refactored into a top-down speed scavenger game where a man builds a rocket in a Florida swamp against a hurricane timer, which is a sentence that has never been typed before in the history of software development.
+Forked from the "Dungeon Bobble" example in [Phaser by Example](https://github.com/phaserjs/phaser-by-example) by Pello. Incrementally refactored into a top-down hurricane scavenger game — a sentence that has never been typed before in the history of software development.
 
-See [TODO.md](TODO.md) for progress. (Spoiler: Juan is still in the swamp.)
+See [TODO.md](TODO.md) for the full build log. (Spoiler: Juan finally has a working rocket.)
+
+---
 
 ## Reference Links
 
 - [phaser-matter-collision-plugin docs](https://mikewesthad.github.io/phaser-matter-collision-plugin/docs/)
 - [Bitmap font generator (snowb)](https://snowb.org/)
-- [Modular game worlds in Phaser 3 - Tilemaps](https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-3-procedural-dungeon-3bc19b841cd)
-- [Matter.js moving platforms](https://blog.ourcade.co/posts/2020/phaser-3-matter-physics-moving-platforms/)
-- [PhysicsEditor for Phaser 3 + Matter.js](https://www.codeandweb.com/physicseditor/tutorials/how-to-create-physics-shapes-for-phaser-3-and-matterjs)
+- [Modular game worlds in Phaser 3 — Tilemaps](https://itnext.io/modular-game-worlds-in-phaser-3-tilemaps-3-procedural-dungeon-3bc19b841cd)
+- [Suno AI music generation](https://suno.com/)
