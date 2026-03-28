@@ -44,7 +44,7 @@ html, body {
     "header  header  header"
     "left    screen  right"
     "footer  footer  footer";
-  min-height: 100vh;
+  height: 100vh;   /* fixed height so 1fr row has a computable pixel size */
   background: #0a0a0a;
 }
 
@@ -140,6 +140,7 @@ html, body {
   justify-content: center;
   padding: 12px;
   background: #0a0a0a;
+  min-height: 0;   /* allow grid row to shrink; prevents overflow when height: 100vh is set */
 }
 
 .crt-frame {
