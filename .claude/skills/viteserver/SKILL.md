@@ -1,3 +1,8 @@
+---
+name: viteserver
+description: Launch a fresh Vite dev server for Swampfire
+---
+
 Launch a fresh Vite dev server for Swampfire. Lists all currently running Vite instances first so you always know what's already up.
 
 ## Step 1 — List running Vite dev servers
