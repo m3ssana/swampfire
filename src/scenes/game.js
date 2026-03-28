@@ -286,7 +286,7 @@ export default class Game extends Phaser.Scene {
     ]);
 
     this.showPoints(itemSprite.x, itemSprite.y, `+ ${itemDef.label}`, itemDef.tint);
-    this.playAudio('coin');
+    this.playAudio('loot');
     itemSprite.destroy();
   }
 
@@ -427,11 +427,13 @@ export default class Game extends Phaser.Scene {
   // ─── Audio ─────────────────────────────────────────────────────────────────
 
   loadAudios() {
-    // Load SFX
+    // Load SFX — one distinct sound per major player action
     this.audios = {
-      crash: this.sound.add("crash"),
-      death: this.sound.add("death"),
-      coin:  this.sound.add("start"),
+      loot:    this.sound.add("start"),  // container search / item pickup
+      craft:   this.sound.add("crash"),  // workbench craft
+      install: this.sound.add("trap"),   // rocket system install
+      launch:  this.sound.add("win"),    // rocket launch sting
+      death:   this.sound.add("death"),  // player death
     };
 
     // Load zone music tracks
@@ -618,6 +620,7 @@ export default class Game extends Phaser.Scene {
     this.player.locked = true;
     this.nearbyInteractable = null;
     this.hideInteractPrompt();
+    this.playAudio('launch');
 
     const timeLeft = this.registry.get('timeLeft') ?? 0;
     const underTheWire = timeLeft < 120; // < 2 min remaining

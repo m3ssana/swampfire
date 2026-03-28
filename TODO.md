@@ -187,11 +187,11 @@ Each task is small enough to fit in a single Claude Code session.
   - FRENZY (5+): shake 0.018, red screen flash, 1.5× XP for 5s
   - Streak resets on death; survives zone transitions
 
-- ⏳ **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11)
+- ⏳ **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11) [#42](https://github.com/m3ssana/swampfire/issues/42)
   - ✅ **5.3a Zone music playback** — Load + loop 5 zone tracks, auto-switch on transition (c2cee61)
-  - ⏳ **5.3b Storm phase audio layers** — Add 4 storm intensity overlays (Phase 1-4)
-  - ⏳ **5.3c Menu + SFX wiring** — Menu theme on splash, pickup/craft/install SFX
-  - ⏳ **5.3d Ambient sound design** — Cypress canopy, strip mall, wind per zone
+  - ⏳ **5.3b Storm phase audio layers** [#11](https://github.com/m3ssana/swampfire/issues/11) — AudioManager written but not wired; blocked on `storm_phase1–4.ogg` files
+  - ⏳ **5.3c Menu + SFX wiring** [#42](https://github.com/m3ssana/swampfire/issues/42) — Menu theme on splash ✅ (PR #85); distinct SFX keys per action ⏳ (PR #90 pending); Suno sting files missing
+  - ⏳ **5.3d Ambient sound design** [#42](https://github.com/m3ssana/swampfire/issues/42) — Per-zone ambient layers, storm weather audio, combo chimes, footstep terrain variants
 
 - ✅ **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
   - Simple NPC game object: sprite + dialog box on E press

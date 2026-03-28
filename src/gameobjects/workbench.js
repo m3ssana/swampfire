@@ -85,7 +85,7 @@ export default class Workbench {
     );
     this.scene.showXPGain(this.sprite.x, this.sprite.y - 20, recipe.xp, 'craft');
     this.scene.cameras.main.shake(120, 0.006);
-    this.scene.playAudio('coin');
+    this.scene.playAudio('craft');
   }
 
   // ── Cleanup ──────────────────────────────────────────────────────────────────

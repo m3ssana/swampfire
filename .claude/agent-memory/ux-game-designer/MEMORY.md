@@ -205,6 +205,13 @@ player.sprite.setVelocity(vx, vy);
 ### Zone spatial constants
 Zone 0, 1, 2, 3, 4 are all 80×60 tiles × 48px = 3840×2880px world space.
 
+## Skills — Project-Local Discovery
+
+- `~/.claude/skills/` = user-global — **this is the only reliably working location**
+- `.claude/skills/` = project-scoped path (committed to repo) — **NOT reliably discovered** (confirmed broken 2026-03-28: `viteserver.md` never appeared in skills list even after multiple restarts)
+- **Workaround:** copy project skills to `~/.claude/skills/` so they are picked up. Keep the `.claude/skills/` copy for repo/collaborator documentation purposes.
+- If a skill isn't appearing in the system-reminder list after restart, move it to `~/.claude/skills/` — project-level discovery appears to be unreliable in current Claude Code version.
+
 ## Phase 3.1 — Zone 0 Tilemap (confirmed patterns)
 
 - **Tileset**: `public/assets/images/swamp-tiles.png` (288×48px, 6 tiles × 48px)
