@@ -276,9 +276,9 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ### Game Bugs
 
-- ⏳ **Downed power lines render inside Zone 1 buildings** [#88](https://github.com/m3ssana/swampfire/issues/88) (bug #88)
-  - Spawn points are on passable tiles but pole body (80×10 px, 0.6 rad, offset −83px/−30px) sweeps ~2 tiles left and clips into adjacent building walls
-  - Fix: move `POWERLINE_SPAWNS` coords ≥3 tiles clear of building walls in the leftward direction, or add obstacle tile query at spawn time
+- ✅ **Downed power lines render inside Zone 1 buildings** [#88](https://github.com/m3ssana/swampfire/issues/88) — PR #89 (52abeae)
+  - Spawn at tile (22, 28) was on GID 5 (Harvey's Hardware store floor) — obstacle layer blind to indoor/outdoor distinction
+  - All 3 spawns moved to col 38 (US-41 asphalt, GID 1): rows 15, 30, 45
 
 - ✅ **BitmapText 'chars' null crash in HUD.updateXP on second run** [#86](https://github.com/m3ssana/swampfire/issues/86) — PR #87 (a399dfa)
   - `onRegistryChange`: early return if `sys.isActive()` is false — kills stale listener firing after `scene.stop()`
