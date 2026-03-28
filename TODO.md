@@ -276,9 +276,9 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
 
 ### Game Bugs
 
-- ⏳ **BitmapText 'chars' null crash in HUD.updateXP on second run** [#86](https://github.com/m3ssana/swampfire/issues/86) (bug #86)
-  - Stale/early registry `changedata` fires `updateXP` → `xpText.setText()` on a BitmapText destroyed by `scene.stop("hud")` at end of previous run
-  - Fix: add `if (!this.xpText || !this.xpText.active) return` guard in `updateXP` and all other BitmapText update methods in HUD
+- ✅ **BitmapText 'chars' null crash in HUD.updateXP on second run** [#86](https://github.com/m3ssana/swampfire/issues/86) — PR #87 (a399dfa)
+  - `onRegistryChange`: early return if `sys.isActive()` is false — kills stale listener firing after `scene.stop()`
+  - `updateTimerDisplay`, `updatePhase`, `updateXP`, `updateHearts`: `?.active` / `?.length` guards against startup race on second launch
 
 - ✅ **Legacy Dungeon Bobble music plays in Splash and Transition scenes** [#84](https://github.com/m3ssana/swampfire/issues/84) — PR #85 (5429059)
   - `splash.js` default theme arg `"splash"` → `"menu_theme"` (was resolving to legacy water SFX)
