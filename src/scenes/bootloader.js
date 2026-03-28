@@ -145,29 +145,23 @@ export default class Bootloader extends Phaser.Scene {
     This loads the audio files: music and sound effects.
     */
   loadAudios() {
-    // ── Zone base music tracks (120s loops) ──────────────────────────────────
-    const zones = ['cypress', 'us41', 'collier', 'conner', 'lolhs'];
-    zones.forEach((zone, i) => {
-      this.load.audio(`zone${i}_${zone}`, `assets/music/zone${i}_${zone}.ogg`);
+    // ── Zone music (Phase 5.3a — simple direct playback) ─────────────────────
+    const zoneNames = ["cypress", "us41", "collier", "conner", "lolhs"];
+    zoneNames.forEach((name, i) => {
+      this.load.audio(`zone${i}_${name}`, `assets/music/zone${i}_${name}.ogg`);
     });
-
-    // ── Storm intensity layers (60s loops) ────────────────────────────────────
-    Array(4)
-      .fill(0)
-      .forEach((_, i) => {
-        this.load.audio(`storm_phase${i + 1}`, `assets/music/storm_phase${i + 1}.ogg`);
-      });
 
     // ── Menu theme ─────────────────────────────────────────────────────────────
     this.load.audio("menu_theme", "assets/music/menu_theme.ogg");
 
-    // ── Legacy SFX (old dungeon crawler sounds) ────────────────────────────────
+    // ── SFX (climb sounds) ─────────────────────────────────────────────────────
     Array(5)
       .fill(0)
       .forEach((_, i) => {
         this.load.audio(`climb${i}`, `assets/sounds/climb${i}.mp3`);
       });
 
+    // ── SFX (events)
     this.load.audio("splash", "assets/sounds/splash.mp3");
     this.load.audio("music", "assets/sounds/music.mp3");
     this.load.audio("jump", "assets/sounds/jump.mp3");
@@ -178,6 +172,7 @@ export default class Bootloader extends Phaser.Scene {
     this.load.audio("win", "assets/sounds/win.mp3");
     this.load.audio("start", "assets/sounds/start.mp3");
     this.load.audio("death", "assets/sounds/death.mp3");
+
   }
 
   /*

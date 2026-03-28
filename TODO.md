@@ -188,19 +188,11 @@ Each task is small enough to fit in a single Claude Code session.
   - FRENZY (5+): shake 0.018, red screen flash, 1.5× XP for 5s
   - Streak resets on death; survives zone transitions
 
-- 🔨 **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11)
-  - ✅ **5.3a Zone music + dual-layer crossfade** (12d1ef8)
-    - AudioManager with zone base layer (500ms crossfade) + storm intensity overlay (2000ms)
-    - Volume ducking: zone 0.35→0.25, storm 0.0→0.15→0.30→0.45
-    - Boots with zone 0 music; listens to zone transitions + storm phase changes
-    - 5 zone base tracks (OGG) + 4 storm layers (stubs, await Suno generation)
-  - ⏳ **5.3b Generate storm intensity + sting tracks via Suno**
-    - Use SPEC.md §8.1.3-4 prompts to generate storm phase 1-4 + menu/install/launch/failure stings
-    - Trim in Audacity per docs/guides/suno-to-audacity-looping.md
-    - Commit MP3/OGG files to public/assets/music/
-  - ⏳ **5.3c SFX replacement** (pickup/craft/install/hazard sounds)
-    - Replace dungeon SFX with swamp-appropriate sfx
-    - Wire SFX playAudio() calls in container.js, workbench.js, rocket.js, hazard_manager.js
+- ⏳ **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11)
+  - ✅ **5.3a Zone music playback** — Load + loop 5 zone tracks, auto-switch on transition (c2cee61)
+  - ⏳ **5.3b Storm phase audio layers** — Add 4 storm intensity overlays (Phase 1-4)
+  - ⏳ **5.3c Menu + SFX wiring** — Menu theme on splash, pickup/craft/install SFX
+  - ⏳ **5.3d Ambient sound design** — Cypress canopy, strip mall, wind per zone
 
 - ✅ **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
   - Simple NPC game object: sprite + dialog box on E press

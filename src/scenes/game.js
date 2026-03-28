@@ -431,11 +431,57 @@ export default class Game extends Phaser.Scene {
   // ─── Audio ─────────────────────────────────────────────────────────────────
 
   loadAudios() {
+    // Load SFX
     this.audios = {
       crash: this.sound.add("crash"),
       death: this.sound.add("death"),
       coin:  this.sound.add("start"),
     };
+
+    // Load zone music tracks
+    this.zoneMusic = {
+      0: this.sound.add("zone0_cypress"),
+      1: this.sound.add("zone1_us41"),
+      2: this.sound.add("zone2_collier"),
+      3: this.sound.add("zone3_conner"),
+      4: this.sound.add("zone4_lolhs"),
+    };
+
+    // Currently playing zone music (null if none)
+    this.currentZoneMusicId = null;
+
+    // Start with Zone 0 music
+    this.playZoneMusic(0);
+
+    // Listen for zone transitions and switch music
+    this.events.on("zoneChanged", (zoneId) => {
+      this.playZoneMusic(zoneId);
+    });
+  }
+
+  playZoneMusic(zoneId) {
+    // Guard: invalid zone
+    if (!this.zoneMusic[zoneId]) {
+      console.warn(`Game: zone music not found for zone ${zoneId}`);
+      return;
+    }
+
+    // Don't restart if already playing
+    if (this.currentZoneMusicId === zoneId) {
+      return;
+    }
+
+    // Stop current music if playing
+    if (this.currentZoneMusicId !== null && this.zoneMusic[this.currentZoneMusicId]) {
+      this.zoneMusic[this.currentZoneMusicId].stop();
+    }
+
+    // Start new zone music
+    const music = this.zoneMusic[zoneId];
+    music.loop = true;
+    music.volume = 0.6;
+    music.play();
+    this.currentZoneMusicId = zoneId;
   }
 
   playAudio(key) {
