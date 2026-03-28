@@ -198,6 +198,7 @@ Each task is small enough to fit in a single Claude Code session.
   - Harvey (Zone 1), Maria (Zone 2), Old Dale (Zone 3), Coach Reeves (Zone 4)
   - Each gives one side quest (fetch item, return for reward)
   - Quest completion awards XP + unlocks access/recipes
+  - ⚠️ **Sgt. Polk missing** — 5th NPC not implemented, see [#92](https://github.com/m3ssana/swampfire/issues/92)
 
 ---
 
@@ -337,6 +338,94 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ✅ **Footer control panel strip** [#68](https://github.com/m3ssana/swampfire/issues/68) — metallic gradient, 4 arcade buttons, 2 joysticks, "INSERT COIN" blink
 - ✅ **Responsive breakpoints** [#69](https://github.com/m3ssana/swampfire/issues/69) — 1600px / 1100px (hide panels) / 800px + prefers-reduced-motion
 - ✅ **Polish + performance audit** [#70](https://github.com/m3ssana/swampfire/issues/70) — `will-change` on all animated elements, GPU-composited traces
+
+---
+
+## Phase 9 — Spec Compliance (SPEC.md gap audit, 2026-03-28)
+
+### 9.1 Core Mechanics Gaps
+
+- ⏳ **9.1.1 Add 5th rocket system (Pressure Regulator)** [#91](https://github.com/m3ssana/swampfire/issues/91)
+  - Recipe: Hydraulic Seal + PVC Coupler → Pressure Regulator
+  - Update ROCKET_SYSTEMS from 4→5, HUD counter, rocket visual states
+  - Loot tables: add ingredients to Gulf Coast Tractor, Tractor Supply zones
+
+- ⏳ **9.1.2 Partial launch win condition (4/5 systems)** [#111](https://github.com/m3ssana/swampfire/issues/111)
+  - Launch with 4/5 triggers modified cutscene: hull breach, violent shake
+  - Outro "PARTIAL ESCAPE" variant text
+  - 5/5 remains full victory
+
+- ⏳ **9.1.3 Near-miss feedback** [#93](https://github.com/m3ssana/swampfire/issues/93)
+  - 200ms slow-motion (0.5x timescale), green screen-edge pulse, +15 XP, whoosh SFX
+  - Sensor bodies already exist on rattlesnakes/power lines/looters — wire up feedback
+
+- ⏳ **9.1.4 Road events system** [#103](https://github.com/m3ssana/swampfire/issues/103)
+  - Debris pickups on roads (+5 XP), random encounters (20% chance), visual set pieces
+  - Events repopulate on phase change
+
+### 9.2 NPC + Hazard Gaps
+
+- ⏳ **9.2.1 Add Sgt. Polk NPC + SR-54 roadblock** [#92](https://github.com/m3ssana/swampfire/issues/92)
+  - Zone 4 NPC, grants SR-54 access after proof-of-rocket quest
+
+- ⏳ **9.2.2 Additional hazards** [#104](https://github.com/m3ssana/swampfire/issues/104)
+  - Wild boar (Zone 3), sinkholes (Zone 3), structural collapse (Zone 2)
+  - National Guard roadblock (Zone 4), panicked civilians (Zone 2)
+
+### 9.3 UI + HUD Gaps
+
+- ⏳ **9.3.1 System Checklist overlay (TAB)** [#94](https://github.com/m3ssana/swampfire/issues/94)
+  - TAB opens semi-transparent overlay: 5 systems, component status, zone hints
+  - Timer keeps ticking (no pause)
+
+- ⏳ **9.3.2 Full-screen zone map (M key)** [#95](https://github.com/m3ssana/swampfire/issues/95)
+  - M opens zone map with roads, discovered locations, travel time estimates
+
+- ⏳ **9.3.3 HUD Progress Ring** [#96](https://github.com/m3ssana/swampfire/issues/96)
+  - Circular 5-segment ring replacing text counter, pulses on progress
+
+- ⏳ **9.3.4 Objective Banner** [#97](https://github.com/m3ssana/swampfire/issues/97)
+  - Always-visible: "Find [item] — check [location]", auto-updates
+
+- ⏳ **9.3.5 Inventory UI (8-slot + stash)** [#100](https://github.com/m3ssana/swampfire/issues/100)
+  - 8-slot grid, color-coded borders, base camp stash, auto-pickup for consumables
+
+- ⏳ **9.3.6 Crafting UI panel** [#105](https://github.com/m3ssana/swampfire/issues/105)
+  - Workbench overlay: ingredients panel, recipe list, single CRAFT button
+
+- ⏳ **9.3.7 Functional minimap** [#108](https://github.com/m3ssana/swampfire/issues/108)
+  - Zone layout, player dot, discovered locations, fog of war, item pings after Maria quest
+
+### 9.4 Visual Effects + Lighting
+
+- ⏳ **9.4.1 Dynamic lighting (Light2D)** [#102](https://github.com/m3ssana/swampfire/issues/102)
+  - Phaser LightsManager, phase-based ambient darkening, street lights, base camp fire
+
+- ⏳ **9.4.2 Player flashlight** [#101](https://github.com/m3ssana/swampfire/issues/101)
+  - Auto-activates Phase 3+, reveals hidden loot, no battery management
+
+- ⏳ **9.4.3 Visual shaders (fog, vignette, chromatic aberration)** [#109](https://github.com/m3ssana/swampfire/issues/109)
+  - Perlin fog (preserves), vignette (always + intensifies), chromatic aberration (Phase 4)
+  - Graceful degradation on low-end hardware
+
+- ⏳ **9.4.4 Fire Tower panoramic** [#107](https://github.com/m3ssana/swampfire/issues/107)
+  - Zone 3 cinematic zoom-out, hurricane visible, minimap unlock, "Storm Chaser" achievement
+
+### 9.5 Systems + Infrastructure
+
+- ⏳ **9.5.1 Save System (localStorage)** [#98](https://github.com/m3ssana/swampfire/issues/98)
+  - Auto-save on Zone 0 return, install, phase transition, every 5 min
+  - CONTINUE from MenuScene resumes full state
+
+- ⏳ **9.5.2 Pause menu (ESC)** [#99](https://github.com/m3ssana/swampfire/issues/99)
+  - ESC pauses game + timer, overlay with RESUME / SETTINGS / QUIT
+
+- ⏳ **9.5.3 Leaderboard + personal bests** [#106](https://github.com/m3ssana/swampfire/issues/106)
+  - localStorage tracking: fastest time, highest XP, best combo, most near-misses
+  - Personal best comparison on end-of-run screen
+
+- ⏳ **9.5.4 Mobile controls** [#110](https://github.com/m3ssana/swampfire/issues/110)
+  - Virtual joystick + action button, auto-detect touch, 48px min touch targets
 
 ---
 

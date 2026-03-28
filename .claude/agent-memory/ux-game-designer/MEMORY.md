@@ -129,14 +129,11 @@ Always comment on the issue at the START of work, not just at the end.
 - **Live URL:** https://swampfire.messana.ai/
 - Raw GitHub Pages URL (`m3ssana.github.io/swampfire`) redirects — always use the custom domain in docs
 
-## TODO Progress (as of Phase 5.3a + Bug #76 complete)
+## TODO Progress (as of 2026-03-28 spec gap audit)
 All of Phase 0–5.2, 5.3a, 5.4, 6.1–6.3, 7.1–7.3, 8 done. In progress: 5.3b–5.3d.
-- [x] 2.5 Rocket sprite 3× scale — PR #79 (9ea1631)
-- [x] 5.3a Zone music playback — simple direct playback, 5 OGG loop tracks (c2cee61)
-- [x] Bug #76 Launch freeze — camera.pan()/zoomTo() replaced with tweens.add() — PR #81 (53f6595)
-- [ ] 5.3b Storm phase audio layers (#11)
-- [ ] 5.3c Menu + SFX wiring (#11)
-- [ ] 5.3d Ambient sound design (#11)
+Phase 9 (Spec Compliance) created: 22 gaps tracked as #91–#111.
+Key gaps: 5th rocket system, Sgt. Polk NPC, UI overlays (TAB/M/inventory/crafting),
+save system, pause, lighting/shaders, additional hazards, road events, mobile controls.
 
 ## Phase 4.2 — Hazard Game Objects (confirmed patterns)
 
