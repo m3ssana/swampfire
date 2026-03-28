@@ -173,8 +173,7 @@ export default class SearchableContainer {
       new DroppedItem(this.scene, dropX, dropY, item);
     }
 
-    // Audio: "coin" SFX as placeholder — proper rummage SFX added in Phase 5.3
-    this.scene.playAudio("coin");
+    this.scene.playAudio("loot");
   }
 
   // ── Loot selection ──────────────────────────────────────────────────────────

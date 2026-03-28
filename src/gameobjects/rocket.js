@@ -90,7 +90,7 @@ export default class Rocket {
     );
     this.scene.showXPGain(this.sprite.x, this.sprite.y - 40, 20, 'install');
     this.scene.cameras.main.shake(180, 0.008);
-    this.scene.playAudio('coin');
+    this.scene.playAudio('install');
   }
 
   // ── Visual state ─────────────────────────────────────────────────────────────
