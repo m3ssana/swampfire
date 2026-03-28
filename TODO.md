@@ -190,7 +190,7 @@ Each task is small enough to fit in a single Claude Code session.
 - ⏳ **5.3 Audio overhaul** [#11](https://github.com/m3ssana/swampfire/issues/11) [#42](https://github.com/m3ssana/swampfire/issues/42)
   - ✅ **5.3a Zone music playback** — Load + loop 5 zone tracks, auto-switch on transition (c2cee61)
   - ⏳ **5.3b Storm phase audio layers** [#11](https://github.com/m3ssana/swampfire/issues/11) — AudioManager written but not wired; blocked on `storm_phase1–4.ogg` files
-  - ⏳ **5.3c Menu + SFX wiring** [#42](https://github.com/m3ssana/swampfire/issues/42) — Menu theme on splash ✅ (PR #85); distinct SFX keys per action ⏳ (PR #90 pending); Suno sting files missing
+  - ⏳ **5.3c Menu + SFX wiring** [#42](https://github.com/m3ssana/swampfire/issues/42) — Menu theme on splash ✅ (PR #85); distinct SFX keys per action ✅ (PR #90, cfacd3e); Suno sting files still needed
   - ⏳ **5.3d Ambient sound design** [#42](https://github.com/m3ssana/swampfire/issues/42) — Per-zone ambient layers, storm weather audio, combo chimes, footstep terrain variants
 
 - ✅ **5.4 NPC system** [#12](https://github.com/m3ssana/swampfire/issues/12)
