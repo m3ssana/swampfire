@@ -4,6 +4,7 @@ import StormManager                   from "../gameobjects/storm_manager";
 import HazardManager                  from "../gameobjects/hazard_manager";
 import ComboTracker                   from "../gameobjects/combo_tracker";
 import AchievementManager             from "../gameobjects/achievement_manager";
+import AudioManager                   from "../gameobjects/audio_manager";
 
 // ── XP Popup tuning ───────────────────────────────────────────────────────────
 const XP_COLORS = {
@@ -60,10 +61,13 @@ export default class Game extends Phaser.Scene {
     this.launchHUD();
     this.loadAudios();
     this.listenForGameOver();
-    this.stormManager   = new StormManager(this);
-    this.hazardManager  = new HazardManager(this);
-    this.comboTracker        = new ComboTracker(this);
-    this.achievementManager  = new AchievementManager(this);
+    this.stormManager      = new StormManager(this);
+    this.hazardManager     = new HazardManager(this);
+    this.comboTracker      = new ComboTracker(this);
+    this.achievementManager = new AchievementManager(this);
+    this.audioManager      = new AudioManager(this);
+    // Start zone 0 music (initial zone load doesn't emit zoneChanged event)
+    this.audioManager._onZoneChanged(0);
     // Wire hazard collision handlers now that both player and hazardManager exist
     this.hazardManager.addCollisions(this);
   }
