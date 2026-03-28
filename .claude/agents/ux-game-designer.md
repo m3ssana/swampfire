@@ -100,12 +100,19 @@ Examples:
 Trigger: questions that benefit from WebSearch or multi-round investigation
 ```
 
-**Run subagents in parallel** when tasks are independent:
+**Run subagents in parallel** when tasks are independent — ALWAYS emit multiple Agent tool calls in a **single message**. Never chain them sequentially when they don't depend on each other:
 ```
-// Good: explore current state + research best practices simultaneously
+// CORRECT — both launch simultaneously in one message
 Agent(Explore, "how does current zone loading work")
 Agent(general-purpose, "Phaser 3 tilemap zone transition patterns")
+
+// WRONG — sequential, wastes time
+Agent(Explore, "how does current zone loading work")
+// ... wait for result ...
+Agent(general-purpose, "Phaser 3 tilemap zone transition patterns")
 ```
+
+**Max parallelism checklist** — before any multi-step task, ask: which of these steps are independent? Launch all independent steps in one message. Only sequence steps that genuinely depend on a prior result.
 
 ---
 
