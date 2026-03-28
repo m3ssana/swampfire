@@ -464,6 +464,15 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ⏳ **9.3.9 Time's Up screen: whiteout + rocket diagram** [#123](https://github.com/m3ssana/swampfire/issues/123)
   - Camera flash white before dark, visual rocket showing installed vs missing systems
 
+- ⏳ **9.3.10 HUD timer visual fixes** [#125](https://github.com/m3ssana/swampfire/issues/125)
+  - Phase 1-2 timer color: white (not cyan); red-pulse threshold: 5:00 (not 1:00)
+
+- ⏳ **9.3.11 NPC quest reward corrections** [#124](https://github.com/m3ssana/swampfire/issues/124)
+  - Old Dale: give Avionics Harness (not just XP); Maria: reveal item locations on minimap (not Steel Bracket)
+
+- ⏳ **9.3.12 BootScene logo fade-in + lightning flash** [#126](https://github.com/m3ssana/swampfire/issues/126)
+  - Logo fades in behind progress bar; lightning flash transitions to MenuScene
+
 ---
 
 ## Cleanup (do anytime)
