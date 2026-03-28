@@ -153,6 +153,10 @@ export default class HUD extends Phaser.Scene {
   // ─── Registry listener ──────────────────────────────────────────────────────
 
   onRegistryChange(parent, key, value) {
+    // Guard against stale listeners firing after scene.stop() destroys game objects.
+    // sys.isActive() is false once the scene has been stopped or shut down.
+    if (!this.sys.isActive()) return;
+
     switch (key) {
       case "timeLeft":        this.updateTimerDisplay(value); break;
       case "hp":              this.updateHearts(value);       break;
@@ -167,6 +171,7 @@ export default class HUD extends Phaser.Scene {
   // ─── Display updaters ───────────────────────────────────────────────────────
 
   updateTimerDisplay(seconds) {
+    if (!this.timerText?.active) return;
     const m = Math.floor(seconds / 60).toString().padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     this.timerText.setText(`${m}:${s}`);
@@ -187,6 +192,7 @@ export default class HUD extends Phaser.Scene {
   }
 
   updatePhase(phase) {
+    if (!this.timerText?.active) return;
     const PHASE_TINTS = { 1: 0x4fffaa, 2: 0xffee44, 3: 0xff8800, 4: 0xff2222 };
     const tint = PHASE_TINTS[phase] ?? 0x4fffaa;
 
@@ -278,12 +284,14 @@ export default class HUD extends Phaser.Scene {
   }
 
   updateHearts(hp) {
+    if (!this.hearts?.length) return;
     this.hearts.forEach((heart, i) => {
       heart.setFillStyle(i < hp ? 0xdd2222 : 0x2a2a2a);
     });
   }
 
   updateXP(xp) {
+    if (!this.xpText?.active) return;
     this.xpText.setText(String(xp));
   }
 
