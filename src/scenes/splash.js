@@ -155,7 +155,7 @@ export default class Splash extends Phaser.Scene {
     });
   }
 
-  playMusic(theme = "splash") {
+  playMusic(theme = "menu_theme") {
     this.theme = this.sound.add(theme);
     this.theme.stop();
     this.theme.play({
