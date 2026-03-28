@@ -24,6 +24,7 @@ export default class Rocket {
     this.scene  = scene;
     this.sprite = scene.matter.add.sprite(x, y, 'rocket_pixel', 0, { isStatic: true });
     this.sprite.setFixedRotation();
+    this.sprite.setScale(3);  // Scale to ~96×216 pixels (3× original 32×72)
     this.updateVisual();
     scene.events.once('shutdown', this.destroy, this);
   }
