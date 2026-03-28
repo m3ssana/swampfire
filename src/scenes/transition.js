@@ -28,8 +28,6 @@ export default class Transition extends Phaser.Scene {
       .setAlpha(1)
       .setDepth(100);
 
-    this.playMusic();
-
     // Reveal phase 1 from black
     this.tweens.add({
       targets: this.cutScreen,
