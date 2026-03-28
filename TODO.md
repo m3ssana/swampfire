@@ -105,10 +105,9 @@ Each task is small enough to fit in a single Claude Code session.
   - `systemsInstalled` registry key persists across deaths; reset in `transition.loadNext()`
   - When all 4 installed: E at rocket calls `finishScene()` → outro "victory"
 
-- ⏳ **2.5 Scale up rocket sprite to match cover art** [#77](https://github.com/m3ssana/swampfire/issues/77)
-  - Current rocket is 32×72px (1× scale) — barely bigger than Juan
-  - Scale to ~3× (96×216px on screen) so it towers over the player and trees
-  - Update physics body, interaction range, and verify tint states + launch cinematic still work
+- ✅ **2.5 Scale up rocket sprite to match cover art** [#77](https://github.com/m3ssana/swampfire/issues/77) — PR #79 (9ea1631)
+  - `setScale(3)` in Rocket constructor — sprite now 96×216px, towers over Juan and trees
+  - Tint states, interaction prompt, and launch cinematic all verified working
 
 ---
 
@@ -287,9 +286,9 @@ Bugs are tracked here alongside their GitHub issue. When a bug is reported:
   - Root cause: `camerafadeoutcomplete` event silently dropped after chaining flash → shake → pan → zoom → shake in `finishScene()` — `endRun()` never called, game locked on black
   - Fix: replaced camera event listener with `time.delayedCall(3200 + 750)` timed to fire after the 700ms fade completes
 
-- ⏳ **Game freezes after 4/4 rocket systems installed — outro never reached** [#76](https://github.com/m3ssana/swampfire/issues/76)
-  - Despite #59 fix, the game still freezes after installing all 4 systems and pressing E to launch
-  - Root cause may differ from #59 or the fix may not cover all code paths in `finishScene()`
+- ✅ **Game freezes after 4/4 rocket systems installed — outro never reached** [#76](https://github.com/m3ssana/swampfire/issues/76) — PR #81 (53f6595)
+  - Root cause: `camera.pan()` and `camera.zoomTo()` throw on the easing parameter in this Phaser build; fix commits (688f389, 19c5a6b) were lost when audio merge (05fdd61) took main's `game.js`
+  - Fix: replaced both calls with `tweens.add()` targeting `scrollX/scrollY` and `zoom` on the camera; added `_launching` guard in `Rocket.interact()` to prevent double-press
 
 - ✅ **Juan stuck in Zone 1, north exit unresponsive** [#27](https://github.com/m3ssana/swampfire/issues/27)
   - Root cause: `Tilemap.destroy()` does NOT remove Matter.js bodies from `convertTilemapLayer()` — Zone 0's static obstacle bodies persist as invisible colliders in Zone 1, blocking the north corridor
