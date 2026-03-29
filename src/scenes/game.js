@@ -420,7 +420,8 @@ export default class Game extends Phaser.Scene {
   addCamera() {
     const { width, height } = this.zone.getBounds();
     this.cameras.main.setBounds(0, 0, width, height);
-    this.cameras.main.startFollow(this.player.sprite, false, 0.5, 0.5);
+    this.cameras.main.startFollow(this.player.sprite, false, 0.15, 0.15);
+    this.cameras.main.setZoom(1.5);
     this.cameras.main.setBackgroundColor(0x1a2e1a); // dark swamp green
   }
 
