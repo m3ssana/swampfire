@@ -133,6 +133,58 @@ GitHub will block self-merges. This is enforced at the repository level — not 
 
 ---
 
+## 🔗 GitHub Issue Dependencies (MANDATORY)
+
+When you identify that one issue cannot be started until another is complete, create a native GitHub **blocked-by relationship** — never a text comment.
+
+### How to create dependencies
+
+**Step 1 — Fetch node IDs** for all issues involved (batch in one query):
+```bash
+gh api graphql -f query='{
+  repository(owner: "m3ssana", name: "swampfire") {
+    iA: issue(number: A) { id }
+    iB: issue(number: B) { id }
+  }
+}'
+```
+
+**Step 2 — Create all relationships in one batched mutation**:
+```bash
+gh api graphql -f query='mutation {
+  r1: addBlockedBy(input: { issueId: "BLOCKED_ID", blockingIssueId: "BLOCKER_ID" }) { clientMutationId }
+  r2: addBlockedBy(input: { issueId: "BLOCKED_ID", blockingIssueId: "BLOCKER_ID" }) { clientMutationId }
+}'
+```
+- `issueId` = the issue that **cannot start** until the other finishes
+- `blockingIssueId` = the issue that **must be done first**
+- All relationships in one mutation — no need to run them one at a time
+
+**Step 3 — Verify**:
+```bash
+gh api graphql -f query='{
+  repository(owner: "m3ssana", name: "swampfire") {
+    issue(number: N) {
+      blockedBy(first: 10) { nodes { number title } }
+      blocking(first: 10) { nodes { number title } }
+    }
+  }
+}'
+```
+
+This creates a structured **"Blocked"** badge visible in the GitHub sidebar and on project boards. The correct field names are `blockedBy` and `blocking` — not `trackedInIssues`.
+
+To remove a relationship: use `removeBlockedBy` with the same input shape.
+
+### When to use what
+| Situation | Method |
+|-----------|--------|
+| Issue B cannot start until issue A is done | `addBlockedBy` (native dependency) |
+| Two issues share criteria but neither blocks the other | `gh issue comment` cross-reference |
+| Parent epic broken into child tasks | `addSubIssue` (parent-child hierarchy) |
+
+---
+
 ## 🐛 Bug Reporting Pattern (MANDATORY for all reported bugs)
 
 When a bug is reported — by the user, discovered during testing, or found during development — follow this pattern **every time**, no exceptions:

@@ -40,6 +40,19 @@ See `e2e-issues.md` for full detail. Key problems:
 - Zone-transition cleanup: `resetFlags()` mirrors `_clearHazards()` in hazard_manager.js
 - DO NOT test `Math.random()` range directly — test the formula that uses it (e.g., `MIN + random * (MAX - MIN)`)
 
+## GitHub Issue Dependencies
+
+Use native `addBlockedBy` GraphQL mutations — never text comments — for issue dependencies.
+Full pattern is in `.claude/AGENT_INSTRUCTIONS.md` → "GitHub Issue Dependencies" section.
+
+Quick reference:
+- Fetch node IDs: `gh api graphql` query with `issue(number: N) { id }` aliases
+- Create: `addBlockedBy(input: { issueId: "BLOCKED", blockingIssueId: "BLOCKER" })`
+- Verify: query `blockedBy` / `blocking` fields (NOT `trackedInIssues`)
+- Remove: `removeBlockedBy` with same input shape
+
+---
+
 ## Common Test Authoring Mistakes Found
 - Tautological tests: defining `const fn = () => true` then calling it — tests nothing (found in original hazard-logic.test.js)
 - Off-by-one in strict boundary: `dist < 6` — exactly 6.0 is false; 5.99 is true

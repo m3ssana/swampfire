@@ -124,17 +124,56 @@ After all issues are created (or if no new issues were needed), review ALL open 
    gh issue comment <number> --body "**Cross-reference:** <explanation of overlap with #X and who owns what>"
    ```
 
-5. **For dependencies**, add a dependency note:
+5. **For dependencies**, create a native GitHub blocked-by relationship using the GraphQL API — do NOT use text comments for this:
+
+   **Step 5a — Fetch node IDs** for every issue involved in a dependency chain (batch all in one query):
    ```
-   gh issue comment <number> --body "**Depends on:** #X must be implemented first because <reason>."
+   gh api graphql -f query='
+   {
+     repository(owner: "OWNER", name: "REPO") {
+       iA: issue(number: A) { id }
+       iB: issue(number: B) { id }
+       ...
+     }
+   }'
    ```
+
+   **Step 5b — Create all blocked-by relationships in a single batched mutation** (use aliases r1, r2, … for each):
+   ```
+   gh api graphql -f query='
+   mutation {
+     r1: addBlockedBy(input: { issueId: "ID_OF_BLOCKED", blockingIssueId: "ID_OF_BLOCKER" }) { clientMutationId }
+     r2: addBlockedBy(input: { issueId: "ID_OF_BLOCKED", blockingIssueId: "ID_OF_BLOCKER" }) { clientMutationId }
+     ...
+   }'
+   ```
+   - `issueId` = the issue that is blocked (cannot start until the other is done)
+   - `blockingIssueId` = the issue that must be completed first
+   - Batch all relationships in one mutation document — no need to run them one at a time
+
+   **Step 5c — Verify** by querying `blockedBy` / `blocking` on a sample of affected issues:
+   ```
+   gh api graphql -f query='
+   {
+     repository(owner: "OWNER", name: "REPO") {
+       issue(number: N) {
+         blockedBy(first: 10) { nodes { number title } }
+         blocking(first: 10) { nodes { number title } }
+       }
+     }
+   }'
+   ```
+
+   This creates a structured relationship visible in the GitHub **Relationships sidebar** and shows a **"Blocked"** badge on project boards. It is queryable via the GraphQL API and replaces ad-hoc "Depends on" text comments entirely.
+
+   Still add a human-readable `gh issue comment` for **overlaps** (not strict dependencies) — overlaps explain shared ownership of specific criteria, which the blocked-by model doesn't capture.
 
 6. **Report to user**: present a table of all relationships found:
    | Type | Issues | Resolution |
    |------|--------|------------|
    | Duplicate | #A ↔ #B | Closed #B |
-   | Overlap | #C ↔ #D | Cross-referenced |
-   | Dependency | #E → #F | #E first |
+   | Overlap | #C ↔ #D | Cross-reference comments added |
+   | Dependency | #E → #F | `addBlockedBy` created (#F blocked by #E) |
 
 ### Phase 6 — Report to User
 

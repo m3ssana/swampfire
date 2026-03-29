@@ -103,6 +103,19 @@ Three-tier automated testing (unit + integration + E2E):
 
 ---
 
+## GitHub Issue Dependencies
+
+Use native `addBlockedBy` GraphQL mutations — never text comments — for issue dependencies.
+Full pattern is in `.claude/AGENT_INSTRUCTIONS.md` → "GitHub Issue Dependencies" section.
+
+Quick reference:
+- Fetch node IDs: `gh api graphql` query with `issue(number: N) { id }` aliases
+- Create: `addBlockedBy(input: { issueId: "BLOCKED", blockingIssueId: "BLOCKER" })`
+- Verify: query `blockedBy` / `blocking` fields (NOT `trackedInIssues`)
+- Remove: `removeBlockedBy` with same input shape
+
+---
+
 ## GitHub Issues Workflow (All Agents)
 
 **Key Rules** (enforce across all agents):

@@ -344,7 +344,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 
 ## Phase 9 — Spec Compliance (audit 2026-03-28, refreshed 2026-03-28)
 
-> 34 total gaps: 4 P0, 7 P1, 13 P2, 10 P3. 22 from first audit + 12 new from deep audit.
+> 40 total gaps: 4 P0, 7 P1, 16 P2, 13 P3. 22 from first audit + 12 from deep audit + 6 from third pass.
 
 ### 9.0 Critical Fixes (P0)
 
@@ -435,6 +435,15 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ⏳ **9.2.14 Ambient sound + SFX gaps** [#42](https://github.com/m3ssana/swampfire/issues/42) / 5.3d
   - 10+ missing SFX (near-miss whoosh, damage thud, combo chimes, footsteps, rummage, etc.)
 
+- ⏳ **9.2.15 Food throw / looter distraction mechanic** [#127](https://github.com/m3ssana/swampfire/issues/127)
+  - Press F/Q to throw food item; looters within 3 tiles leave patrol to investigate for ~3s
+
+- ⏳ **9.2.16 NPC sprite sheets (Harvey, Maria, Dale, Reeves, Sgt. Polk)** [#128](https://github.com/m3ssana/swampfire/issues/128)
+  - 16×16 or 32×32 pixel art per NPC, 2-frame idle animation, packed into shared NPC atlas
+
+- ⏳ **9.2.17 Performance test suite** [#131](https://github.com/m3ssana/swampfire/issues/131)
+  - Zone transition <300ms, save/load <50ms, Phase 4 stress 60fps, XP popup stress, memory leak cycle
+
 ### 9.3 Low Priority (P3) — Polish + Platform
 
 - ⏳ **9.3.1 Visual shaders (fog, vignette, chromatic aberration)** [#109](https://github.com/m3ssana/swampfire/issues/109)
@@ -472,6 +481,15 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 
 - ⏳ **9.3.12 BootScene logo fade-in + lightning flash** [#126](https://github.com/m3ssana/swampfire/issues/126)
   - Logo fades in behind progress bar; lightning flash transitions to MenuScene
+
+- ⏳ **9.3.13 Texture atlases (per-zone + shared)** [#129](https://github.com/m3ssana/swampfire/issues/129)
+  - Pack all sprites into atlases; configure Vite/TexturePacker; update all load calls
+
+- ⏳ **9.3.14 Tilemap culling + entity sleep** [#130](https://github.com/m3ssana/swampfire/issues/130)
+  - `cullPaddingX/Y` = 1 tile; disable NPC/hazard update loops outside camera+2-tile buffer
+
+- ⏳ **9.3.15 UX telemetry hooks** [#132](https://github.com/m3ssana/swampfire/issues/132)
+  - `TelemetryManager` events: first_pickup, death, victory, share_card_copied; opt-in via `?telemetry=1`
 
 ---
 

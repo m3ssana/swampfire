@@ -41,6 +41,17 @@
 - Zone 4: LOLHS + SR-54 corridor (school, Tractor Supply)
 - Removed: Starkey Wilderness (too remote for 60-min pacing)
 
+## GitHub Issue Dependencies
+
+Use native `addBlockedBy` GraphQL mutations — never text comments — for issue dependencies.
+Full pattern (confirmed working 2026-03-28) is in `.claude/AGENT_INSTRUCTIONS.md` → "GitHub Issue Dependencies" section.
+
+Quick reference:
+- Fetch node IDs: `gh api graphql` query with `issue(number: N) { id }` aliases
+- Create: `addBlockedBy(input: { issueId: "BLOCKED", blockingIssueId: "BLOCKER" })`
+- Verify: query `blockedBy` / `blocking` fields (NOT `trackedInIssues`)
+- Remove: `removeBlockedBy` with same input shape
+
 ## Performance Notes
 - Particle budget: 800 desktop / 400 mobile
 - Shader passes: 3 max desktop / 1 mobile
@@ -129,11 +140,18 @@ Always comment on the issue at the START of work, not just at the end.
 - **Live URL:** https://swampfire.messana.ai/
 - Raw GitHub Pages URL (`m3ssana.github.io/swampfire`) redirects — always use the custom domain in docs
 
-## TODO Progress (as of 2026-03-28 spec gap audit)
+## TODO Progress (as of 2026-03-28 spec gap audit — third pass)
 All of Phase 0–5.2, 5.3a, 5.4, 6.1–6.3, 7.1–7.3, 8 done. In progress: 5.3b–5.3d.
-Phase 9 (Spec Compliance) created: 22 gaps tracked as #91–#111.
-Key gaps: 5th rocket system, Sgt. Polk NPC, UI overlays (TAB/M/inventory/crafting),
-save system, pause, lighting/shaders, additional hazards, road events, mobile controls.
+Phase 9 (Spec Compliance): 40 gaps tracked, issues #91–#132.
+P0 (4): XP values, camera defaults, 5th rocket system, partial launch win condition
+P1 (7): lightning, near-miss feedback, save system, pause menu, objective banner, TAB checklist, MenuScene
+P2 (16): Sgt. Polk, hazards, lighting, flashlight, road events, minimap, progress ring, crafting UI,
+         achievements, particles, launch cutscene, victory screen, audio, food throw, NPC sprites, perf tests
+P3 (13): shaders, fire tower, map, leaderboard, mobile, Juan sprite, accessibility, shake governor,
+         time's up screen, HUD timer, NPC rewards, BootScene, texture atlases, culling/sleep, telemetry
+Key dependency chains: #91→#111→#96 (5th system first), #98→#99→#115 (save before pause/menu),
+  #102→#101 (lighting before flashlight), #112→#93 (XP values before near-miss), #106→#119 (leaderboard before victory bests),
+  #108→#95 (minimap data layer before full-screen map), #129→#120+#128 (atlases before sprites)
 
 ## Phase 4.2 — Hazard Game Objects (confirmed patterns)
 
