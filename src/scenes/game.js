@@ -7,9 +7,12 @@ import AchievementManager             from "../gameobjects/achievement_manager";
 
 // ── XP Popup tuning ───────────────────────────────────────────────────────────
 const XP_COLORS = {
-  loot:    0x44ff88,  // green  — item found in container
-  craft:   0xffdd00,  // gold   — rocket component crafted
-  install: 0x00eeff,  // cyan   — component installed on rocket
+  loot:    0x44ff88,  // green      — item found in container
+  craft:   0xffdd00,  // gold       — rocket component crafted
+  install: 0xff4422,  // red        — component installed on rocket (big payoff)
+  quest:   0xcc44ff,  // purple     — NPC quest completed
+  nearmiss:0xaaff44,  // lime green — hazard dodged
+  discover:0x00eeff,  // cyan       — new zone entered for the first time
 };
 /** ms window in which rapid same-context XP grants merge into one popup */
 const XP_MERGE_MS = 400;
@@ -287,6 +290,19 @@ export default class Game extends Phaser.Scene {
 
     this.showPoints(itemSprite.x, itemSprite.y, `+ ${itemDef.label}`, itemDef.tint);
     this.playAudio('loot');
+
+    // Zoom bump when a rocket component lands in inventory (type: 'component')
+    if (itemDef.type === 'component') {
+      const cam = this.cameras.main;
+      this.tweens.add({
+        targets: cam,
+        zoom: 1.6,
+        duration: 100,
+        ease: 'Quad.Out',
+        onComplete: () => this.tweens.add({ targets: cam, zoom: 1.5, duration: 200, ease: 'Quad.InOut' }),
+      });
+    }
+
     itemSprite.destroy();
   }
 
@@ -572,6 +588,7 @@ export default class Game extends Phaser.Scene {
       // ── Swap zones ──────────────────────────────────────────────────────────
       this.zone.destroyCurrentZone();
       this.zone.loadZone(targetZoneId, sourceZoneId);
+      const isNewZone = !this._visitedZones.has(targetZoneId);
       this._visitedZones.add(targetZoneId);
       this.registry.set('visitedZones', [...this._visitedZones]);
 
@@ -587,6 +604,15 @@ export default class Game extends Phaser.Scene {
 
       // ── Notify hazard manager of new zone ────────────────────────────────────
       this.events.emit('zoneChanged', targetZoneId);
+
+      // ── Zone discovery XP (first visit only) ────────────────────────────────
+      if (isNewZone) {
+        this.time.delayedCall(350, () => {
+          const xp = this.registry.get('xp') ?? 0;
+          this.registry.set('xp', xp + 50);
+          this.showXPGain(entry.x, entry.y - 60, 50, 'discover');
+        });
+      }
 
       // ── Fade back in ────────────────────────────────────────────────────────
       this.cameras.main.fadeIn(250, 0, 0, 0);

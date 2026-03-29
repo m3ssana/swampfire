@@ -220,6 +220,9 @@ export default class Rattlesnake {
     const { x, y } = this.sprite;
     this.scene.showPoints(x, y - 24, '~ rattle ~', 0xaaff44);
     this.scene.cameras.main.flash(60, 0xaa, 0xff, 0x44);
+    const xp = this.scene.registry.get('xp') ?? 0;
+    this.scene.registry.set('xp', xp + 15);
+    this.scene.showXPGain(x, y - 48, 15, 'nearmiss');
 
     // Reset debounce after the player has had time to move away
     this.scene.time.delayedCall(1500, () => { this._nearPlayer = false; });

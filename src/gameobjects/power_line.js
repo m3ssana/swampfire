@@ -242,6 +242,9 @@ export default class PowerLine {
 
     this.scene.showPoints(this._x, this._y - 32, '! live wire !', 0xffee00);
     this.scene.cameras.main.flash(80, 0xff, 0xee, 0x00, true);
+    const xp = this.scene.registry.get('xp') ?? 0;
+    this.scene.registry.set('xp', xp + 15);
+    this.scene.showXPGain(this._x, this._y - 56, 15, 'nearmiss');
 
     this.scene.time.delayedCall(2000, () => { this._nearPlayer = false; });
   }

@@ -81,15 +81,29 @@ export default class Rocket {
 
     // Award XP
     const xp = this.scene.registry.get('xp') ?? 0;
-    this.scene.registry.set('xp', xp + 20);
+    this.scene.registry.set('xp', xp + 500);
 
-    // Feedback — label popup + separate XP popup
+    // Feedback — label popup + XP popup + red flash + zoom bump + shake
     this.scene.showPoints(
       this.sprite.x, this.sprite.y - 40,
       `${component.label} installed`, component.tint ?? 0x4fffaa
     );
-    this.scene.showXPGain(this.sprite.x, this.sprite.y - 40, 20, 'install');
+    this.scene.showXPGain(this.sprite.x, this.sprite.y - 40, 500, 'install');
+    this.scene.cameras.main.flash(200, 0xff, 0x44, 0x22);
     this.scene.cameras.main.shake(180, 0.008);
+    // Brief zoom-in to 2.0x then pull back to 1.5x
+    this.scene.tweens.add({
+      targets: this.scene.cameras.main,
+      zoom: 2.0,
+      duration: 150,
+      ease: 'Quad.Out',
+      onComplete: () => this.scene.tweens.add({
+        targets: this.scene.cameras.main,
+        zoom: 1.5,
+        duration: 400,
+        ease: 'Quad.InOut',
+      }),
+    });
     this.scene.playAudio('install');
   }
 
