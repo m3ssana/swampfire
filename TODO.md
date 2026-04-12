@@ -356,12 +356,12 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
   - Camera follow lerp 0.5→0.15 (snappier), default zoom 1.0→1.5x
   - Zoom bump 1.5→1.6x on rocket part pickup; 2.0x on install cutscene
 
-- ⏳ **9.0.3 Add 5th rocket system (Pressure Regulator)** [#91](https://github.com/m3ssana/swampfire/issues/91)
+- ✅ **9.0.3 Add 5th rocket system (Pressure Regulator)** [#91](https://github.com/m3ssana/swampfire/issues/91) _(7ff816f)_
   - Recipe: Hydraulic Seal + PVC Coupler → Pressure Regulator
   - Update ROCKET_SYSTEMS from 4→5, HUD counter, rocket visual states
   - Co-implemented with 9.0.4 in PR #137
 
-- ⏳ **9.0.4 Partial launch win condition (4/5 systems)** [#111](https://github.com/m3ssana/swampfire/issues/111)
+- ✅ **9.0.4 Partial launch win condition (4/5 systems)** [#111](https://github.com/m3ssana/swampfire/issues/111) _(7ff816f)_
   - Launch with 4/5 triggers hull breach variant; 5/5 is full victory
   - Co-implemented with 9.0.3 in PR #137
 
