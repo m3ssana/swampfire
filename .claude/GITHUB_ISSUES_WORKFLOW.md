@@ -76,6 +76,10 @@ gh pr create --title "feat: implement NPC system (#12)" \
 ## Changes
 - [list key changes]
 
+## Tests Written First
+- [x] Unit tests written and failing before implementation
+- [x] E2E stubs added for Phaser-dependent behaviour
+
 ## Acceptance Criteria
 - [x] Criterion 1
 - [x] Criterion 2
@@ -134,15 +138,17 @@ TODO.md updated. Changes are now in production on main branch."
 
 A work item is **ONLY complete** when:
 
-1. ✅ Code is written and tested locally
-2. ✅ All acceptance criteria are met
-3. ✅ PR is created with a clear description
-4. ✅ **Human has reviewed and approved the PR**
-5. ✅ **Human has merged PR to main** ← CRITICAL (agents do not self-merge)
-6. ✅ **TODO.md updated** — task marked ✅ with commit hash
-7. ✅ Issue is closed with final comment linking the merged commit
+1. ✅ **Failing tests written first** against SPEC acceptance criteria ← TDD REQUIREMENT
+2. ✅ Tests verified to fail before implementation
+3. ✅ Code written and all tests pass
+4. ✅ All acceptance criteria are met
+5. ✅ PR is created with a clear description
+6. ✅ **Human has reviewed and approved the PR**
+7. ✅ **Human has merged PR to main** ← CRITICAL (agents do not self-merge)
+8. ✅ **TODO.md updated** — task marked ✅ with commit hash
+9. ✅ Issue is closed with final comment linking the merged commit
 
-**⚠️ CRITICAL: Agents must not merge their own PRs. Do NOT close the issue until step 5 is complete.**
+**⚠️ CRITICAL: Agents must not merge their own PRs. Do NOT close the issue until step 7 is complete.**
 
 If the PR is closed/abandoned before merging, **reopen** the issue and update its status.
 
@@ -298,5 +304,6 @@ Refer to this document first. If unclear, ask in the issue comments and wait for
 
 ---
 
-**Last Updated**: 2026-03-08 (added human-in-the-loop PR review requirement)
+**Last Updated**: 2026-04-11 (adopted TDD — tests written before implementation)
+**Maintained by**: DevOps Agent + all team members
 **Maintained by**: DevOps Agent + all team members

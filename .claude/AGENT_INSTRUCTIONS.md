@@ -39,7 +39,9 @@ Close issue: "✅ Merged to main (commit: SHA)"
 ```
 
 ### Definition of Done
-- ✅ Code written & tested
+- ✅ **Tests written first** against SPEC acceptance criteria ← TDD REQUIREMENT
+- ✅ Tests fail before implementation (verified)
+- ✅ Code written & all tests pass
 - ✅ All acceptance criteria met
 - ✅ PR created with clear description
 - ✅ **Human reviewed and approved** ← REQUIRED
@@ -110,9 +112,10 @@ GitHub will block self-merges. This is enforced at the repository level — not 
    - Features: `git checkout -b feature/issue-X-description`
    - Bugs:     `git checkout -b fix/issue-X-description`
    - Docs:     `git checkout -b docs/issue-X-description`
-5. **Work** and post progress updates
-6. **Create a PR** and post "📋 PR #N ready for human review"
-7. **Wait** — do not merge. Do not close the issue.
+5. **Write failing tests first** — before any implementation (see TDD Workflow below)
+6. **Implement** — make the tests pass
+7. **Create a PR** and post "📋 PR #N ready for human review"
+8. **Wait** — do not merge. Do not close the issue.
 
 > **Every change — features, bug fixes, docs — goes through a branch and PR.**
 > Nothing is committed directly to `main`.
@@ -256,5 +259,53 @@ Post on the issue: `"📋 PR #N ready for human review — waiting for approval"
 
 ---
 
-**Last Updated**: 2026-03-08
+---
+
+## 🧪 TDD Workflow (MANDATORY)
+
+This project uses **test-driven development**. Tests are always written before implementation.
+
+### The TDD cycle
+
+```
+Read SPEC acceptance criteria
+  ↓
+Write failing tests (unit + E2E stubs)
+  ↓
+Verify tests FAIL (a passing test before implementation tests nothing)
+  ↓
+Implement the minimum code to make tests pass
+  ↓
+Refactor with tests as safety net
+  ↓
+All tests green → open PR
+```
+
+### Who writes the tests?
+
+- **qa-eng** writes the failing test suite for a feature based on SPEC acceptance criteria
+- **The implementing agent** (ux-game-designer or general) writes code to make those tests pass
+- For solo work, write the tests first in the same branch before any implementation
+
+### What kind of tests, and where?
+
+| Behaviour | Test type | File pattern | Tool |
+|-----------|-----------|--------------|------|
+| Pure game logic (XP values, phase boundaries, loot weights) | Unit | `tests/*.test.js` | Vitest |
+| Registry state + scene coordination | Unit (mock-registry) | `tests/game-scenes.test.js` | Vitest |
+| Phaser scene rendering + player input | E2E | `tests/*.e2e.js` | Playwright |
+
+**Critical constraint**: never import `src/gameobjects/*.js` or `src/scenes/*.js` in Vitest — they extend Phaser classes and throw in jsdom. Extract pure logic to standalone modules first, then test those.
+
+### Inlined constants rule
+
+When a test inlines constants from source files (e.g. `NPC_CONFIGS`, `ROCKET_SYSTEMS`), add:
+```js
+// inlined from src/gameobjects/npc.js — keep in sync
+```
+And treat a sync failure as a **test bug** to fix immediately — it silently masks regressions.
+
+---
+
+**Last Updated**: 2026-04-11
 **Mandatory for**: All agents

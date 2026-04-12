@@ -7,11 +7,17 @@
 - `window.game` is set in `src/main.js` (line 43) after Phaser init
 
 ## Test Infrastructure
-- Unit tests: `vitest run` → `tests/*.test.js` (201 tests, all green as of task 4.2)
-- E2E tests: `playwright test` → `tests/*.e2e.js` — currently can't run (browsers not installed)
-- Playwright browsers must be installed separately: `npx playwright install`
+- Unit tests: `vitest run` → `tests/*.test.js` (391 tests as of PRs #133/#134 merge, all green)
+- E2E tests: `playwright test` → `tests/*.e2e.js` (13 tests, all pass after `npx playwright install chromium`)
+- Playwright browsers must be installed separately: `npx playwright install chromium`
+- `node_modules` may be absent after a fresh clone/pull — run `npm install` before any test run
 - **E2E tests are NOT wired into CI/CD** — `deploy.yml` only runs `npm test` (unit tests)
 - Vitest excludes `src/scenes/*.js` from coverage tracking
+
+## ⚠️ Stale Inlined Constants Risk
+- `npc-logic.test.js` inlines `NPC_CONFIGS` but was not updated when PR #133 changed quest reward XP from 30/40/35 → 200 for all NPCs. Tests still passed because assertions use `NPC_CONFIGS.harvey.quest.reward.xp` (self-referential), not the literal source value.
+- The `// inlined from X.js — keep in sync` comment is the only enforcement — it is **not machine-checked**.
+- When inlining constants: always use the literal value in at least one assertion so a sync failure causes a real test failure. Never write `expect(INLINED_CONST).toBe(INLINED_CONST)` — that tests nothing.
 
 ## Known Issues in E2E Tests (game-flow.e2e.js)
 See `e2e-issues.md` for full detail. Key problems:
