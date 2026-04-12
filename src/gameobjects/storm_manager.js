@@ -15,6 +15,15 @@
 // ── Pure phase logic (re-exported for unit tests) ──────────────────────────
 export { getPhaseForTimeLeft } from './storm_phase_logic.js';
 
+// ── Lightning logic (pure — imported for bolt generation, intervals) ────────
+import {
+  pickInterval,
+  getShakeProfile,
+  getThunderDelay,
+  generateBoltPoints,
+  isLightningPhase,
+} from './lightning_logic.js';
+
 // ── Per-phase rain config ──────────────────────────────────────────────────
 const RAIN_CONFIG = {
   1: { quantity: 1,  freq: 120, speedX: 0,                        speedY: { min: 280, max: 360 }, alpha: { start: 0.25, end: 0 }, lifespan: 900 },
@@ -188,6 +197,11 @@ export default class StormManager {
           if (!this._destroyed) this._scene.cameras.main.shake(600, 0.007);
         },
       });
+    }
+
+    // Lightning starts at Phase 2 and intensifies through Phase 4.
+    // Restart scheduler each phase transition so the interval range updates.
+    if (isLightningPhase(phase)) {
       this._startLightning();
     }
 
@@ -200,22 +214,111 @@ export default class StormManager {
     this._scene.registry.set('stormPhase', phase);
   }
 
-  // ── Phase 4 lightning ────────────────────────────────────────────────────
+  // ── Lightning system (Phase 2-4) ────────────────────────────────────────
 
+  /**
+   * Starts (or restarts) the recurring lightning scheduler for the current phase.
+   * Called on every phase transition to >= 2, so the interval range updates.
+   */
   _startLightning() {
+    // Cancel any in-flight timer so intervals always reflect the new phase
+    this._lightningTimer?.remove(false);
+    this._lightningTimer = null;
+
     const scheduleNext = () => {
       if (this._destroyed) return;
-      const delay = Phaser.Math.Between(5000, 15000);
+      const delay = pickInterval(this._currentPhase);
+      if (delay === null) return; // Phase 1 or unexpected — bail
+
       this._lightningTimer = this._scene.time.delayedCall(delay, () => {
         if (this._destroyed) return;
-        this._scene.cameras.main.flash(80, 255, 255, 255);
-        this._scene.time.delayedCall(140, () => {
-          if (!this._destroyed) this._scene.cameras.main.flash(60, 255, 255, 255);
-        });
+        this._fireLightning();
         scheduleNext();
       });
     };
+
     scheduleNext();
+  }
+
+  /**
+   * Executes one lightning event: camera flash, procedural bolt, item reveal,
+   * proximity shake, and delayed thunder SFX.
+   */
+  _fireLightning() {
+    const cam    = this._scene.cameras.main;
+    const { width, height } = this._scene.sys.game.config;
+
+    // 100 ms white flash (spec: "Camera flash white 100ms on strike")
+    cam.flash(100, 255, 255, 255);
+
+    // Procedural bolt rendered in screen-space
+    const boltX = Phaser.Math.Between(Math.floor(width * 0.1), Math.floor(width * 0.9));
+    this._renderBolt(boltX, 0, Math.floor(height * 0.65));
+
+    // Item reveal — searchable containers flash white for ~2 frames
+    this._revealItems();
+
+    // Shake: Phase 4 = close (intense), Phase 2-3 = distant (subtle)
+    const profile = getShakeProfile(this._currentPhase >= 4 ? 'close' : 'distant');
+    cam.shake(profile.duration, profile.intensity);
+
+    // Delayed thunder SFX — simulate bolt distance
+    const thunderDelay = getThunderDelay();
+    this._scene.time.delayedCall(thunderDelay, () => {
+      if (this._destroyed || !this._scene?.sound) return;
+      // Graceful no-op if 'thunder' key not yet loaded
+      try { this._scene.sound.play('thunder', { volume: 0.6 }); } catch (_) { /* missing asset */ }
+    });
+  }
+
+  /**
+   * Draws a jagged lightning bolt using Phaser Graphics in screen-space.
+   * Bolt fades out over ~100 ms then self-destructs.
+   */
+  _renderBolt(startX, startY, endY) {
+    const points = generateBoltPoints(startX, startY, endY, 8, 40);
+
+    const gfx = this._scene.add.graphics();
+    gfx.setScrollFactor(0);
+    gfx.setDepth(500); // Above rain, overlay, player — below pure-UI
+
+    // Glow layer: wider, soft blue-white, low alpha
+    gfx.lineStyle(6, 0xbbddff, 0.25);
+    gfx.beginPath();
+    gfx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) gfx.lineTo(points[i].x, points[i].y);
+    gfx.strokePath();
+
+    // Core bolt: crisp white, 2 px
+    gfx.lineStyle(2, 0xffffff, 1.0);
+    gfx.beginPath();
+    gfx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) gfx.lineTo(points[i].x, points[i].y);
+    gfx.strokePath();
+
+    // Fade out over 100 ms then destroy
+    this._scene.tweens.add({
+      targets:    gfx,
+      alpha:      0,
+      duration:   100,
+      ease:       'Linear',
+      onComplete: () => gfx.destroy(),
+    });
+  }
+
+  /**
+   * Flashes all undestroyed searchable containers white for ~80 ms.
+   * This is the "item reveal" mechanic — lightning briefly illuminates loot locations.
+   */
+  _revealItems() {
+    const containers = this._scene.zoneManager?.containers ?? [];
+    for (const c of containers) {
+      if (c._destroyed) continue;
+      c.sprite?.setTint(0xffffff);
+      this._scene.time.delayedCall(80, () => {
+        if (!c._destroyed) c.sprite?.clearTint();
+      });
+    }
   }
 
   // ── Cleanup ──────────────────────────────────────────────────────────────

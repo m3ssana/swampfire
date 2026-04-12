@@ -158,11 +158,16 @@ export default class Bootloader extends Phaser.Scene {
     // "start" → loot pickup  "crash" → workbench craft  "trap" → rocket install
     // "win"   → launch sting  "death" → player death
     // (climb0-4, bubble, jump, fireball, splash, music removed — legacy Dungeon Bobble, never used)
-    this.load.audio("start",  "assets/sounds/start.mp3");
-    this.load.audio("crash",  "assets/sounds/crash.mp3");
-    this.load.audio("trap",   "assets/sounds/trap.mp3");
-    this.load.audio("win",    "assets/sounds/win.mp3");
-    this.load.audio("death",  "assets/sounds/death.mp3");
+    this.load.audio("start",   "assets/sounds/start.mp3");
+    this.load.audio("crash",   "assets/sounds/crash.mp3");
+    this.load.audio("trap",    "assets/sounds/trap.mp3");
+    this.load.audio("win",     "assets/sounds/win.mp3");
+    this.load.audio("death",   "assets/sounds/death.mp3");
+
+    // ── Storm SFX ─────────────────────────────────────────────────────────────
+    // 'thunder' — delayed crack/rumble on each lightning strike (9.1.1)
+    // Asset file: assets/sounds/thunder.mp3  (missing → graceful no-op in StormManager)
+    this.load.audio("thunder", "assets/sounds/thunder.mp3");
 
   }
 

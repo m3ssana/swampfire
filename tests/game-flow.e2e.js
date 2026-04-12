@@ -380,6 +380,40 @@ test.describe('Swampfire Game E2E Tests', () => {
   });
 });
 
+// ── Lightning System E2E Stubs (9.1.1) ────────────────────────────────────
+// These stubs will become real tests once implementation is deployed.
+// They verify Phaser-dependent behaviour that cannot be unit-tested.
+test.describe('Lightning system (Phase 2-4)', () => {
+  test.skip('camera flash fires 100ms white on lightning strike', async ({ page }) => {
+    // Setup: advance to Phase 2 (timeLeft = 2600)
+    // Trigger: wait for lightning event (intercept cam.flash call)
+    // Assert: flash was called with r=255, g=255, b=255, duration=100
+  });
+
+  test.skip('bolt Graphics object is created and destroyed within 200ms', async ({ page }) => {
+    // Setup: advance to Phase 2
+    // Trigger: lightning fires
+    // Assert: a Graphics object at depth 500 appears, then is removed within 200ms
+  });
+
+  test.skip('searchable containers briefly tint white during lightning', async ({ page }) => {
+    // Setup: zone 0 loaded, containers visible
+    // Trigger: lightning fires
+    // Assert: container sprite.tintTopLeft === 0xffffff for ~80ms then restores
+  });
+
+  test.skip('shake profile is distant (0.003) for Phase 2-3 and close (0.008) for Phase 4', async ({ page }) => {
+    // Setup: advance to Phase 2, observe shake intensity
+    // Advance to Phase 4, observe shake intensity
+    // Assert: Phase 4 shake > Phase 2 shake
+  });
+
+  test.skip('lightning fires more frequently in Phase 4 than Phase 2', async ({ page }) => {
+    // Setup: track lightning event count over 60 seconds in Phase 2 vs Phase 4
+    // Assert: Phase 4 count > Phase 2 count (shorter interval)
+  });
+});
+
 // ── Post-Deployment E2E Tests ──────────────────────────────────────────────
 // These run against the live deployed game to verify everything works in production
 
