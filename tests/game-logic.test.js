@@ -4,7 +4,7 @@
  * Unit tests for core game systems that don't require the full Phaser runtime:
  * - Inventory management (add/remove items, persistence)
  * - Crafting recipes (ingredient consumption, component creation)
- * - Rocket installation (4-system sequence, win condition)
+ * - Rocket installation (5-system sequence, win condition)
  * - State transitions (hp loss, xp gain, timer decrement)
  * - Loot table validation (weighted random selection)
  */

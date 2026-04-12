@@ -4,7 +4,7 @@
  * Handles all three end states:
  *   "death"   — HP hit 0. Florida Man headline + stats.
  *   "timeout" — Timer hit 0:00. Hurricane made landfall.
- *   "victory" — All 4 systems installed. Placeholder for Phase 6.
+ *   "victory" — All 5 systems installed. Placeholder for Phase 6.
  *
  * Stats are read from Phaser's global registry (set by HUDScene / GameScene).
  * SPACE or ENTER returns to the splash screen.
@@ -115,11 +115,11 @@ export default class Outro extends Phaser.Scene {
       .setTint(0xdddddd)
       .setCenterAlign();
 
-    // Rocket progress — 0/4 until Phase 2 wires up system tracking
+    // Rocket progress — 0/5 until Phase 2 wires up system tracking
     const systems = this.registry.get("systemsInstalled") ?? 0;
     this.add
       .bitmapText(this.cx, 148, "default",
-        `Juan's rocket sat ${systems}/4 systems complete\nin Cypress Creek Preserve.`, 15)
+        `Juan's rocket sat ${systems}/5 systems complete\nin Cypress Creek Preserve.`, 15)
       .setOrigin(0.5, 0)
       .setTint(0x4fffaa)
       .setCenterAlign();
@@ -169,7 +169,7 @@ export default class Outro extends Phaser.Scene {
     // SYSTEMS INSTALLED — victory screen only
     const systems = this.registry.get("systemsInstalled") ?? 0;
     this.add
-      .bitmapText(this.cx, statsY + 55, "default", `SYSTEMS INSTALLED: ${systems} / 4`, 18)
+      .bitmapText(this.cx, statsY + 55, "default", `SYSTEMS INSTALLED: ${systems} / 5`, 18)
       .setOrigin(0.5)
       .setTint(0x00eeff);
   }
