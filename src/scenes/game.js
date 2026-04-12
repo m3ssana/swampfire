@@ -294,6 +294,7 @@ export default class Game extends Phaser.Scene {
     // Zoom bump when a rocket component lands in inventory (type: 'component')
     if (itemDef.type === 'component') {
       const cam = this.cameras.main;
+      this.tweens.killTweensOf(this.cameras.main);
       this.tweens.add({
         targets: cam,
         zoom: 1.6,
@@ -353,7 +354,7 @@ export default class Game extends Phaser.Scene {
     @param {number} x       - World X of the event source
     @param {number} y       - World Y of the event source
     @param {number} amount  - XP amount gained (ignored if ≤ 0)
-    @param {string} context - 'loot' | 'craft' | 'install'
+    @param {string} context - 'loot' | 'craft' | 'install' | 'quest' | 'nearmiss' | 'discover'
   */
   showXPGain(x, y, amount, context = 'loot') {
     if (amount <= 0) return;

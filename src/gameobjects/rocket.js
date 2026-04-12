@@ -92,13 +92,15 @@ export default class Rocket {
     this.scene.cameras.main.flash(200, 0xff, 0x44, 0x22);
     this.scene.cameras.main.shake(180, 0.008);
     // Brief zoom-in to 2.0x then pull back to 1.5x
+    const cam = this.scene.cameras.main;
+    this.scene.tweens.killTweensOf(cam);
     this.scene.tweens.add({
-      targets: this.scene.cameras.main,
+      targets: cam,
       zoom: 2.0,
       duration: 150,
       ease: 'Quad.Out',
       onComplete: () => this.scene.tweens.add({
-        targets: this.scene.cameras.main,
+        targets: cam,
         zoom: 1.5,
         duration: 400,
         ease: 'Quad.InOut',
