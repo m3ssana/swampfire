@@ -126,6 +126,31 @@ node scripts/generate-juan-sprite.js # → public/assets/images/player.png
 
 Scripts use ESM (`import`) and pure Node.js (no npm dependencies beyond zlib). Do not edit the output files by hand.
 
+### Test-Driven Development
+
+**This project uses TDD. Tests are written before implementation — always.**
+
+The workflow for every feature or bug fix:
+
+1. **Read the SPEC** — identify the acceptance criteria for what you're building
+2. **Write failing tests first** — unit tests for pure logic, E2E stubs for Phaser-dependent behaviour
+3. **Verify tests fail** — a test that passes before implementation tests nothing
+4. **Implement** — write the minimum code to make the tests pass
+5. **Refactor** — clean up with tests as the safety net
+
+**qa-eng writes the failing tests. The implementing agent makes them pass.**
+When a feature spans both agents, qa-eng opens a test PR first; the feature PR merges after.
+
+For pure-logic systems (storm phases, XP values, loot tables, hazard thresholds):
+- Extract logic to a standalone module with no Phaser imports
+- Write Vitest unit tests against that module before writing any Phaser-dependent code
+- The extracted module IS the spec contract — tests lock its behaviour
+
+For Phaser-dependent behaviour (scenes, game objects, cameras):
+- Write Playwright E2E stubs that describe the expected player-facing outcome
+- These stubs fail or skip until the implementation is complete
+- Scene-level unit tests use the mock-registry pattern (see `tests/game-scenes.test.js`)
+
 ### Testing Constraints
 
 **Never import `src/gameobjects/*.js` or `src/scenes/*.js` directly in Vitest tests.** These files extend Phaser classes, which throws `ReferenceError: Phaser is not defined` in jsdom. Instead:
