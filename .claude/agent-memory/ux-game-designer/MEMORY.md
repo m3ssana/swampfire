@@ -67,7 +67,7 @@ Quick reference:
 - Under-the-Wire achievement (launch < 2 min remaining) = peak clutch share moment
 
 ## Confirmed Implementation Details (Phase 0-2 done)
-- Registry keys: `hp` (0-3), `xp`, `timeLeft` (3600 start), `timerExpired` (bool), `systemsInstalled` (0-5)
+- Registry keys: `hp` (0-3), `xp`, `timeLeft` (3600 start), `timerExpired` (bool), `systemsInstalled` (0-4)
 - HUD: parallel scene launched from game.js; guards double-launch with `scene.isActive("hud")`
 - HUD owns countdown tick via `this.time.addEvent`. Writes `timerExpired=true` when done.
 - Game listens for `changedata-timerExpired` event (specific key, not all mutations)
@@ -98,12 +98,6 @@ Agent({ subagent_type: "...", isolation: "worktree", prompt: "..." })
 If worktree isolation isn't used and branches get cross-contaminated, check
 `git branch --show-current` before every commit, and `git log --oneline --all --graph`
 to see where commits actually landed.
-
-## ⚠️ NEVER commit directly to main — ALWAYS branch first
-Every change, no matter how small, goes through `git checkout -b feature/...` BEFORE any edits.
-Committing to main then reverting leaves the feature branch with no unique commits (GitHub
-rejects the PR with "No commits between main and feature/..."). Recovery requires cherry-pick.
-Correct order: (1) checkout branch, (2) make edits, (3) commit, (4) push, (5) gh pr create.
 
 ## ⚠️ GitHub Workflow — HUMAN-IN-THE-LOOP (enforced 2026-03-08)
 **ALL changes** (features, bug fixes, docs) go through a branch + PR. Nothing direct to main.
@@ -146,18 +140,32 @@ Always comment on the issue at the START of work, not just at the end.
 - **Live URL:** https://swampfire.messana.ai/
 - Raw GitHub Pages URL (`m3ssana.github.io/swampfire`) redirects — always use the custom domain in docs
 
-## TODO Progress (as of 2026-03-28 spec gap audit — third pass)
-All of Phase 0–5.2, 5.3a, 5.4, 6.1–6.3, 7.1–7.3, 8 done. In progress: 5.3b–5.3d.
-Phase 9 (Spec Compliance): 40 gaps tracked, issues #91–#132.
-P0 (4): ✅ XP values (#112, 085686c), ✅ camera defaults (#113, 755245c), ⏳ 5th rocket system + partial launch (#91/#111, PR #137 pending review)
-P1 (7): lightning, near-miss feedback, save system, pause menu, objective banner, TAB checklist, MenuScene
-P2 (16): Sgt. Polk, hazards, lighting, flashlight, road events, minimap, progress ring, crafting UI,
-         achievements, particles, launch cutscene, victory screen, audio, food throw, NPC sprites, perf tests
-P3 (13): shaders, fire tower, map, leaderboard, mobile, Juan sprite, accessibility, shake governor,
-         time's up screen, HUD timer, NPC rewards, BootScene, texture atlases, culling/sleep, telemetry
-Key dependency chains: #91→#111→#96 (5th system first), #98→#99→#115 (save before pause/menu),
-  #102→#101 (lighting before flashlight), #112→#93 (XP values before near-miss), #106→#119 (leaderboard before victory bests),
-  #108→#95 (minimap data layer before full-screen map), #129→#120+#128 (atlases before sprites)
+## TODO Progress (refreshed 2026-04-12)
+All of Phase 0–5.2, 5.3a, 5.4, 6.1–6.3, 7.1–7.3, 8 done.
+Phase 9: 40 gaps tracked (issues #91–#132).
+P0 DONE: 9.0.1 XP values ✅ (085686c), 9.0.2 camera defaults ✅ (755245c),
+         9.0.3 5th rocket system ✅ (9d77971), 9.0.4 partial launch PR #137 open
+P1 IN PROGRESS: 9.1.1 lightning PR #140 open; remaining: #93 #98 #99 #97 #94 #115 #100
+P2/P3: untouched
+Key dependency chains: #98→#99→#115 (save→pause→menu), #102→#101 (lighting→flashlight),
+  #108→#95 (minimap data→full map), #129→#120+#128 (atlases→sprites)
+
+## Phase 9.1.1 — Lightning System (2026-04-12)
+- `src/gameobjects/lightning_logic.js` — pure module, no Phaser; safe to unit test
+  - `LIGHTNING_INTERVALS`: phase 2→{20000,30000}ms, 3→{10000,20000}, 4→{5000,15000}
+  - `SHAKE_PROFILES`: distant={0.003,200ms}, close={0.008,400ms}
+  - `THUNDER_DELAY_MS`: {MIN:200, MAX:800}
+  - `generateBoltPoints(x,y,endY,numSeg,jitter)` → [{x,y}] array (numSeg+1 points)
+  - `pickInterval(phase)` → random ms in range or null (Phase 1)
+  - `isLightningPhase(phase)` → true for phase >= 2
+- `StormManager` updated: `_startLightning()` now Phase 2-4 (not just 4); calls `_fireLightning()`
+  - `_renderBolt()`: `scene.add.graphics()` with glow layer (6px, 0xbbddff, 0.25α) + core (2px, white)
+    - Set ScrollFactor(0), depth 500; fade alpha→0 over 100ms via tween, then destroy
+  - `_revealItems()`: loops `zoneManager.containers`, sets `sprite.setTint(0xffffff)`, restores after 80ms
+  - `_fireLightning()`: cam.flash(100,255,255,255) + _renderBolt + _revealItems + shake + thunder delay
+  - Thunder SFX wrapped in try/catch — graceful no-op if `thunder.mp3` not present
+- `Bootloader`: added `thunder.mp3` load entry (asset file not yet in repo — no-op until added)
+- 47 new unit tests in `tests/lightning-logic.test.js`; 5 E2E stubs in `game-flow.e2e.js`
 
 ## Phase 4.2 — Hazard Game Objects (confirmed patterns)
 
@@ -362,24 +370,22 @@ candidates array `[...unsearched containers, workbench, rocket]`; first within R
 
 ### Workbench (`src/gameobjects/workbench.js`)
 - Consumes 2 `type:"ingredient"` items, produces next in ROCKET_SYSTEMS[totalBuilt]
-- `totalBuilt = systemsInstalled + inventory.components.length` — cap at 5
-- ROCKET_SYSTEMS: Fuel Injector / Oxidizer Tank / Avionics Board / Battery Array / Pressure Regulator (5 systems)
+- `totalBuilt = systemsInstalled + inventory.components.length` — cap at 4
 - Awards +15 XP per craft. Camera shake 120ms/0.006.
 - Error popups via `scene.showPoints()` with red 0xff4444 tint
 
 ### Rocket (`src/gameobjects/rocket.js`)
-- 6 tint states: TINTS[0–5] grey→gold; hot pink (0xff44aa) at 4/5, gold (0xffee44) at 5/5
-- `updateVisual()` called after every install; clamps to `Math.min(n, 5)`
-- `promptText()`: `[E] Install` (n<4) | `[E] Launch (4/5)` (n==4, partial warning) | `[E] Launch` (n>=5)
-- n>=4 → calls `scene.finishScene(n>=5 ? 'full' : 'partial')` — partial=red hull-breach fx
-- `finishScene('partial')` → `endRun('partial_victory')`; `finishScene('full')` → `endRun('victory')`
+- 6 tint states: TINTS[0–5] grey→gold via `this.sprite.setTint(TINTS[n])`
+  - [0]=0x666666, [1]=0x998877, [2]=0xaabb99, [3]=0xbbddcc, [4]=0xff44aa (4/5 hot-pink), [5]=0xffee44 (gold)
+- `updateVisual()` called after every install to keep sprite in sync
+- promptText(): "[E] Launch" at n>=5, "[E] Launch (4/5)" at n>=4, else "[E] Install"
+- n>=4 → calls `scene.finishScene(n>=5 ? 'full' : 'partial')` → partial_victory or victory
+- n<4 installs consume first `type:"component"` from inventory; awards +20 XP
 
 ### Registry addition
 - `systemsInstalled` (0–5): seeded in `transition.loadNext()`, updated in `rocket.interact()`
-- HUD watches via `onRegistryChange` case `"systemsInstalled"` → `updateSystems(n)`
-- `updateSystems`: text turns cyan (0x4fffaa) at 5/5, hot pink (0xff44aa) at 4/5, gold (0xffee44) otherwise
+- HUD counter shows "N / 5"; turns cyan (0x4fffaa) at 5, hot-pink (0xff44aa) at 4, gold otherwise
 - Persists across death/restart within a run; reset only on new run via transition
-- ⚠️ Never implement 5th system without partial launch (9.0.4) — they're co-dependent
 
 ### Texture generation
 - `generateWorkbenchTexture()` + `generateRocketTexture()` in `bootloader.preload()`
