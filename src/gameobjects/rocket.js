@@ -1,18 +1,19 @@
 /**
  * Rocket — E-key installable that accepts crafted components and launches when full.
  *
- * 5 visual states (0–4 systems installed), implemented via tint on a single sprite:
+ * 6 visual states (0–5 systems installed), implemented via tint on a single sprite:
  *   0  Grey    — untouched
  *   1  Warm    — first system in
- *   2  Warmer  — halfway there
- *   3  Almost  — one away
- *   4  Gold    — all systems go; pressing E triggers finishScene()
+ *   2  Warmer  — two in
+ *   3  Almost  — halfway there
+ *   4  Hot     — one away
+ *   5  Gold    — all systems go; pressing E triggers finishScene()
  *
- * Prompt text flips from "[E] Install" to "[E] Launch" after the 4th system.
+ * Prompt text flips from "[E] Install" to "[E] Launch" after the 5th system.
  * This is re-evaluated on every proximity entry so the text is always fresh.
  */
 
-const TINTS = [0x666666, 0x998877, 0xaabb99, 0xbbddcc, 0xffee44];
+const TINTS = [0x666666, 0x998877, 0xaabb99, 0xbbddcc, 0xff44aa, 0xffee44];
 
 export default class Rocket {
   /**
@@ -33,13 +34,13 @@ export default class Rocket {
 
   promptText() {
     const n = this.scene.registry.get('systemsInstalled') ?? 0;
-    return n >= 4 ? '[E] Launch' : '[E] Install';
+    return n >= 5 ? '[E] Launch' : '[E] Install';
   }
 
   /**
    * Called when player presses E while this rocket is nearby.
    *
-   * - If all 4 systems installed → triggers the win condition.
+   * - If all 5 systems installed → triggers the win condition.
    * - If a crafted component exists → installs it, increments counter, updates visual.
    * - Otherwise → shows error prompt.
    */
@@ -48,7 +49,7 @@ export default class Rocket {
     const inv = this.scene.registry.get('inventory') ?? [];
 
     // All systems installed — launch! Guard against double-press during cinematic.
-    if (n >= 4) {
+    if (n >= 5) {
       if (!this.scene._launching) this.scene.finishScene();
       return;
     }
@@ -117,7 +118,7 @@ export default class Rocket {
    */
   updateVisual() {
     const n = this.scene.registry.get('systemsInstalled') ?? 0;
-    this.sprite.setTint(TINTS[Math.min(n, 4)]);
+    this.sprite.setTint(TINTS[Math.min(n, 5)]);
   }
 
   // ── Cleanup ──────────────────────────────────────────────────────────────────

@@ -134,12 +134,12 @@ describe('Achievement check() functions', () => {
     it('1 → true',  () => { expect(a.check(1)).toBe(true);  });
   });
 
-  describe('all_systems — systemsInstalled >= 4', () => {
+  describe('all_systems — systemsInstalled >= 5', () => {
     const a = ACHIEVEMENTS.find(x => x.id === 'all_systems');
 
-    it('3 → false', () => { expect(a.check(3)).toBe(false); });
-    it('4 → true',  () => { expect(a.check(4)).toBe(true);  });
-    it('5 → true (defensive against overshoot)', () => { expect(a.check(5)).toBe(true); });
+    it('4 → false', () => { expect(a.check(4)).toBe(false); });
+    it('5 → true',  () => { expect(a.check(5)).toBe(true);  });
+    it('6 → true (defensive against overshoot)', () => { expect(a.check(6)).toBe(true); });
   });
 
   describe('explorer — visitedZones.length >= 2', () => {
@@ -227,21 +227,21 @@ describe('AchievementManager — unlock via registry change', () => {
     expect(mgr.isUnlocked('first_install')).toBe(true);
   });
 
-  it('all_systems unlocks when systemsInstalled reaches 4', () => {
+  it('all_systems unlocks when systemsInstalled reaches 5', () => {
     const scene = makeScene({ systemsInstalled: 0 });
     const mgr = makeManager(scene);
 
-    scene.registry.set('systemsInstalled', 4);
+    scene.registry.set('systemsInstalled', 5);
 
     expect(mgr.isUnlocked('all_systems')).toBe(true);
     expect(mgr.toasts).toContain('★ LAUNCH READY');
   });
 
-  it('explorer and all_systems unlock in same change when jumping 0→4', () => {
+  it('explorer and all_systems unlock in same change when jumping 0→5', () => {
     const scene = makeScene({ systemsInstalled: 0 });
     const mgr = makeManager(scene);
 
-    scene.registry.set('systemsInstalled', 4);
+    scene.registry.set('systemsInstalled', 5);
 
     // Both first_install AND all_systems should unlock from same change
     expect(mgr.isUnlocked('first_install')).toBe(true);
