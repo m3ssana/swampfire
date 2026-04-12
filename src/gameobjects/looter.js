@@ -225,6 +225,9 @@ export default class Looter {
     const { x, y } = this._body.position;
     this.scene.showPoints(x, y - 28, '! looter !', 0xff4444);
     this.scene.cameras.main.flash(50, 0xff, 0x44, 0x44, true);
+    const xp = this.scene.registry.get('xp') ?? 0;
+    this.scene.registry.set('xp', xp + 15);
+    this.scene.showXPGain(x, y - 52, 15, 'nearmiss');
 
     this.scene.time.delayedCall(2000, () => { this._nearPlayer = false; });
   }

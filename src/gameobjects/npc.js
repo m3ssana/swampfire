@@ -8,7 +8,7 @@ const NPC_CONFIGS = {
     doneDialog: 'You\'re a legend. Go launch that thing!',
     quest: {
       wantLabel: 'Copper Wiring',
-      reward: { xp: 30, item: { label: 'Solenoid Valve', type: 'ingredient', tint: 0x88aaff } }
+      reward: { xp: 200, item: { label: 'Solenoid Valve', type: 'ingredient', tint: 0x88aaff } }
     }
   },
   maria: {
@@ -18,7 +18,7 @@ const NPC_CONFIGS = {
     doneDialog: 'Side entrance is faster — good luck out there!',
     quest: {
       wantLabel: 'Multi-tool',
-      reward: { xp: 30, item: { label: 'Steel Bracket', type: 'ingredient', tint: 0xaaaaaa } }
+      reward: { xp: 200, item: { label: 'Steel Bracket', type: 'ingredient', tint: 0xaaaaaa } }
     }
   },
   dale: {
@@ -28,7 +28,7 @@ const NPC_CONFIGS = {
     doneDialog: 'Storm eye passes soon. You got this, son.',
     quest: {
       wantLabel: 'Road Flare',
-      reward: { xp: 40 }
+      reward: { xp: 200 }
     }
   },
   reeves: {
@@ -38,7 +38,7 @@ const NPC_CONFIGS = {
     doneDialog: 'Lab\'s open! Pressure Gauge inside — go go go!',
     quest: {
       wantLabel: 'Hydraulic Seal',
-      reward: { xp: 35, item: { label: 'Pressure Gauge', type: 'ingredient', tint: 0xffaa44 } }
+      reward: { xp: 200, item: { label: 'Pressure Gauge', type: 'ingredient', tint: 0xffaa44 } }
     }
   }
 };
@@ -127,7 +127,7 @@ export default class NPC {
       this.scene.showXPGain(
         this.sprite.x, this.sprite.y - 40,
         this._config.quest.reward.xp,
-        'loot'
+        'quest'
       );
 
       // Add reward item if present
