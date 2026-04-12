@@ -60,9 +60,9 @@ export const ACHIEVEMENTS = [
   {
     id:    'all_systems',
     label: '★ LAUNCH READY',
-    // all 4 rocket systems installed — rocket is ready to fire
+    // all 5 rocket systems installed — rocket is ready to fire
     watch: 'systemsInstalled',
-    check: (value) => value >= 4,
+    check: (value) => value >= 5,
   },
   {
     id:    'explorer',
