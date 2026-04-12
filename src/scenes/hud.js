@@ -128,7 +128,7 @@ export default class HUD extends Phaser.Scene {
 
     // Live systems counter — updated via updateSystems()
     this.systemsText = this.add
-      .bitmapText(mx, my - 8, 'default', '0 / 5', 26)
+      .bitmapText(mx, my - 8, 'default', '0 / 4', 26)
       .setOrigin(0.5).setTint(0xffee44);
 
     // Footer label
@@ -296,8 +296,8 @@ export default class HUD extends Phaser.Scene {
   }
 
   updateSystems(n) {
-    this.systemsText?.setText(`${n} / 5`);
-    this.systemsText?.setTint(n >= 5 ? 0x4fffaa : 0xffee44);
+    this.systemsText?.setText(`${n} / 4`);
+    this.systemsText?.setTint(n >= 4 ? 0x4fffaa : 0xffee44);
   }
 
   // ─── Cleanup ────────────────────────────────────────────────────────────────

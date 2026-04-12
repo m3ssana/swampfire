@@ -8,15 +8,14 @@
  *
  * Guards:
  *   - Requires exactly ≥2 ingredients; shows error if fewer
- *   - No-ops if all 5 systems are already built (installed + crafted ≥ 5)
+ *   - No-ops if all 4 systems are already built (installed + crafted ≥ 4)
  */
 
 const ROCKET_SYSTEMS = [
-  { label: 'Fuel Injector',       xp: 15, tint: 0xff6600 },
-  { label: 'Oxidizer Tank',       xp: 15, tint: 0x00ccff },
-  { label: 'Avionics Board',      xp: 15, tint: 0x00ff88 },
-  { label: 'Battery Array',       xp: 15, tint: 0xffee00 },
-  { label: 'Pressure Regulator',  xp: 15, tint: 0xff44aa },
+  { label: 'Fuel Injector',  xp: 15, tint: 0xff6600 },
+  { label: 'Oxidizer Tank',  xp: 15, tint: 0x00ccff },
+  { label: 'Avionics Board', xp: 15, tint: 0x00ff88 },
+  { label: 'Battery Array',  xp: 15, tint: 0xffee00 },
 ];
 
 export default class Workbench {
@@ -46,8 +45,8 @@ export default class Workbench {
     const crafted    = inv.filter(i => i.type === 'component').length;
     const totalBuilt = installed + crafted;
 
-    // All 5 systems already accounted for — nothing left to build
-    if (totalBuilt >= 5) {
+    // All 4 systems already accounted for — nothing left to build
+    if (totalBuilt >= 4) {
       this.scene.showPoints(this.sprite.x, this.sprite.y - 20, 'All systems built!', 0x888888);
       return;
     }
