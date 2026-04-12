@@ -348,20 +348,22 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 
 ### 9.0 Critical Fixes (P0)
 
-- ⏳ **9.0.1 Fix XP values: install +500, quest +200, per SPEC table** [#112](https://github.com/m3ssana/swampfire/issues/112)
+- ✅ **9.0.1 Fix XP values: install +500, quest +200, per SPEC table** [#112](https://github.com/m3ssana/swampfire/issues/112) _(085686c)_
   - Install: 20→500 XP (red + flash), quest: 30→200 XP (purple), near-miss: 0→15 XP (green)
   - Road pickup +5 XP, discover zone +50 XP — currently not awarded
 
-- ⏳ **9.0.2 Fix camera defaults: lerp 0.15, zoom 1.5x, add zoom bumps** [#113](https://github.com/m3ssana/swampfire/issues/113)
+- ✅ **9.0.2 Fix camera defaults: lerp 0.15, zoom 1.5x, add zoom bumps** [#113](https://github.com/m3ssana/swampfire/issues/113) _(755245c)_
   - Camera follow lerp 0.5→0.15 (snappier), default zoom 1.0→1.5x
   - Zoom bump 1.5→1.6x on rocket part pickup; 2.0x on install cutscene
 
 - ⏳ **9.0.3 Add 5th rocket system (Pressure Regulator)** [#91](https://github.com/m3ssana/swampfire/issues/91)
   - Recipe: Hydraulic Seal + PVC Coupler → Pressure Regulator
   - Update ROCKET_SYSTEMS from 4→5, HUD counter, rocket visual states
+  - Co-implemented with 9.0.4 in PR #137
 
 - ⏳ **9.0.4 Partial launch win condition (4/5 systems)** [#111](https://github.com/m3ssana/swampfire/issues/111)
   - Launch with 4/5 triggers hull breach variant; 5/5 is full victory
+  - Co-implemented with 9.0.3 in PR #137
 
 ### 9.1 High Priority (P1)
 

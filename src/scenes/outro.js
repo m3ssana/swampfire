@@ -2,9 +2,10 @@
  * EndRunScreen (key: "outro")
  *
  * Handles all three end states:
- *   "death"   — HP hit 0. Florida Man headline + stats.
- *   "timeout" — Timer hit 0:00. Hurricane made landfall.
- *   "victory" — All 5 systems installed. Placeholder for Phase 6.
+ *   "death"           — HP hit 0. Florida Man headline + stats.
+ *   "timeout"         — Timer hit 0:00. Hurricane made landfall.
+ *   "partial_victory" — 4/5 systems installed. Hull breach escape.
+ *   "victory"         — All 5 systems installed. Full clean escape.
  *
  * Stats are read from Phaser's global registry (set by HUDScene / GameScene).
  * SPACE or ENTER returns to the splash screen.
@@ -29,7 +30,7 @@ export default class Outro extends Phaser.Scene {
   }
 
   init(data) {
-    this.state        = data.state        || "death"; // "death" | "timeout" | "victory"
+    this.state        = data.state        || "death"; // "death" | "timeout" | "partial_victory" | "victory"
     this.underTheWire = data.underTheWire ?? false;
     this.peakCombo    = data.peakCombo    ?? 0;
     this.frenzyCount  = data.frenzyCount  ?? 0;
@@ -57,9 +58,10 @@ export default class Outro extends Phaser.Scene {
     this.cameras.main.fadeIn(500, 0, 0, 0);
 
     switch (this.state) {
-      case "timeout": this.showTimeoutScreen(); break;
-      case "victory": this.showVictoryScreen(); break;
-      default:        this.showDeathScreen();   break;
+      case "timeout":         this.showTimeoutScreen();        break;
+      case "partial_victory": this.showPartialVictoryScreen(); break;
+      case "victory":         this.showVictoryScreen();        break;
+      default:                this.showDeathScreen();          break;
     }
 
     this.addShareCard();
@@ -115,7 +117,7 @@ export default class Outro extends Phaser.Scene {
       .setTint(0xdddddd)
       .setCenterAlign();
 
-    // Rocket progress — 0/5 until Phase 2 wires up system tracking
+    // Rocket progress — 0/4 until Phase 2 wires up system tracking
     const systems = this.registry.get("systemsInstalled") ?? 0;
     this.add
       .bitmapText(this.cx, 148, "default",
@@ -174,6 +176,57 @@ export default class Outro extends Phaser.Scene {
       .setTint(0x00eeff);
   }
 
+  // ─── Partial victory screen (4/5 systems — hull breach) ─────────────────────
+
+  showPartialVictoryScreen() {
+    this.cameras.main.setBackgroundColor(0x1a0505);
+
+    this.add
+      .bitmapText(this.cx, 42, "default", "PARTIAL ESCAPE", 48)
+      .setOrigin(0.5)
+      .setTint(0xff44aa);
+
+    this.add
+      .bitmapText(this.cx, 100, "default", "HULL BREACH — MISSING PRESSURE REGULATOR", 14)
+      .setOrigin(0.5)
+      .setTint(0xff6633)
+      .setCenterAlign();
+
+    this.add
+      .bitmapText(this.cx, 124, "default",
+        "Juan made it to orbit. Barely.\nThe hull breach gave him 6 hours of oxygen.", 15)
+      .setOrigin(0.5, 0)
+      .setTint(0xffffff)
+      .setCenterAlign();
+
+    this.add
+      .bitmapText(this.cx, 188, "default",
+        '"He spent them thinking about the Pressure Regulator\nhe left on the workbench."', 13)
+      .setOrigin(0.5, 0)
+      .setTint(0x888888)
+      .setCenterAlign();
+
+    if (this.underTheWire) {
+      this.add
+        .bitmapText(this.cx, 248, "default", "** UNDER THE WIRE -- < 2 MIN REMAINING **", 14)
+        .setOrigin(0.5)
+        .setTint(0xff4444)
+        .setCenterAlign();
+    }
+
+    const dividerY = this.underTheWire ? 284 : 260;
+    const statsY   = this.underTheWire ? 314 : 290;
+
+    this.addDivider(dividerY);
+    this.addStatsRow(statsY);
+
+    const systems = this.registry.get("systemsInstalled") ?? 0;
+    this.add
+      .bitmapText(this.cx, statsY + 55, "default", `SYSTEMS INSTALLED: ${systems} / 5`, 18)
+      .setOrigin(0.5)
+      .setTint(0xff44aa);
+  }
+
   // ─── Shared layout helpers ──────────────────────────────────────────────────
 
   addDivider(y) {
@@ -222,9 +275,11 @@ export default class Outro extends Phaser.Scene {
 
     const stateLabel = this.state === "victory"
       ? `Escaped Hurricane Kendra in ${this.formatTime(this.elapsed)} with ${this.xp} XP.${this.underTheWire ? ' Under the Wire!' : ''}`
-      : this.state === "timeout"
-        ? `Survived ${this.formatTime(this.elapsed)} before Hurricane Kendra made landfall.`
-        : `Survived ${this.formatTime(this.elapsed)} and earned ${this.xp} XP before going down.`;
+      : this.state === "partial_victory"
+        ? `Partial escape! 4/5 systems. Hull breach in orbit. ${this.xp} XP.${this.underTheWire ? ' Under the Wire!' : ''}`
+        : this.state === "timeout"
+          ? `Survived ${this.formatTime(this.elapsed)} before Hurricane Kendra made landfall.`
+          : `Survived ${this.formatTime(this.elapsed)} and earned ${this.xp} XP before going down.`;
 
     this.add
       .bitmapText(this.cx, cardY + 36, "default", stateLabel, 12)
@@ -270,8 +325,9 @@ export default class Outro extends Phaser.Scene {
       const ctx = canvas.getContext('2d');
 
       // Background: dark solid matching end state
-      ctx.fillStyle = this.state === 'victory' ? '#051a05'
-                    : this.state === 'timeout'  ? '#05050a'
+      ctx.fillStyle = this.state === 'victory'         ? '#051a05'
+                    : this.state === 'partial_victory'  ? '#1a0505'
+                    : this.state === 'timeout'           ? '#05050a'
                     : '#1a0505';
       ctx.fillRect(0, 0, W, H);
 
@@ -293,12 +349,14 @@ export default class Outro extends Phaser.Scene {
       ctx.fillText('SWAMPFIRE PROTOCOL', W / 2, 16);
 
       // ── State line ──
-      const stateStr = this.state === 'victory' ? 'JUAN ESCAPES'
-                     : this.state === 'timeout'  ? 'HURRICANE KENDRA LANDS'
+      const stateStr = this.state === 'victory'         ? 'JUAN ESCAPES'
+                     : this.state === 'partial_victory'  ? 'PARTIAL ESCAPE'
+                     : this.state === 'timeout'           ? 'HURRICANE KENDRA LANDS'
                      : 'JUAN IS DOWN';
       ctx.font      = 'bold 26px monospace';
-      ctx.fillStyle = this.state === 'victory' ? '#4fffaa'
-                    : this.state === 'timeout'  ? '#ff6633'
+      ctx.fillStyle = this.state === 'victory'         ? '#4fffaa'
+                    : this.state === 'partial_victory'  ? '#ff44aa'
+                    : this.state === 'timeout'           ? '#ff6633'
                     : '#ff3333';
       ctx.fillText(stateStr, W / 2, 44);
 
@@ -420,7 +478,7 @@ export default class Outro extends Phaser.Scene {
   }
 
   addRestartPrompt() {
-    const label = this.state === "victory"
+    const label = (this.state === "victory" || this.state === "partial_victory")
       ? "PRESS SPACE TO PLAY AGAIN"
       : "PRESS SPACE TO TRY AGAIN";
 

@@ -241,20 +241,40 @@ describe('Game State Transitions', () => {
     expect(isGameOver(registry)).toBe(true);
   });
 
-  it('detects win condition', () => {
-    const isWin = (registry) => {
+  it('detects partial win condition (4/5 systems)', () => {
+    // 4 systems = partial launch (hull breach variant) — still a win
+    const isPartialWin = (registry) => {
+      const installed = registry.get('systemsInstalled');
+      const time = registry.get('timeLeft');
+      return installed >= 4 && time > 0;
+    };
+
+    expect(isPartialWin(registry)).toBe(false);
+
+    registry.set('systemsInstalled', 4);
+    expect(isPartialWin(registry)).toBe(true);
+
+    registry.set('timeLeft', 0);
+    expect(isPartialWin(registry)).toBe(false);
+  });
+
+  it('detects full win condition (5/5 systems)', () => {
+    const isFullWin = (registry) => {
       const installed = registry.get('systemsInstalled');
       const time = registry.get('timeLeft');
       return installed >= 5 && time > 0;
     };
 
-    expect(isWin(registry)).toBe(false);
+    expect(isFullWin(registry)).toBe(false);
+
+    registry.set('systemsInstalled', 4);
+    expect(isFullWin(registry)).toBe(false); // 4/5 = partial, not full
 
     registry.set('systemsInstalled', 5);
-    expect(isWin(registry)).toBe(true);
+    expect(isFullWin(registry)).toBe(true);
 
     registry.set('timeLeft', 0);
-    expect(isWin(registry)).toBe(false);
+    expect(isFullWin(registry)).toBe(false);
   });
 });
 
@@ -351,7 +371,7 @@ describe('Crafting & Installation State', () => {
     expect(components).toHaveLength(1);
   });
 
-  it('tracks system installation', () => {
+  it('tracks system installation up to 5', () => {
     registry.set('systemsInstalled', 1);
     expect(registry.get('systemsInstalled')).toBe(1);
 
@@ -368,7 +388,7 @@ describe('Crafting & Installation State', () => {
     expect(registry.get('systemsInstalled')).toBe(5);
   });
 
-  it('completes full craft+install sequence', () => {
+  it('completes full 5-system craft+install sequence', () => {
     // Simulate 5 craft cycles + 5 install cycles
     for (let i = 0; i < 5; i++) {
       // Craft a component
@@ -435,7 +455,7 @@ describe('Multi-State Coordination', () => {
     expect(registry.get('inventory').length).toBeGreaterThan(0);
   });
 
-  it('captures gameplay progression', () => {
+  it('captures gameplay progression through all 5 systems', () => {
     const actions = [];
 
     // Listen to state changes and track progression

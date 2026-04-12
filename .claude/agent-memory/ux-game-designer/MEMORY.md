@@ -67,7 +67,7 @@ Quick reference:
 - Under-the-Wire achievement (launch < 2 min remaining) = peak clutch share moment
 
 ## Confirmed Implementation Details (Phase 0-2 done)
-- Registry keys: `hp` (0-3), `xp`, `timeLeft` (3600 start), `timerExpired` (bool), `systemsInstalled` (0-4)
+- Registry keys: `hp` (0-3), `xp`, `timeLeft` (3600 start), `timerExpired` (bool), `systemsInstalled` (0-5)
 - HUD: parallel scene launched from game.js; guards double-launch with `scene.isActive("hud")`
 - HUD owns countdown tick via `this.time.addEvent`. Writes `timerExpired=true` when done.
 - Game listens for `changedata-timerExpired` event (specific key, not all mutations)
@@ -98,6 +98,12 @@ Agent({ subagent_type: "...", isolation: "worktree", prompt: "..." })
 If worktree isolation isn't used and branches get cross-contaminated, check
 `git branch --show-current` before every commit, and `git log --oneline --all --graph`
 to see where commits actually landed.
+
+## ⚠️ NEVER commit directly to main — ALWAYS branch first
+Every change, no matter how small, goes through `git checkout -b feature/...` BEFORE any edits.
+Committing to main then reverting leaves the feature branch with no unique commits (GitHub
+rejects the PR with "No commits between main and feature/..."). Recovery requires cherry-pick.
+Correct order: (1) checkout branch, (2) make edits, (3) commit, (4) push, (5) gh pr create.
 
 ## ⚠️ GitHub Workflow — HUMAN-IN-THE-LOOP (enforced 2026-03-08)
 **ALL changes** (features, bug fixes, docs) go through a branch + PR. Nothing direct to main.
@@ -143,7 +149,7 @@ Always comment on the issue at the START of work, not just at the end.
 ## TODO Progress (as of 2026-03-28 spec gap audit — third pass)
 All of Phase 0–5.2, 5.3a, 5.4, 6.1–6.3, 7.1–7.3, 8 done. In progress: 5.3b–5.3d.
 Phase 9 (Spec Compliance): 40 gaps tracked, issues #91–#132.
-P0 (4): XP values, camera defaults, 5th rocket system, partial launch win condition
+P0 (4): ✅ XP values (#112, 085686c), ✅ camera defaults (#113, 755245c), ⏳ 5th rocket system + partial launch (#91/#111, PR #137 pending review)
 P1 (7): lightning, near-miss feedback, save system, pause menu, objective banner, TAB checklist, MenuScene
 P2 (16): Sgt. Polk, hazards, lighting, flashlight, road events, minimap, progress ring, crafting UI,
          achievements, particles, launch cutscene, victory screen, audio, food throw, NPC sprites, perf tests
@@ -356,22 +362,24 @@ candidates array `[...unsearched containers, workbench, rocket]`; first within R
 
 ### Workbench (`src/gameobjects/workbench.js`)
 - Consumes 2 `type:"ingredient"` items, produces next in ROCKET_SYSTEMS[totalBuilt]
-- `totalBuilt = systemsInstalled + inventory.components.length` — cap at 4
+- `totalBuilt = systemsInstalled + inventory.components.length` — cap at 5
+- ROCKET_SYSTEMS: Fuel Injector / Oxidizer Tank / Avionics Board / Battery Array / Pressure Regulator (5 systems)
 - Awards +15 XP per craft. Camera shake 120ms/0.006.
 - Error popups via `scene.showPoints()` with red 0xff4444 tint
 
 ### Rocket (`src/gameobjects/rocket.js`)
-- 5 tint states: TINTS[0–4] grey→gold via `this.sprite.setTint(TINTS[n])`
-- `updateVisual()` called after every install to keep sprite in sync
-- promptText() returns "[E] Launch" when n>=4, else "[E] Install"
-- Installs consume first `type:"component"` from inventory; awards +20 XP
-- n>=4 → calls `scene.finishScene()` → `endRun("victory")`
+- 6 tint states: TINTS[0–5] grey→gold; hot pink (0xff44aa) at 4/5, gold (0xffee44) at 5/5
+- `updateVisual()` called after every install; clamps to `Math.min(n, 5)`
+- `promptText()`: `[E] Install` (n<4) | `[E] Launch (4/5)` (n==4, partial warning) | `[E] Launch` (n>=5)
+- n>=4 → calls `scene.finishScene(n>=5 ? 'full' : 'partial')` — partial=red hull-breach fx
+- `finishScene('partial')` → `endRun('partial_victory')`; `finishScene('full')` → `endRun('victory')`
 
 ### Registry addition
-- `systemsInstalled` (0–4): seeded in `transition.loadNext()`, updated in `rocket.interact()`
+- `systemsInstalled` (0–5): seeded in `transition.loadNext()`, updated in `rocket.interact()`
 - HUD watches via `onRegistryChange` case `"systemsInstalled"` → `updateSystems(n)`
-- `updateSystems`: text turns cyan (0x4fffaa) at 4/4, stays gold (0xffee44) otherwise
+- `updateSystems`: text turns cyan (0x4fffaa) at 5/5, hot pink (0xff44aa) at 4/5, gold (0xffee44) otherwise
 - Persists across death/restart within a run; reset only on new run via transition
+- ⚠️ Never implement 5th system without partial launch (9.0.4) — they're co-dependent
 
 ### Texture generation
 - `generateWorkbenchTexture()` + `generateRocketTexture()` in `bootloader.preload()`

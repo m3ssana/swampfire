@@ -18,7 +18,7 @@
  *   first_loot    — picked up any item from a container
  *   first_craft   — crafted the first rocket component
  *   first_install — installed the first rocket system
- *   all_systems   — all 5 systems installed (launch ready)
+ *   all_systems   — all 5 systems installed (full launch ready)
  *   explorer      — left the starting zone for the first time
  *   globe_trotter — visited all 5 zones (0–4)
  *   first_frenzy  — triggered FRENZY combo for the first time
@@ -60,7 +60,7 @@ export const ACHIEVEMENTS = [
   {
     id:    'all_systems',
     label: '★ LAUNCH READY',
-    // all 5 rocket systems installed — rocket is ready to fire
+    // all 5 rocket systems installed — full victory launch ready
     watch: 'systemsInstalled',
     check: (value) => value >= 5,
   },
