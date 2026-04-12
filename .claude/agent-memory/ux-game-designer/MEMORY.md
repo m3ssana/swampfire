@@ -99,6 +99,12 @@ If worktree isolation isn't used and branches get cross-contaminated, check
 `git branch --show-current` before every commit, and `git log --oneline --all --graph`
 to see where commits actually landed.
 
+## ⚠️ NEVER commit directly to main — ALWAYS branch first
+Every change, no matter how small, goes through `git checkout -b feature/...` BEFORE any edits.
+Committing to main then reverting leaves the feature branch with no unique commits (GitHub
+rejects the PR with "No commits between main and feature/..."). Recovery requires cherry-pick.
+Correct order: (1) checkout branch, (2) make edits, (3) commit, (4) push, (5) gh pr create.
+
 ## ⚠️ GitHub Workflow — HUMAN-IN-THE-LOOP (enforced 2026-03-08)
 **ALL changes** (features, bug fixes, docs) go through a branch + PR. Nothing direct to main.
 - Features: `git checkout -b feature/issue-X-description`

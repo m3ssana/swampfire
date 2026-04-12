@@ -636,18 +636,25 @@ export default class Game extends Phaser.Scene {
 
   /*
     Player completed the run. Plays a ~4-second rocket launch cinematic before
-    handing off to the end screen via endRun('victory').
+    handing off to the end screen.
 
-    Sequence:
+    launchType:
+      'full'    — all 5 systems installed → orange ignition → endRun('victory')
+      'partial' — 4/5 systems installed   → red hull-breach flash + violent shake
+                                             → endRun('partial_victory')
+
+    Sequence (shared):
       t=0      — guard flags, ignition flash + camera shake
       t=100ms  — engine exhaust particle emitter starts
       t=350ms  — camera detaches from player, pans to rocket
       t=700ms  — camera zooms out, rocket ascent tween begins
       t=1000ms — under-the-wire toast (only if timeLeft < 2 min)
-      t=2600ms — final rumble shake
-      t=3200ms — fade to black → endRun('victory')
+      t=2600ms — final rumble shake (partial: extra red flash)
+      t=3200ms — fade to black → endRun(state)
   */
-  finishScene() {
+  finishScene(launchType = 'full') {
+    const partial = launchType === 'partial';
+
     // ── Step 1 — Initiate ────────────────────────────────────────────────────
     this._launching = true;
     this.player.locked = true;
@@ -661,8 +668,14 @@ export default class Game extends Phaser.Scene {
     const rocket = this.zone?.rocket?.sprite;
 
     // ── Step 2 — Ignition flash ──────────────────────────────────────────────
-    this.cameras.main.flash(350, 255, 140, 0); // orange ignition flash
-    this.cameras.main.shake(300, 0.014);
+    // Partial launch: red hull-breach alarm instead of warm orange ignition
+    if (partial) {
+      this.cameras.main.flash(500, 255, 0, 0);   // red emergency flash
+      this.cameras.main.shake(400, 0.02);          // violent hull-breach shudder
+    } else {
+      this.cameras.main.flash(350, 255, 140, 0);  // orange ignition flash
+      this.cameras.main.shake(300, 0.014);
+    }
 
     // ── Step 3 — Engine particles (t=100ms) ─────────────────────────────────
     this.time.delayedCall(100, () => {
@@ -751,7 +764,7 @@ export default class Game extends Phaser.Scene {
       if (!this.scene?.isActive()) return;
       this._launchEmitter?.destroy();
       this._launchEmitter = null;
-      this.endRun('victory', { underTheWire });
+      this.endRun(partial ? 'partial_victory' : 'victory', { underTheWire });
     });
   }
 }

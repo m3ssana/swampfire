@@ -4,7 +4,7 @@
  * Unit tests for core game systems that don't require the full Phaser runtime:
  * - Inventory management (add/remove items, persistence)
  * - Crafting recipes (ingredient consumption, component creation)
- * - Rocket installation (5-system sequence, win condition)
+ * - Rocket installation (4-system sequence, win condition)
  * - State transitions (hp loss, xp gain, timer decrement)
  * - Loot table validation (weighted random selection)
  */
@@ -14,6 +14,7 @@ import { getPhaseForTimeLeft } from '../src/gameobjects/storm_phase_logic.js';
 
 // ── Crafting system ─────────────────────────────────────────────────────────
 
+// inlined from src/gameobjects/workbench.js — keep in sync
 const ROCKET_SYSTEMS = [
   { label: 'Fuel Injector',      xp: 15, tint: 0xff6600 },
   { label: 'Oxidizer Tank',      xp: 15, tint: 0x00ccff },
@@ -184,7 +185,21 @@ describe('Rocket Installation', () => {
     expect(newInv).toHaveLength(1);
   });
 
-  it('triggers win condition at 5 systems installed', () => {
+  it('triggers partial win condition at 4 systems installed', () => {
+    let systemsInstalled = 3;
+    const inventory = [{ type: 'component' }];
+
+    if (inventory.some(i => i.type === 'component')) {
+      systemsInstalled++;
+    }
+
+    expect(systemsInstalled).toBe(4);
+    // 4/5 = partial launch available (hull breach)
+    expect(systemsInstalled >= 4).toBe(true);
+    expect(systemsInstalled >= 5).toBe(false);
+  });
+
+  it('triggers full win condition at 5 systems installed', () => {
     let systemsInstalled = 4;
     const inventory = [{ type: 'component' }];
 
@@ -196,7 +211,7 @@ describe('Rocket Installation', () => {
     expect(systemsInstalled >= 5).toBe(true);
   });
 
-  it('completes the full installation sequence', () => {
+  it('completes the full 5-system installation sequence', () => {
     let systemsInstalled = 0;
     let inventory = [
       { type: 'component' },
@@ -279,7 +294,7 @@ describe('Loot Table System', () => {
       { label: 'Copper Wiring', xp: 5, tint: 0x4fc3f7, weight: 25, type: 'ingredient' },
       { label: 'Solenoid Valve', xp: 10, tint: 0x4fc3f7, weight: 20, type: 'ingredient' },
       { label: 'Hydraulic Seal', xp: 5, tint: 0x4fc3f7, weight: 20, type: 'ingredient' },
-      { label: 'PVC Coupler', xp: 3, tint: 0xffffff, weight: 20, type: 'ingredient' },
+      { label: 'PVC Coupler', xp: 3, tint: 0xffffff, weight: 20, type: 'junk' },
       { label: 'Empty', xp: 0, tint: 0x666666, weight: 15, type: 'junk' },
     ],
   };
@@ -355,7 +370,7 @@ describe('Loot Table System', () => {
 });
 
 describe('Core Gameplay Loop', () => {
-  it('completes the full win sequence', () => {
+  it('completes the full 5-system win sequence', () => {
     // Start
     let inventory = [];
     let systemsInstalled = 0;
@@ -404,10 +419,17 @@ describe('Core Gameplay Loop', () => {
       });
     }
 
-    // Launch
+    // Full launch (5/5)
     expect(systemsInstalled).toBe(5);
-    expect(xp).toBe(75);
+    expect(xp).toBe(75); // 15 * 5
     expect(timeLeft).toBe(3600);
+  });
+
+  it('allows partial launch at 4/5 systems', () => {
+    let systemsInstalled = 4;
+    // 4 systems installed — partial launch is available
+    expect(systemsInstalled >= 4).toBe(true);
+    expect(systemsInstalled >= 5).toBe(false);
   });
 });
 

@@ -297,7 +297,7 @@ export default class HUD extends Phaser.Scene {
 
   updateSystems(n) {
     this.systemsText?.setText(`${n} / 5`);
-    this.systemsText?.setTint(n >= 5 ? 0x4fffaa : 0xffee44);
+    this.systemsText?.setTint(n >= 5 ? 0x4fffaa : n >= 4 ? 0xff44aa : 0xffee44);
   }
 
   // ─── Cleanup ────────────────────────────────────────────────────────────────

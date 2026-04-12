@@ -134,11 +134,11 @@ describe('Achievement check() functions', () => {
     it('1 → true',  () => { expect(a.check(1)).toBe(true);  });
   });
 
-  describe('all_systems — systemsInstalled >= 5', () => {
+  describe('all_systems — systemsInstalled >= 5 (full launch)', () => {
     const a = ACHIEVEMENTS.find(x => x.id === 'all_systems');
 
-    it('4 → false', () => { expect(a.check(4)).toBe(false); });
-    it('5 → true',  () => { expect(a.check(5)).toBe(true);  });
+    it('4 → false (partial launch, not full)', () => { expect(a.check(4)).toBe(false); });
+    it('5 → true (all 5 systems installed)',    () => { expect(a.check(5)).toBe(true);  });
     it('6 → true (defensive against overshoot)', () => { expect(a.check(6)).toBe(true); });
   });
 
@@ -227,6 +227,15 @@ describe('AchievementManager — unlock via registry change', () => {
     expect(mgr.isUnlocked('first_install')).toBe(true);
   });
 
+  it('all_systems does NOT unlock at 4 (partial launch is not full launch ready)', () => {
+    const scene = makeScene({ systemsInstalled: 0 });
+    const mgr = makeManager(scene);
+
+    scene.registry.set('systemsInstalled', 4);
+
+    expect(mgr.isUnlocked('all_systems')).toBe(false);
+  });
+
   it('all_systems unlocks when systemsInstalled reaches 5', () => {
     const scene = makeScene({ systemsInstalled: 0 });
     const mgr = makeManager(scene);
@@ -237,7 +246,7 @@ describe('AchievementManager — unlock via registry change', () => {
     expect(mgr.toasts).toContain('★ LAUNCH READY');
   });
 
-  it('explorer and all_systems unlock in same change when jumping 0→5', () => {
+  it('first_install and all_systems unlock in same change when jumping 0→5', () => {
     const scene = makeScene({ systemsInstalled: 0 });
     const mgr = makeManager(scene);
 
