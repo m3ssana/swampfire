@@ -4,7 +4,7 @@
  * Unit tests for core game systems that don't require the full Phaser runtime:
  * - Inventory management (add/remove items, persistence)
  * - Crafting recipes (ingredient consumption, component creation)
- * - Rocket installation (4-system sequence, win condition)
+ * - Rocket installation (5-system sequence, win condition)
  * - State transitions (hp loss, xp gain, timer decrement)
  * - Loot table validation (weighted random selection)
  */
@@ -15,10 +15,11 @@ import { getPhaseForTimeLeft } from '../src/gameobjects/storm_phase_logic.js';
 // ── Crafting system ─────────────────────────────────────────────────────────
 
 const ROCKET_SYSTEMS = [
-  { label: 'Fuel Injector', xp: 15, tint: 0xff6600 },
-  { label: 'Oxidizer Tank', xp: 15, tint: 0x00ccff },
-  { label: 'Avionics Board', xp: 15, tint: 0x00ff88 },
-  { label: 'Battery Array', xp: 15, tint: 0xffee00 },
+  { label: 'Fuel Injector',      xp: 15, tint: 0xff6600 },
+  { label: 'Oxidizer Tank',      xp: 15, tint: 0x00ccff },
+  { label: 'Avionics Board',     xp: 15, tint: 0x00ff88 },
+  { label: 'Battery Array',      xp: 15, tint: 0xffee00 },
+  { label: 'Pressure Regulator', xp: 15, tint: 0xff44aa },
 ];
 
 describe('Inventory System', () => {
@@ -101,13 +102,13 @@ describe('Crafting System', () => {
     expect(ingredients.length >= 2).toBe(false);
   });
 
-  it('prevents crafting when all 4 systems are built', () => {
+  it('prevents crafting when all 5 systems are built', () => {
     const inventory = [];
-    const installed = 4;
+    const installed = 5;
     const crafted = 0;
     const totalBuilt = installed + crafted;
 
-    expect(totalBuilt >= 4).toBe(true);
+    expect(totalBuilt >= 5).toBe(true);
   });
 
   it('produces the correct component in sequence', () => {
@@ -131,24 +132,25 @@ describe('Crafting System', () => {
     expect(xp).toBe(15);
   });
 
-  it('handles full 4-component crafting sequence', () => {
+  it('handles full 5-component crafting sequence', () => {
     let inventory = [];
     let xp = 0;
 
-    // Craft all 4 components
-    for (let i = 0; i < 4; i++) {
+    // Craft all 5 components
+    for (let i = 0; i < 5; i++) {
       const recipe = ROCKET_SYSTEMS[i];
       inventory.push({ label: recipe.label, type: 'component', tint: recipe.tint });
       xp += recipe.xp;
     }
 
-    expect(inventory).toHaveLength(4);
-    expect(xp).toBe(60); // 15 * 4
+    expect(inventory).toHaveLength(5);
+    expect(xp).toBe(75); // 15 * 5
     expect(inventory.map(c => c.label)).toEqual([
       'Fuel Injector',
       'Oxidizer Tank',
       'Avionics Board',
       'Battery Array',
+      'Pressure Regulator',
     ]);
   });
 });
@@ -182,16 +184,16 @@ describe('Rocket Installation', () => {
     expect(newInv).toHaveLength(1);
   });
 
-  it('triggers win condition at 4 systems installed', () => {
-    let systemsInstalled = 3;
+  it('triggers win condition at 5 systems installed', () => {
+    let systemsInstalled = 4;
     const inventory = [{ type: 'component' }];
 
     if (inventory.some(i => i.type === 'component')) {
       systemsInstalled++;
     }
 
-    expect(systemsInstalled).toBe(4);
-    expect(systemsInstalled >= 4).toBe(true);
+    expect(systemsInstalled).toBe(5);
+    expect(systemsInstalled >= 5).toBe(true);
   });
 
   it('completes the full installation sequence', () => {
@@ -201,10 +203,11 @@ describe('Rocket Installation', () => {
       { type: 'component' },
       { type: 'component' },
       { type: 'component' },
+      { type: 'component' },
     ];
 
-    // Install all 4 components
-    while (inventory.length > 0 && systemsInstalled < 4) {
+    // Install all 5 components
+    while (inventory.length > 0 && systemsInstalled < 5) {
       let installed = false;
       inventory = inventory.filter(item => {
         if (!installed && item.type === 'component') {
@@ -216,7 +219,7 @@ describe('Rocket Installation', () => {
       });
     }
 
-    expect(systemsInstalled).toBe(4);
+    expect(systemsInstalled).toBe(5);
     expect(inventory).toHaveLength(0);
   });
 });
@@ -276,7 +279,7 @@ describe('Loot Table System', () => {
       { label: 'Copper Wiring', xp: 5, tint: 0x4fc3f7, weight: 25, type: 'ingredient' },
       { label: 'Solenoid Valve', xp: 10, tint: 0x4fc3f7, weight: 20, type: 'ingredient' },
       { label: 'Hydraulic Seal', xp: 5, tint: 0x4fc3f7, weight: 20, type: 'ingredient' },
-      { label: 'PVC Coupler', xp: 3, tint: 0xffffff, weight: 20, type: 'junk' },
+      { label: 'PVC Coupler', xp: 3, tint: 0xffffff, weight: 20, type: 'ingredient' },
       { label: 'Empty', xp: 0, tint: 0x666666, weight: 15, type: 'junk' },
     ],
   };
@@ -364,8 +367,8 @@ describe('Core Gameplay Loop', () => {
       inventory.push({ label: 'Ingredient', type: 'ingredient' });
     }
 
-    // Craft components (repeat 4 times)
-    for (let craft = 0; craft < 4; craft++) {
+    // Craft components (repeat 5 times)
+    for (let craft = 0; craft < 5; craft++) {
       // Consume 2 ingredients
       let consumed = 0;
       inventory = inventory.filter(item => {
@@ -377,7 +380,7 @@ describe('Core Gameplay Loop', () => {
       });
 
       // Add more ingredients for next cycle
-      if (craft < 3) {
+      if (craft < 4) {
         for (let i = 0; i < 2; i++) {
           inventory.push({ label: 'Ingredient', type: 'ingredient' });
         }
@@ -389,7 +392,7 @@ describe('Core Gameplay Loop', () => {
     }
 
     // Install all components
-    while (inventory.some(i => i.type === 'component') && systemsInstalled < 4) {
+    while (inventory.some(i => i.type === 'component') && systemsInstalled < 5) {
       let installed = false;
       inventory = inventory.filter(item => {
         if (!installed && item.type === 'component') {
@@ -402,8 +405,8 @@ describe('Core Gameplay Loop', () => {
     }
 
     // Launch
-    expect(systemsInstalled).toBe(4);
-    expect(xp).toBe(60);
+    expect(systemsInstalled).toBe(5);
+    expect(xp).toBe(75);
     expect(timeLeft).toBe(3600);
   });
 });

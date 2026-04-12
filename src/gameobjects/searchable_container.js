@@ -24,7 +24,7 @@ const LOOT_TABLES = {
     { label: "Copper Wiring",  xp:  5, tint: 0x4fc3f7, weight: 25, type: "ingredient" },
     { label: "Solenoid Valve", xp: 10, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
     { label: "Hydraulic Seal", xp:  5, tint: 0x4fc3f7, weight: 20, type: "ingredient" },
-    { label: "PVC Coupler",    xp:  3, tint: 0xffffff, weight: 20, type: "junk" },
+    { label: "PVC Coupler",    xp:  3, tint: 0xffffff, weight: 20, type: "ingredient" },
     { label: "Empty",          xp:  0, tint: 0x666666, weight: 15, type: "junk" },
   ],
 
@@ -50,7 +50,7 @@ const LOOT_TABLES = {
     { label: "Water Bottle",     xp:  2, tint: 0x40c4ff, weight: 25, type: "junk" },
     { label: "Beef Jerky",       xp:  3, tint: 0xa1887f, weight: 20, type: "junk" },
     { label: "Hydraulic Seal",   xp:  5, tint: 0x4fc3f7, weight: 15, type: "ingredient" },
-    { label: "PVC Coupler",      xp:  3, tint: 0xffffff, weight:  8, type: "junk" },
+    { label: "PVC Coupler",      xp:  3, tint: 0xffffff, weight:  8, type: "ingredient" },
     { label: "Empty",            xp:  0, tint: 0x666666, weight:  2, type: "junk" },
   ],
 

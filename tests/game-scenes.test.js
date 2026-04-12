@@ -245,12 +245,12 @@ describe('Game State Transitions', () => {
     const isWin = (registry) => {
       const installed = registry.get('systemsInstalled');
       const time = registry.get('timeLeft');
-      return installed >= 4 && time > 0;
+      return installed >= 5 && time > 0;
     };
 
     expect(isWin(registry)).toBe(false);
 
-    registry.set('systemsInstalled', 4);
+    registry.set('systemsInstalled', 5);
     expect(isWin(registry)).toBe(true);
 
     registry.set('timeLeft', 0);
@@ -363,11 +363,14 @@ describe('Crafting & Installation State', () => {
 
     registry.set('systemsInstalled', 4);
     expect(registry.get('systemsInstalled')).toBe(4);
+
+    registry.set('systemsInstalled', 5);
+    expect(registry.get('systemsInstalled')).toBe(5);
   });
 
   it('completes full craft+install sequence', () => {
-    // Simulate 4 craft cycles + 4 install cycles
-    for (let i = 0; i < 4; i++) {
+    // Simulate 5 craft cycles + 5 install cycles
+    for (let i = 0; i < 5; i++) {
       // Craft a component
       let inventory = registry.get('inventory');
       inventory.push({ label: `System${i}`, type: 'component' });
@@ -381,7 +384,7 @@ describe('Crafting & Installation State', () => {
       registry.set('systemsInstalled', i + 1);
     }
 
-    expect(registry.get('systemsInstalled')).toBe(4);
+    expect(registry.get('systemsInstalled')).toBe(5);
     expect(registry.get('inventory')).toHaveLength(0);
   });
 });
@@ -444,7 +447,8 @@ describe('Multi-State Coordination', () => {
     registry.set('systemsInstalled', 2);
     registry.set('systemsInstalled', 3);
     registry.set('systemsInstalled', 4);
+    registry.set('systemsInstalled', 5);
 
-    expect(actions).toEqual(['installed-1', 'installed-2', 'installed-3', 'installed-4']);
+    expect(actions).toEqual(['installed-1', 'installed-2', 'installed-3', 'installed-4', 'installed-5']);
   });
 });
