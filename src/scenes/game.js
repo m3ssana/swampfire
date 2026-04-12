@@ -5,6 +5,10 @@ import HazardManager                  from "../gameobjects/hazard_manager";
 import ComboTracker                   from "../gameobjects/combo_tracker";
 import AchievementManager             from "../gameobjects/achievement_manager";
 
+// ── Camera tuning ─────────────────────────────────────────────────────────────
+const CAMERA_LERP  = 0.15;
+const DEFAULT_ZOOM = 1.5;
+
 // ── XP Popup tuning ───────────────────────────────────────────────────────────
 const XP_COLORS = {
   loot:    0x44ff88,  // green  — item found in container
@@ -287,6 +291,20 @@ export default class Game extends Phaser.Scene {
 
     this.showPoints(itemSprite.x, itemSprite.y, `+ ${itemDef.label}`, itemDef.tint);
     this.playAudio('loot');
+
+    // Zoom bump when a rocket component lands in inventory (type: 'component')
+    if (itemDef.type === 'component') {
+      const cam = this.cameras.main;
+      this.tweens.killTweensOf(this.cameras.main);
+      this.tweens.add({
+        targets: cam,
+        zoom: 1.6,
+        duration: 100,
+        ease: 'Quad.Out',
+        onComplete: () => this.tweens.add({ targets: cam, zoom: 1.5, duration: 200, ease: 'Quad.InOut' }),
+      });
+    }
+
     itemSprite.destroy();
   }
 
@@ -337,7 +355,7 @@ export default class Game extends Phaser.Scene {
     @param {number} x       - World X of the event source
     @param {number} y       - World Y of the event source
     @param {number} amount  - XP amount gained (ignored if ≤ 0)
-    @param {string} context - 'loot' | 'craft' | 'install'
+    @param {string} context - 'loot' | 'craft' | 'install' | 'quest' | 'nearmiss' | 'discover'
   */
   showXPGain(x, y, amount, context = 'loot') {
     if (amount <= 0) return;
@@ -420,7 +438,8 @@ export default class Game extends Phaser.Scene {
   addCamera() {
     const { width, height } = this.zone.getBounds();
     this.cameras.main.setBounds(0, 0, width, height);
-    this.cameras.main.startFollow(this.player.sprite, false, 0.5, 0.5);
+    this.cameras.main.startFollow(this.player.sprite, false, CAMERA_LERP, CAMERA_LERP);
+    this.cameras.main.setZoom(DEFAULT_ZOOM);
     this.cameras.main.setBackgroundColor(0x1a2e1a); // dark swamp green
   }
 
@@ -583,6 +602,7 @@ export default class Game extends Phaser.Scene {
       // ── Update camera to new zone ───────────────────────────────────────────
       const { width, height } = this.zone.getBounds();
       this.cameras.main.setBounds(0, 0, width, height);
+      this.cameras.main.setZoom(DEFAULT_ZOOM);
       // Camera is already following player.sprite — no need to re-bind.
 
       // ── Notify hazard manager of new zone ────────────────────────────────────
