@@ -43,11 +43,6 @@ describe('Pause Menu — Flavour Text', () => {
       'Time paused. The hurricane waits for no one. But it will wait for you.'
     );
   });
-
-  it('flavour text is a non-empty string', () => {
-    expect(typeof PAUSE_FLAVOUR_TEXT).toBe('string');
-    expect(PAUSE_FLAVOUR_TEXT.length).toBeGreaterThan(0);
-  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════

@@ -314,6 +314,15 @@ export default class PauseScene extends Phaser.Scene {
 
   _quitToMenu() {
     this._processing = true;
+
+    // Attempt to save progress before discarding the session.
+    // save_manager.js lives on PR #144 and does NOT exist in this worktree.
+    // We reach it defensively through the Game scene instance so this is a
+    // harmless no-op here and starts working automatically once #144 merges.
+    try {
+      this.scene.get('game')?.saveManager?.save?.('quit');
+    } catch (_) { /* no-op if save system is absent */ }
+
     // Stop HUD and game scenes cleanly
     this.scene.stop('hud');
     this.scene.stop('game');

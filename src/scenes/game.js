@@ -172,6 +172,12 @@ export default class Game extends Phaser.Scene {
 
     this._pausing = true;
 
+    // Close the TAB checklist overlay if it was open (it lives on the HUD scene)
+    const hud = this.scene.get('hud');
+    if (hud?._checklistOpen) {
+      hud._hideChecklist();
+    }
+
     // Pause game scene (freezes update loop, physics, tweens)
     this.scene.pause('game');
     // Pause HUD scene (freezes the countdown timer)
