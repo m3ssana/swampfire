@@ -245,7 +245,7 @@ Each task is small enough to fit in a single Claude Code session.
 ## Bugs
 
 Bugs are tracked here alongside their GitHub issue. When a bug is reported:
-1. Create a GitHub issue with label `bug` (see `.claude/AGENT_INSTRUCTIONS.md` for the full pattern)
+1. Create a GitHub issue with label `bug` (see `.kiro/steering/agent-instructions.md` for the full pattern)
 2. Add it to this section as ⏳
 3. Fix it, mark ✅ with commit hash, close the issue
 
@@ -367,9 +367,10 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 
 ### 9.1 High Priority (P1)
 
-- ⏳ **9.1.1 Lightning system** [#114](https://github.com/m3ssana/swampfire/issues/114)
+- ✅ **9.1.1 Lightning system** [#114](https://github.com/m3ssana/swampfire/issues/114) — PR #140 (8159f50)
   - Phase 2: 20-30s, Phase 3: 10-20s, Phase 4: 5-15s intervals
   - Camera flash, procedural bolt via Graphics, item reveal on strike, thunder shake
+  - `src/gameobjects/lightning_logic.js` pure module + 47 unit tests
 
 - ⏳ **9.1.2 Near-miss feedback** [#93](https://github.com/m3ssana/swampfire/issues/93)
   - 200ms slow-motion (0.5x), green screen-edge pulse, +15 XP, whoosh SFX
