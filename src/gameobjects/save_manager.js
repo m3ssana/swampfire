@@ -33,6 +33,9 @@ import {
   isValidSave,
   hasSave,
   clearSave,
+  markSearched,
+  clampState,
+  getFullResetState,
 } from './save_logic.js';
 
 import { getPhaseForTimeLeft } from './storm_phase_logic.js';
@@ -134,6 +137,26 @@ export default class SaveManager {
     // Current zone ID
     const zone = scene.zone?.currentZoneId ?? 0;
 
+    // Build searchedContainers: merge current zone's searched containers into
+    // the existing map (preserving records from zones the player is not in)
+    const existingMap = registry.get('searchedContainers') ?? {};
+    // Copy existing map to avoid mutation
+    const searchedContainers = { ...existingMap };
+    // Record current zone's searched containers from the live container instances
+    if (scene.zone?.containers) {
+      const currentZoneSearched = [];
+      for (const container of scene.zone.containers) {
+        if (container.searched && container.containerId != null) {
+          currentZoneSearched.push(container.containerId);
+        }
+      }
+      if (currentZoneSearched.length > 0) {
+        searchedContainers[String(zone)] = currentZoneSearched;
+      }
+    }
+    // Persist back to registry so zone transitions carry it forward
+    registry.set('searchedContainers', searchedContainers);
+
     return {
       position,
       zone,
@@ -146,7 +169,9 @@ export default class SaveManager {
       stormPhase: registry.get('stormPhase') ?? 1,
       npcQuests: registry.get('npcQuests') ?? { harvey: false, maria: false, dale: false, reeves: false },
       visitedZones: registry.get('visitedZones') ?? [0],
-      achievements: registry.get('achievements') ?? [],
+      searchedContainers,
+      craftCount: registry.get('craftCount') ?? 0,
+      frenzyCount: registry.get('frenzyCount') ?? 0,
     };
   }
 
@@ -218,26 +243,37 @@ export default class SaveManager {
     const state = SaveManager.getSavedState();
     if (!state) return null;
 
+    // Fix 3: clamp numeric fields as defence-in-depth
+    const clamped = clampState(state);
+
+    // Fix 4: merge with full transition defaults so no registry key is unset
+    const full = getFullResetState(clamped);
+
     const registry = scene.registry;
 
-    // Restore all registry keys
-    registry.set('hp', state.hp);
-    registry.set('xp', state.xp);
-    registry.set('timeLeft', state.timeLeft);
-    registry.set('timerExpired', state.timerExpired);
-    registry.set('inventory', state.inventory);
-    registry.set('systemsInstalled', state.systemsInstalled);
-    registry.set('npcQuests', state.npcQuests);
-    registry.set('visitedZones', state.visitedZones);
+    // Restore ALL 14 registry keys that transition.loadNext() seeds
+    registry.set('hp', full.hp);
+    registry.set('xp', full.xp);
+    registry.set('timeLeft', full.timeLeft);
+    registry.set('timerExpired', full.timerExpired);
+    registry.set('inventory', full.inventory);
+    registry.set('systemsInstalled', full.systemsInstalled);
+    registry.set('hudToast', full.hudToast);
+    registry.set('npcQuests', full.npcQuests);
+    registry.set('visitedZones', full.visitedZones);
+    registry.set('craftCount', full.craftCount);
+    registry.set('frenzyCount', full.frenzyCount);
+    registry.set('achievementToast', full.achievementToast);
+    registry.set('searchedContainers', full.searchedContainers);
 
     // Recompute storm phase from timeLeft — don't trust saved stormPhase
     // (in case the clock ticked between save and load)
-    const correctPhase = getPhaseForTimeLeft(state.timeLeft);
+    const correctPhase = getPhaseForTimeLeft(full.timeLeft);
     registry.set('stormPhase', correctPhase);
 
     // Position and zone are returned for the caller to use when spawning
     // the player and loading the correct zone map
-    return state;
+    return { ...full, zone: clamped.zone, position: clamped.position };
   }
 
   /**

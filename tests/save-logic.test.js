@@ -56,20 +56,27 @@ function makeFullState() {
     position: { x: 1920, y: 2496 },
     zone: 0,
 
-    // 9 registry keys — inlined from src/scenes/transition.js loadNext() — keep in sync
+    // Registry keys — inlined from src/scenes/transition.js loadNext() — keep in sync
     hp: 3,
     xp: 450,
     timeLeft: 2100,          // 35 minutes remaining (seconds)
     timerExpired: false,
-    inventory: ['branch', 'copper_wire', 'capacitor'],
+    inventory: [
+      { label: 'Copper Wiring', type: 'ingredient' },
+      { label: 'Solenoid Valve', type: 'ingredient' },
+      { label: 'Energy Drink', type: 'junk' },
+    ],
     systemsInstalled: 2,
     stormPhase: 2,
     npcQuests: { harvey: true, maria: false, dale: false, reeves: false },
     visitedZones: [0, 1, 2],
 
-    // Achievements (stored separately in localStorage by achievement_manager,
-    // but the save system snapshots progress for continuity)
-    achievements: ['first_loot', 'first_craft', 'explorer'],
+    // Fix 1: searched container IDs per zone (Tiled object.id)
+    searchedContainers: { '0': [5, 8, 12], '1': [3, 7] },
+
+    // Fix 4: run stats that survive reload
+    craftCount: 4,
+    frenzyCount: 1,
   };
 }
 
@@ -83,9 +90,9 @@ describe('Save system constants', () => {
     expect(SAVE_KEY).toBe('swampfire_save');
   });
 
-  it('SAVE_VERSION is 1', () => {
+  it('SAVE_VERSION is 2', () => {
     // inlined from src/gameobjects/save_logic.js — keep in sync
-    expect(SAVE_VERSION).toBe(1);
+    expect(SAVE_VERSION).toBe(2);
   });
 
   it('AUTOSAVE_INTERVAL_MS is exactly 300000 (5 minutes in milliseconds)', () => {
@@ -137,7 +144,7 @@ describe('serialize(state)', () => {
     const state = makeFullState();
     const json = serialize(state);
     const parsed = JSON.parse(json);
-    expect(parsed.version).toBe(1);
+    expect(parsed.version).toBe(2);
   });
 
   it('includes a timestamp in serialized output', () => {
@@ -191,7 +198,11 @@ describe('deserialize(json) — round-trip fidelity', () => {
   });
 
   it('preserves inventory array (registry key: inventory)', () => {
-    expect(restored.inventory).toEqual(['branch', 'copper_wire', 'capacitor']);
+    expect(restored.inventory).toEqual([
+      { label: 'Copper Wiring', type: 'ingredient' },
+      { label: 'Solenoid Valve', type: 'ingredient' },
+      { label: 'Energy Drink', type: 'junk' },
+    ]);
   });
 
   it('preserves systemsInstalled (registry key: systemsInstalled)', () => {
@@ -215,8 +226,16 @@ describe('deserialize(json) — round-trip fidelity', () => {
     expect(restored.visitedZones).toEqual([0, 1, 2]);
   });
 
-  it('preserves achievements array', () => {
-    expect(restored.achievements).toEqual(['first_loot', 'first_craft', 'explorer']);
+  it('preserves searchedContainers map', () => {
+    expect(restored.searchedContainers).toEqual({ '0': [5, 8, 12], '1': [3, 7] });
+  });
+
+  it('preserves craftCount', () => {
+    expect(restored.craftCount).toBe(4);
+  });
+
+  it('preserves frenzyCount', () => {
+    expect(restored.frenzyCount).toBe(1);
   });
 });
 
@@ -480,7 +499,7 @@ describe('Save/load performance', () => {
   it('single serialize+deserialize cycle under 50ms even with large inventory', () => {
     const state = makeFullState();
     // Stress: 50 items in inventory (more than any real gameplay)
-    state.inventory = Array.from({ length: 50 }, (_, i) => `item_${i}`);
+    state.inventory = Array.from({ length: 50 }, (_, i) => ({ label: `item_${i}`, type: 'ingredient' }));
 
     const start = performance.now();
     const json = serialize(state);
@@ -556,5 +575,453 @@ describe('Save system edge cases', () => {
     const storage2 = makeFakeStorage();
     storage2.setItem('wrong_key', serialize(makeFullState()));
     expect(hasSave(storage2)).toBe(false);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Group 11 — Fix 1: Searched container persistence helpers
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import {
+  markSearched,
+  isSearched,
+  getSearchedContainers,
+} from '../src/gameobjects/save_logic.js';
+
+describe('Searched container persistence (Fix 1)', () => {
+  describe('markSearched(map, zoneId, containerId)', () => {
+    it('adds a container id to the map for the given zone', () => {
+      const map = {};
+      const result = markSearched(map, 1, 7);
+      expect(result['1']).toContain(7);
+    });
+
+    it('creates the zone array if not present', () => {
+      const map = {};
+      markSearched(map, 0, 3);
+      expect(Array.isArray(map['0'])).toBe(true);
+      expect(map['0']).toEqual([3]);
+    });
+
+    it('appends to existing zone array without duplicates', () => {
+      const map = { '1': [3, 7] };
+      markSearched(map, 1, 7);
+      expect(map['1']).toEqual([3, 7]); // no duplicate
+    });
+
+    it('handles multiple zones independently', () => {
+      const map = {};
+      markSearched(map, 0, 5);
+      markSearched(map, 1, 12);
+      markSearched(map, 0, 8);
+      expect(map['0']).toEqual([5, 8]);
+      expect(map['1']).toEqual([12]);
+    });
+
+    it('returns the mutated map for chaining', () => {
+      const map = {};
+      const result = markSearched(map, 2, 10);
+      expect(result).toBe(map);
+    });
+  });
+
+  describe('isSearched(map, zoneId, containerId)', () => {
+    it('returns true for a previously-marked container', () => {
+      const map = { '1': [3, 7, 12] };
+      expect(isSearched(map, 1, 7)).toBe(true);
+    });
+
+    it('returns false for a container not in the map', () => {
+      const map = { '1': [3, 7, 12] };
+      expect(isSearched(map, 1, 99)).toBe(false);
+    });
+
+    it('returns false for an unknown zone', () => {
+      const map = { '1': [3, 7] };
+      expect(isSearched(map, 4, 3)).toBe(false);
+    });
+
+    it('returns false for empty map', () => {
+      expect(isSearched({}, 0, 5)).toBe(false);
+    });
+
+    it('returns false for null/undefined map (defensive)', () => {
+      expect(isSearched(null, 0, 5)).toBe(false);
+      expect(isSearched(undefined, 0, 5)).toBe(false);
+    });
+  });
+
+  describe('getSearchedContainers(map, zoneId)', () => {
+    it('returns the array of searched ids for a zone', () => {
+      const map = { '2': [1, 4, 9] };
+      expect(getSearchedContainers(map, 2)).toEqual([1, 4, 9]);
+    });
+
+    it('returns empty array for unknown zone', () => {
+      expect(getSearchedContainers({}, 3)).toEqual([]);
+    });
+
+    it('returns empty array for null map', () => {
+      expect(getSearchedContainers(null, 0)).toEqual([]);
+    });
+  });
+
+  describe('searchedContainers in serialization round-trip', () => {
+    it('survives serialize+deserialize', () => {
+      const state = {
+        ...makeFullState(),
+        searchedContainers: { '0': [5, 8], '1': [3, 7, 12] },
+      };
+      const json = serialize(state);
+      const restored = deserialize(json);
+      expect(restored.searchedContainers).toEqual({ '0': [5, 8], '1': [3, 7, 12] });
+    });
+
+    it('handles empty searchedContainers map', () => {
+      const state = { ...makeFullState(), searchedContainers: {} };
+      const json = serialize(state);
+      const restored = deserialize(json);
+      expect(restored.searchedContainers).toEqual({});
+    });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Group 12 — Fix 2: Strict type validation in isValidSave()
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('isValidSave() strict type validation (Fix 2)', () => {
+  function makeValidEnvelope() {
+    return {
+      version: SAVE_VERSION,
+      timestamp: Date.now(),
+      state: {
+        ...makeFullState(),
+        // Ensure inventory is the proper object format
+        inventory: [{ label: 'Copper Wiring', type: 'ingredient' }],
+        // Add searchedContainers (Fix 1 schema addition)
+        searchedContainers: {},
+      },
+    };
+  }
+
+  it('rejects inventory containing null (crashes workbench .type filter)', () => {
+    const env = makeValidEnvelope();
+    env.state.inventory = [null];
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects inventory item missing label field', () => {
+    const env = makeValidEnvelope();
+    env.state.inventory = [{ type: 'ingredient' }]; // no label
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects inventory item missing type field', () => {
+    const env = makeValidEnvelope();
+    env.state.inventory = [{ label: 'Copper Wiring' }]; // no type
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects inventory item with non-string label', () => {
+    const env = makeValidEnvelope();
+    env.state.inventory = [{ label: 42, type: 'ingredient' }];
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects inventory item with non-string type', () => {
+    const env = makeValidEnvelope();
+    env.state.inventory = [{ label: 'Test', type: 123 }];
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects systemsInstalled: 99 (out of range, crashes ROCKET_SYSTEMS[99])', () => {
+    const env = makeValidEnvelope();
+    env.state.systemsInstalled = 99;
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects timeLeft: "abc" (NaN timer, storm pinned to Phase 4)', () => {
+    const env = makeValidEnvelope();
+    env.state.timeLeft = "abc";
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects xp: "0" (string concatenation corrupts XP total)', () => {
+    const env = makeValidEnvelope();
+    env.state.xp = "0";
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects hp as a string', () => {
+    const env = makeValidEnvelope();
+    env.state.hp = "3";
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects stormPhase as a string', () => {
+    const env = makeValidEnvelope();
+    env.state.stormPhase = "2";
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects zone as NaN', () => {
+    const env = makeValidEnvelope();
+    env.state.zone = NaN;
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects position.x as Infinity', () => {
+    const env = makeValidEnvelope();
+    env.state.position.x = Infinity;
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects position.y as a string', () => {
+    const env = makeValidEnvelope();
+    env.state.position.y = "100";
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects timerExpired as a string "false"', () => {
+    const env = makeValidEnvelope();
+    env.state.timerExpired = "false";
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('rejects timerExpired as 0 (number, not boolean)', () => {
+    const env = makeValidEnvelope();
+    env.state.timerExpired = 0;
+    expect(isValidSave(env)).toBe(false);
+  });
+
+  it('accepts valid save with proper object inventory items', () => {
+    const env = makeValidEnvelope();
+    expect(isValidSave(env)).toBe(true);
+  });
+
+  it('accepts valid save with empty inventory array', () => {
+    const env = makeValidEnvelope();
+    env.state.inventory = [];
+    expect(isValidSave(env)).toBe(true);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Group 13 — Fix 3: clampState() defence in depth
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import { clampState } from '../src/gameobjects/save_logic.js';
+
+describe('clampState(state) — defence in depth (Fix 3)', () => {
+  it('clamps hp to 0-3 range (too high)', () => {
+    const state = { ...makeFullState(), hp: 99 };
+    const clamped = clampState(state);
+    expect(clamped.hp).toBe(3);
+  });
+
+  it('clamps hp to 0-3 range (negative)', () => {
+    const state = { ...makeFullState(), hp: -1 };
+    const clamped = clampState(state);
+    expect(clamped.hp).toBe(0);
+  });
+
+  it('clamps timeLeft to 0-3600 range (too high)', () => {
+    const state = { ...makeFullState(), timeLeft: 9999 };
+    const clamped = clampState(state);
+    expect(clamped.timeLeft).toBe(3600);
+  });
+
+  it('clamps timeLeft to 0-3600 range (negative)', () => {
+    const state = { ...makeFullState(), timeLeft: -100 };
+    const clamped = clampState(state);
+    expect(clamped.timeLeft).toBe(0);
+  });
+
+  it('clamps systemsInstalled to 0-5 range (too high)', () => {
+    const state = { ...makeFullState(), systemsInstalled: 99 };
+    const clamped = clampState(state);
+    expect(clamped.systemsInstalled).toBe(5);
+  });
+
+  it('clamps systemsInstalled to 0-5 range (negative)', () => {
+    const state = { ...makeFullState(), systemsInstalled: -1 };
+    const clamped = clampState(state);
+    expect(clamped.systemsInstalled).toBe(0);
+  });
+
+  it('clamps stormPhase to 1-4 range (too high)', () => {
+    const state = { ...makeFullState(), stormPhase: 7 };
+    const clamped = clampState(state);
+    expect(clamped.stormPhase).toBe(4);
+  });
+
+  it('clamps stormPhase to 1-4 range (too low)', () => {
+    const state = { ...makeFullState(), stormPhase: 0 };
+    const clamped = clampState(state);
+    expect(clamped.stormPhase).toBe(1);
+  });
+
+  it('clamps zone to 0-4 range (too high)', () => {
+    const state = { ...makeFullState(), zone: 10 };
+    const clamped = clampState(state);
+    expect(clamped.zone).toBe(4);
+  });
+
+  it('clamps zone to 0-4 range (negative)', () => {
+    const state = { ...makeFullState(), zone: -1 };
+    const clamped = clampState(state);
+    expect(clamped.zone).toBe(0);
+  });
+
+  it('clamps xp to >= 0 (negative)', () => {
+    const state = { ...makeFullState(), xp: -50 };
+    const clamped = clampState(state);
+    expect(clamped.xp).toBe(0);
+  });
+
+  it('does not modify valid values', () => {
+    const state = { ...makeFullState(), hp: 2, timeLeft: 1800, systemsInstalled: 3, stormPhase: 2, zone: 1, xp: 100 };
+    const clamped = clampState(state);
+    expect(clamped.hp).toBe(2);
+    expect(clamped.timeLeft).toBe(1800);
+    expect(clamped.systemsInstalled).toBe(3);
+    expect(clamped.stormPhase).toBe(2);
+    expect(clamped.zone).toBe(1);
+    expect(clamped.xp).toBe(100);
+  });
+
+  it('does not mutate the original state object', () => {
+    const state = { ...makeFullState(), hp: 99 };
+    clampState(state);
+    expect(state.hp).toBe(99); // original unchanged
+  });
+
+  it('preserves non-clamped fields (inventory, position, etc.)', () => {
+    const state = { ...makeFullState(), hp: 99, inventory: [{ label: 'Test', type: 'ingredient' }] };
+    const clamped = clampState(state);
+    expect(clamped.inventory).toEqual([{ label: 'Test', type: 'ingredient' }]);
+    expect(clamped.position).toEqual(state.position);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Group 14 — Fix 4: getFullResetState() returns all registry keys
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import { getFullResetState } from '../src/gameobjects/save_logic.js';
+
+describe('getFullResetState(savedState) — missing key reset (Fix 4)', () => {
+  it('returns all 14 registry keys that transition.loadNext() seeds', () => {
+    const saved = makeFullState();
+    const full = getFullResetState(saved);
+    // All 14 keys from transition.js loadNext():
+    expect(full).toHaveProperty('hp');
+    expect(full).toHaveProperty('xp');
+    expect(full).toHaveProperty('timeLeft');
+    expect(full).toHaveProperty('timerExpired');
+    expect(full).toHaveProperty('inventory');
+    expect(full).toHaveProperty('systemsInstalled');
+    expect(full).toHaveProperty('stormPhase');
+    expect(full).toHaveProperty('hudToast');
+    expect(full).toHaveProperty('npcQuests');
+    expect(full).toHaveProperty('visitedZones');
+    expect(full).toHaveProperty('craftCount');
+    expect(full).toHaveProperty('frenzyCount');
+    expect(full).toHaveProperty('achievementToast');
+    // searchedContainers (Fix 1)
+    expect(full).toHaveProperty('searchedContainers');
+  });
+
+  it('restores saved values for keys present in the save', () => {
+    const saved = { ...makeFullState(), xp: 500, hp: 2 };
+    const full = getFullResetState(saved);
+    expect(full.xp).toBe(500);
+    expect(full.hp).toBe(2);
+  });
+
+  it('resets hudToast to "" when not in save', () => {
+    const saved = makeFullState();
+    delete saved.hudToast;
+    const full = getFullResetState(saved);
+    expect(full.hudToast).toBe('');
+  });
+
+  it('resets achievementToast to "" when not in save', () => {
+    const saved = makeFullState();
+    delete saved.achievementToast;
+    const full = getFullResetState(saved);
+    expect(full.achievementToast).toBe('');
+  });
+
+  it('restores craftCount from save if present', () => {
+    const saved = { ...makeFullState(), craftCount: 7 };
+    const full = getFullResetState(saved);
+    expect(full.craftCount).toBe(7);
+  });
+
+  it('resets craftCount to 0 when not in save', () => {
+    const saved = makeFullState();
+    delete saved.craftCount;
+    const full = getFullResetState(saved);
+    expect(full.craftCount).toBe(0);
+  });
+
+  it('restores frenzyCount from save if present', () => {
+    const saved = { ...makeFullState(), frenzyCount: 3 };
+    const full = getFullResetState(saved);
+    expect(full.frenzyCount).toBe(3);
+  });
+
+  it('resets frenzyCount to 0 when not in save', () => {
+    const saved = makeFullState();
+    delete saved.frenzyCount;
+    const full = getFullResetState(saved);
+    expect(full.frenzyCount).toBe(0);
+  });
+
+  it('resets searchedContainers to {} when not in save', () => {
+    const saved = makeFullState();
+    delete saved.searchedContainers;
+    const full = getFullResetState(saved);
+    expect(full.searchedContainers).toEqual({});
+  });
+
+  it('restores searchedContainers from save if present', () => {
+    const saved = { ...makeFullState(), searchedContainers: { '0': [1, 2] } };
+    const full = getFullResetState(saved);
+    expect(full.searchedContainers).toEqual({ '0': [1, 2] });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Group 15 — Fix 5: achievements field removed from schema
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('achievements field removed from save schema (Fix 5)', () => {
+  it('isValidSave accepts saves without achievements field', () => {
+    const env = {
+      version: SAVE_VERSION,
+      timestamp: Date.now(),
+      state: {
+        ...makeFullState(),
+        inventory: [{ label: 'Test', type: 'ingredient' }],
+        searchedContainers: {},
+        craftCount: 0,
+        frenzyCount: 0,
+      },
+    };
+    delete env.state.achievements;
+    expect(isValidSave(env)).toBe(true);
+  });
+
+  it('SAVE_VERSION is bumped to 2 (schema shape changed)', () => {
+    expect(SAVE_VERSION).toBe(2);
+  });
+
+  it('getFullResetState does NOT include achievements field', () => {
+    const saved = makeFullState();
+    const full = getFullResetState(saved);
+    expect(full).not.toHaveProperty('achievements');
   });
 });
