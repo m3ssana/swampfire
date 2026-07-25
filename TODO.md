@@ -387,7 +387,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ✅ **9.1.6 System Checklist overlay (TAB)** [#94](https://github.com/m3ssana/swampfire/issues/94) _(d93b688)_
   - TAB opens semi-transparent overlay: 5 systems, component status, zone hints
 
-- ⏳ **9.1.7 MenuScene options** [#115](https://github.com/m3ssana/swampfire/issues/115)
+- ✅ **9.1.7 MenuScene options** [#115](https://github.com/m3ssana/swampfire/issues/115) _(e74a341)_
   - NEW GAME / CONTINUE / LEADERBOARD / SETTINGS; animated background; amber title
 
 - ⏳ **9.1.8 Inventory UI (8-slot + stash)** [#100](https://github.com/m3ssana/swampfire/issues/100)

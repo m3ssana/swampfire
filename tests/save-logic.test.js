@@ -26,6 +26,8 @@ import {
   isValidSave,
   hasSave,
   clearSave,
+  resolveSpawnPosition,
+  resolveInitialZone,
   AUTOSAVE_INTERVAL_MS,
   AUTOSAVE_TRIGGERS,
   SAVE_KEY,
@@ -579,7 +581,141 @@ describe('Save system edge cases', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Group 11 — Fix 1: Searched container persistence helpers
+// Group 11 — resolveInitialZone (zone-routing fix for CONTINUE)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('resolveInitialZone', () => {
+  it('passes through valid zone 0', () => {
+    expect(resolveInitialZone(0)).toBe(0);
+  });
+
+  it('passes through valid zone 1', () => {
+    expect(resolveInitialZone(1)).toBe(1);
+  });
+
+  it('passes through valid zone 2', () => {
+    expect(resolveInitialZone(2)).toBe(2);
+  });
+
+  it('passes through valid zone 3', () => {
+    expect(resolveInitialZone(3)).toBe(3);
+  });
+
+  it('passes through valid zone 4', () => {
+    expect(resolveInitialZone(4)).toBe(4);
+  });
+
+  it('falls back to 0 for negative zone id (-1)', () => {
+    expect(resolveInitialZone(-1)).toBe(0);
+  });
+
+  it('falls back to 0 for out-of-range zone id (42)', () => {
+    expect(resolveInitialZone(42)).toBe(0);
+  });
+
+  it('falls back to 0 for null', () => {
+    expect(resolveInitialZone(null)).toBe(0);
+  });
+
+  it('falls back to 0 for undefined', () => {
+    expect(resolveInitialZone(undefined)).toBe(0);
+  });
+
+  it('coerces numeric string "2" to zone 2', () => {
+    expect(resolveInitialZone("2")).toBe(2);
+  });
+
+  it('coerces numeric string "0" to zone 0', () => {
+    expect(resolveInitialZone("0")).toBe(0);
+  });
+
+  it('coerces numeric string "4" to zone 4', () => {
+    expect(resolveInitialZone("4")).toBe(4);
+  });
+
+  it('falls back to 0 for NaN', () => {
+    expect(resolveInitialZone(NaN)).toBe(0);
+  });
+
+  it('falls back to 0 for Infinity', () => {
+    expect(resolveInitialZone(Infinity)).toBe(0);
+  });
+
+  it('falls back to 0 for non-numeric string "abc"', () => {
+    expect(resolveInitialZone("abc")).toBe(0);
+  });
+
+  it('falls back to 0 for floating point 2.5 (not an integer zone id)', () => {
+    expect(resolveInitialZone(2.5)).toBe(0);
+  });
+
+  it('falls back to 0 for empty string ""', () => {
+    expect(resolveInitialZone("")).toBe(0);
+  });
+
+  it('coerces boolean true to zone 1 (Number(true) = 1, which is valid)', () => {
+    expect(resolveInitialZone(true)).toBe(1);
+  });
+
+  it('falls back to 0 for zone id 5 (one beyond max)', () => {
+    expect(resolveInitialZone(5)).toBe(0);
+  });
+});
+
+/**
+ * resolveSpawnPosition — where the player materialises on scene create.
+ *
+ * Regression guard for the CONTINUE flow (#115 -> #98): MenuScene passed
+ * savedPosition into GameScene but nothing consumed it, so a resumed run
+ * dropped the player at the zone's default spawn instead of where they saved.
+ */
+describe('resolveSpawnPosition', () => {
+  const zoneSpawn = { x: 1920, y: 1440 };
+
+  it('returns the saved position when resuming from a save', () => {
+    const result = resolveSpawnPosition(zoneSpawn, { x: 640, y: 512 }, true);
+    expect(result).toEqual({ x: 640, y: 512 });
+  });
+
+  it('returns the zone spawn on a fresh run even if a position is supplied', () => {
+    const result = resolveSpawnPosition(zoneSpawn, { x: 640, y: 512 }, false);
+    expect(result).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('falls back to the zone spawn when savedPosition is null', () => {
+    expect(resolveSpawnPosition(zoneSpawn, null, true)).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('falls back to the zone spawn when a coordinate is missing', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: 640 }, true)).toEqual({ x: 1920, y: 1440 });
+    expect(resolveSpawnPosition(zoneSpawn, { y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('falls back to the zone spawn on non-finite coordinates from a corrupt save', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: NaN, y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+    expect(resolveSpawnPosition(zoneSpawn, { x: Infinity, y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+    expect(resolveSpawnPosition(zoneSpawn, { x: 'abc', y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('accepts a legitimate origin position of 0,0 rather than treating it as falsy', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: 0, y: 0 }, true)).toEqual({ x: 0, y: 0 });
+  });
+
+  it('coerces numeric strings from a JSON round-trip', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: '640', y: '512' }, true)).toEqual({ x: 640, y: 512 });
+  });
+
+  it('does not mutate the inputs', () => {
+    const saved = { x: 640, y: 512 };
+    const zone  = { x: 1920, y: 1440 };
+    resolveSpawnPosition(zone, saved, true);
+    expect(saved).toEqual({ x: 640, y: 512 });
+    expect(zone).toEqual({ x: 1920, y: 1440 });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Group 12 — Fix 1: Searched container persistence helpers
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import {

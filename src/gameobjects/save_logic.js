@@ -183,6 +183,53 @@ export function clearSave(storage) {
   }
 }
 
+/**
+ * Resolves an initial zone ID from potentially untrusted input (e.g., a save
+ * file). Coerces numeric strings, rejects non-integer / out-of-range values,
+ * and falls back to zone 0 (Cypress Creek Preserve — the starting zone) when
+ * the input is invalid.
+ *
+ * Valid zone IDs are integers 0–4 matching the ZONES catalogue in zone_manager.js.
+ * This function mirrors the isZoneDefined() check but lives here so it is
+ * unit-testable without Phaser.
+ *
+ * @param {*} zone — raw zone value from save data or scene init
+ * @returns {number} a valid zone ID (0–4), defaulting to 0
+ */
+export function resolveInitialZone(zone) {
+  const num = Number(zone);
+  if (!Number.isFinite(num)) return 0;
+  if (!Number.isInteger(num)) return 0;
+  if (num < 0 || num > 4) return 0;
+  return num;
+}
+
+/**
+ * Decides where the player materialises when a zone is created.
+ *
+ * A resumed run must place the player exactly where they saved; a fresh run
+ * (or a death/restart mid-run) uses the zone's own spawn point. Any missing or
+ * non-finite coordinate falls back to the zone spawn so a corrupt or truncated
+ * save can never drop the player outside the world.
+ *
+ * Pure: never mutates either argument.
+ *
+ * @param {{x: number, y: number}} zoneSpawn — the zone's default spawn point
+ * @param {{x: *, y: *}|null} savedPosition — position from the save file
+ * @param {boolean} loadedFromSave — true only when resuming via CONTINUE
+ * @returns {{x: number, y: number}} the position to spawn at
+ */
+export function resolveSpawnPosition(zoneSpawn, savedPosition, loadedFromSave) {
+  if (loadedFromSave === true && savedPosition) {
+    const x = Number(savedPosition.x);
+    const y = Number(savedPosition.y);
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      return { x, y };
+    }
+  }
+  return { x: zoneSpawn.x, y: zoneSpawn.y };
+}
+
 // ── Fix 1: Searched container helpers ─────────────────────────────────────────
 
 /**

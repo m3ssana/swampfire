@@ -24,7 +24,7 @@ import SearchableContainer from './searchable_container';
 import Workbench           from './workbench';
 import Rocket              from './rocket';
 import NPC                 from './npc';
-import { isSearched }      from './save_logic';
+import { resolveInitialZone, isSearched } from './save_logic';
 
 // ── Zone catalogue ─────────────────────────────────────────────────────────────
 //
@@ -106,7 +106,7 @@ export function isZoneDefined(zoneId) {
 // ── ZoneManager ────────────────────────────────────────────────────────────────
 
 export default class ZoneManager {
-  constructor(scene) {
+  constructor(scene, initialZone) {
     this.scene = scene;
 
     // Exposed world objects (populated/cleared on each loadZone call)
@@ -124,7 +124,11 @@ export default class ZoneManager {
     this.map           = null;
     this.currentZoneId = null;
 
-    this.loadZone(0);
+    // Resolve initialZone through the pure helper: undefined/NaN/out-of-range → 0.
+    // Then guard against zones that aren't defined in this build (isZoneDefined).
+    const resolved = resolveInitialZone(initialZone);
+    const startZone = isZoneDefined(resolved) ? resolved : 0;
+    this.loadZone(startZone);
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
