@@ -372,7 +372,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
   - Camera flash, procedural bolt via Graphics, item reveal on strike, thunder shake
   - `src/gameobjects/lightning_logic.js` pure module + 47 unit tests
 
-- ⏳ **9.1.2 Near-miss feedback** [#93](https://github.com/m3ssana/swampfire/issues/93)
+- ✅ **9.1.2 Near-miss feedback** [#93](https://github.com/m3ssana/swampfire/issues/93) _(ba9f566)_
   - 200ms slow-motion (0.5x), green screen-edge pulse, +15 XP, whoosh SFX
 
 - ⏳ **9.1.3 Save System (localStorage)** [#98](https://github.com/m3ssana/swampfire/issues/98)
