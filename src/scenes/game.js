@@ -158,6 +158,8 @@ export default class Game extends Phaser.Scene {
       this.input.keyboard.off("keydown-E", this.onEKey, this);
       this.events.off("update", this.checkInteractableProximity, this);
       this.events.off("update", this.checkExitZones, this);
+      // Never leave a near-miss slow-motion window active across scenes.
+      this.restoreTimeScale();
     });
   }
 
@@ -456,21 +458,40 @@ export default class Game extends Phaser.Scene {
    * @param {number} x - World X of the hazard that triggered the near-miss
    * @param {number} y - World Y of the hazard that triggered the near-miss
    */
+  /**
+   * Restores normal time flow after a near-miss slow-motion window.
+   *
+   * Also called on scene shutdown: Phaser destroys pending timer events when a
+   * scene stops, so if the scene ends mid-slow-motion the restore callback
+   * would never fire and the 0.5x timescale would leak into the next run.
+   */
+  restoreTimeScale() {
+    this._slowMoTimer?.remove(false);
+    this._slowMoTimer = null;
+    this.time.timeScale = 1;
+    if (this.matter?.world) {
+      this.matter.world.engine.timing.timeScale = 1;
+    }
+  }
+
   triggerNearMiss(x, y) {
     if (this._nearMissDebounce) return;
     this._nearMissDebounce = true;
 
     // ── 1. Slow-motion ───────────────────────────────────────────────────────
+    // Clock.timeScale scales the clock itself, so a delayedCall of N ms fires
+    // after N / timeScale ms of REAL time. Compensate so the slow-mo window is
+    // SLOW_MO_DURATION_MS of wall-clock time, matching the spec.
     this.time.timeScale = SLOW_MO_TIMESCALE;
     if (this.matter?.world) {
       this.matter.world.engine.timing.timeScale = SLOW_MO_TIMESCALE;
     }
-    this.time.delayedCall(SLOW_MO_DURATION_MS, () => {
-      this.time.timeScale = 1;
-      if (this.matter?.world) {
-        this.matter.world.engine.timing.timeScale = 1;
-      }
-    });
+    this._slowMoTimer = this.time.delayedCall(
+      SLOW_MO_DURATION_MS * SLOW_MO_TIMESCALE,
+      this.restoreTimeScale,
+      undefined,
+      this
+    );
 
     // ── 2. Green screen-edge pulse ───────────────────────────────────────────
     const cam = this.cameras.main;
