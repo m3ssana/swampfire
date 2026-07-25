@@ -381,7 +381,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ⏳ **9.1.4 Pause menu (ESC)** [#99](https://github.com/m3ssana/swampfire/issues/99)
   - ESC pauses game + timer, overlay with RESUME / SETTINGS / QUIT
 
-- ⏳ **9.1.5 Objective Banner** [#97](https://github.com/m3ssana/swampfire/issues/97)
+- ✅ **9.1.5 Objective Banner** [#97](https://github.com/m3ssana/swampfire/issues/97) _(97304e7)_
   - Always-visible: "Find [item] — check [location]", auto-updates
 
 - ⏳ **9.1.6 System Checklist overlay (TAB)** [#94](https://github.com/m3ssana/swampfire/issues/94)
