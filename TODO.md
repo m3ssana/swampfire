@@ -384,7 +384,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ✅ **9.1.5 Objective Banner** [#97](https://github.com/m3ssana/swampfire/issues/97) _(97304e7)_
   - Always-visible: "Find [item] — check [location]", auto-updates
 
-- ⏳ **9.1.6 System Checklist overlay (TAB)** [#94](https://github.com/m3ssana/swampfire/issues/94)
+- ✅ **9.1.6 System Checklist overlay (TAB)** [#94](https://github.com/m3ssana/swampfire/issues/94) _(d93b688)_
   - TAB opens semi-transparent overlay: 5 systems, component status, zone hints
 
 - ⏳ **9.1.7 MenuScene options** [#115](https://github.com/m3ssana/swampfire/issues/115)
