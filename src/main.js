@@ -5,6 +5,7 @@ import Splash from "./scenes/splash";
 import Transition from "./scenes/transition";
 import Game from "./scenes/game";
 import HUD from "./scenes/hud";
+import PauseScene from "./scenes/pause";
 import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
 
 // Pre-size #game-container before Phaser init.
@@ -56,7 +57,7 @@ const config = {
       },
     ],
   },
-  scene: [Bootloader, Splash, Transition, Game, HUD, Outro],
+  scene: [Bootloader, Splash, Transition, Game, HUD, PauseScene, Outro],
 };
 
 const game = new Phaser.Game(config);
