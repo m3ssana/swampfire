@@ -16,6 +16,8 @@
  *   Top-right   — minimap placeholder
  */
 
+import { buildChecklist, formatProgress, STATUS_SYMBOLS, STATUS_COLORS, RECIPES } from '../gameobjects/checklist_logic.js';
+
 const MAX_HP = 3;
 const HEART_W = 16;
 const HEART_H = 14;
@@ -38,6 +40,7 @@ export default class HUD extends Phaser.Scene {
     this.buildXP();
     this.buildHearts();
     this.buildMinimap();
+    this.buildChecklist();
 
     // Sync to whatever is already in the registry
     this.updateTimerDisplay(this.registry.get("timeLeft") ?? 3600);
@@ -56,6 +59,15 @@ export default class HUD extends Phaser.Scene {
 
     // React to registry changes pushed by GameScene
     this.registry.events.on("changedata", this.onRegistryChange, this);
+
+    // TAB key — capture to prevent browser stealing focus/scrolling
+    this._tabKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.TAB, true, true
+    );
+    this._tabKey.on('down', this._toggleChecklist, this);
+
+    // Clean up on shutdown
+    this.events.once('shutdown', this._cleanupChecklist, this);
   }
 
   // ─── Layout builders ────────────────────────────────────────────────────────
@@ -300,10 +312,149 @@ export default class HUD extends Phaser.Scene {
     this.systemsText?.setTint(n >= 5 ? 0x4fffaa : n >= 4 ? 0xff44aa : 0xffee44);
   }
 
+  // ─── System Checklist Overlay (TAB) ─────────────────────────────────────────
+
+  buildChecklist() {
+    this._checklistOpen = false;
+    this._checklistElements = [];
+  }
+
+  _toggleChecklist() {
+    if (!this.sys.isActive()) return;
+
+    if (this._checklistOpen) {
+      this._hideChecklist();
+    } else {
+      this._showChecklist();
+    }
+  }
+
+  _showChecklist() {
+    this._checklistOpen = true;
+    this._destroyChecklistElements();
+
+    const cx = this.w / 2;
+    const cy = this.h / 2;
+    const panelW = this.w * 0.8;
+    const panelH = this.h * 0.85;
+
+    // Semi-transparent backdrop (depth 100 — above all HUD elements)
+    const bg = this.add.rectangle(cx, cy, panelW, panelH, 0x000000)
+      .setAlpha(0.82)
+      .setDepth(100)
+      .setScrollFactor(0);
+    this._checklistElements.push(bg);
+
+    // Border
+    const border = this.add.graphics().setDepth(101).setScrollFactor(0);
+    border.lineStyle(2, 0x4fffaa, 0.7);
+    border.strokeRect(cx - panelW / 2, cy - panelH / 2, panelW, panelH);
+    this._checklistElements.push(border);
+
+    // Header
+    const installed = this.registry.get('systemsInstalled') ?? 0;
+    const headerStr = `SYSTEM CHECKLIST — ${formatProgress(installed, 5)}`;
+    const header = this.add.bitmapText(cx, cy - panelH / 2 + 20, 'default', headerStr, 14)
+      .setOrigin(0.5)
+      .setTint(0x4fffaa)
+      .setDepth(101)
+      .setScrollFactor(0);
+    this._checklistElements.push(header);
+
+    // Time remaining
+    const timeLeft = this.registry.get('timeLeft') ?? 0;
+    const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const s = (timeLeft % 60).toString().padStart(2, '0');
+    const timeStr = `TIME: ${m}:${s}`;
+    const timeText = this.add.bitmapText(cx, cy - panelH / 2 + 40, 'default', timeStr, 12)
+      .setOrigin(0.5)
+      .setTint(0xffee44)
+      .setDepth(101)
+      .setScrollFactor(0);
+    this._checklistElements.push(timeText);
+
+    // Build checklist data
+    const inventory = this.registry.get('inventory') ?? [];
+    const rows = buildChecklist({ systemsInstalled: installed, inventory });
+
+    // Color map for status
+    const TINT_MAP = { green: 0x44ff88, yellow: 0xffdd00, gray: 0x888888 };
+
+    // Render each system row
+    const startY = cy - panelH / 2 + 65;
+    const rowHeight = (panelH - 100) / 5;
+    const leftX = cx - panelW / 2 + 20;
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const y = startY + i * rowHeight;
+      const statusKey = row.status === 'installed' ? 'INSTALLED'
+        : row.status === 'in_inventory' ? 'IN_INVENTORY' : 'NEEDED';
+      const symbol = STATUS_SYMBOLS[statusKey];
+      const tint = TINT_MAP[STATUS_COLORS[statusKey]];
+
+      // System line: [X] Engine — Fuel Injector
+      const sysStr = `${symbol} ${row.systemLabel} — ${row.componentLabel}`;
+      const sysText = this.add.bitmapText(leftX, y, 'default', sysStr, 12)
+        .setTint(tint)
+        .setDepth(101)
+        .setScrollFactor(0);
+      this._checklistElements.push(sysText);
+
+      // Ingredient details (below system line, indented)
+      for (let j = 0; j < row.ingredients.length; j++) {
+        const ing = row.ingredients[j];
+        const ingStatusKey = ing.status === 'installed' ? 'INSTALLED'
+          : ing.status === 'in_inventory' ? 'IN_INVENTORY' : 'NEEDED';
+        const ingSymbol = STATUS_SYMBOLS[ingStatusKey];
+        const ingTint = TINT_MAP[STATUS_COLORS[ingStatusKey]];
+
+        let ingStr = `  ${ingSymbol} ${ing.label}`;
+        if (ing.status === 'needed' && ing.zones.length > 0) {
+          ingStr += ` (${ing.zones.join(', ')})`;
+        }
+
+        const ingText = this.add.bitmapText(leftX + 12, y + 16 + j * 14, 'default', ingStr, 10)
+          .setTint(ingTint)
+          .setDepth(101)
+          .setScrollFactor(0);
+        this._checklistElements.push(ingText);
+      }
+    }
+
+    // Footer hint
+    const footerStr = 'TAB to close';
+    const footer = this.add.bitmapText(cx, cy + panelH / 2 - 16, 'default', footerStr, 10)
+      .setOrigin(0.5)
+      .setTint(0x666666)
+      .setDepth(101)
+      .setScrollFactor(0);
+    this._checklistElements.push(footer);
+  }
+
+  _hideChecklist() {
+    this._checklistOpen = false;
+    this._destroyChecklistElements();
+  }
+
+  _destroyChecklistElements() {
+    for (const el of this._checklistElements) {
+      if (el?.active) el.destroy();
+    }
+    this._checklistElements = [];
+  }
+
+  _cleanupChecklist() {
+    this._tabKey?.off('down', this._toggleChecklist, this);
+    this._tabKey = null;
+    this._destroyChecklistElements();
+  }
+
   // ─── Cleanup ────────────────────────────────────────────────────────────────
 
   shutdown() {
     this.registry.events.off("changedata", this.onRegistryChange, this);
+    this._cleanupChecklist();
     this._toastText?.destroy();
     this._toastText = null;
     this._achievementToast?.destroy();
