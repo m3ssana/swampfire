@@ -57,7 +57,7 @@ test.describe('Near-miss feedback system (#93)', () => {
     const timescale = await page.evaluate(() => {
       const scene = window.game.scene.getScene('game');
       // Simulate near-miss trigger
-      scene.handleNearMiss?.('rattlesnake_warn');
+      scene.triggerNearMiss?.('rattlesnake_warn');
       return window.game.loop.timeScale;
     });
     expect(timescale).toBe(0.5);
@@ -78,7 +78,7 @@ test.describe('Near-miss feedback system (#93)', () => {
       let called = false;
       const orig = scene.cameras.main.flash.bind(scene.cameras.main);
       scene.cameras.main.flash = (...args) => { called = true; orig(...args); };
-      scene.handleNearMiss?.('rattlesnake_warn');
+      scene.triggerNearMiss?.('rattlesnake_warn');
       return called;
     });
     expect(flashFired).toBe(true);
@@ -92,7 +92,7 @@ test.describe('Near-miss feedback system (#93)', () => {
 
     await page.evaluate(() => {
       const scene = window.game.scene.getScene('game');
-      scene.handleNearMiss?.('looter_warn');
+      scene.triggerNearMiss?.('looter_warn');
     });
 
     const xpAfter = await page.evaluate(() => window.game.registry.get('xp'));
@@ -108,7 +108,7 @@ test.describe('Near-miss feedback system (#93)', () => {
       const played = [];
       const origPlay = scene.sound.play.bind(scene.sound);
       scene.sound.play = (key, ...args) => { played.push(key); origPlay(key, ...args); };
-      scene.handleNearMiss?.('powerline_warn');
+      scene.triggerNearMiss?.('powerline_warn');
       return played;
     });
     expect(sfxPlayed).toContain('nearmiss_whoosh');
@@ -126,7 +126,7 @@ test.describe('Near-miss feedback system (#93)', () => {
 
     await page.evaluate(() => {
       const scene = window.game.scene.getScene('game');
-      scene.handleNearMiss?.('rattlesnake_warn');
+      scene.triggerNearMiss?.('rattlesnake_warn');
     });
 
     const comboAfter = await page.evaluate(() => {
@@ -143,7 +143,7 @@ test.describe('Near-miss feedback system (#93)', () => {
     const result = await page.evaluate(() => {
       const scene = window.game.scene.getScene('game');
       const xpBefore = window.game.registry.get('xp') ?? 0;
-      scene.handleNearMiss?.('rattlesnake_warn');
+      scene.triggerNearMiss?.('rattlesnake_warn');
       const xpAfter = window.game.registry.get('xp') ?? 0;
       return { gained: xpAfter - xpBefore };
     });
@@ -157,7 +157,7 @@ test.describe('Near-miss feedback system (#93)', () => {
     const result = await page.evaluate(() => {
       const scene = window.game.scene.getScene('game');
       const xpBefore = window.game.registry.get('xp') ?? 0;
-      scene.handleNearMiss?.('powerline_warn');
+      scene.triggerNearMiss?.('powerline_warn');
       const xpAfter = window.game.registry.get('xp') ?? 0;
       return { gained: xpAfter - xpBefore };
     });
@@ -171,7 +171,7 @@ test.describe('Near-miss feedback system (#93)', () => {
     const result = await page.evaluate(() => {
       const scene = window.game.scene.getScene('game');
       const xpBefore = window.game.registry.get('xp') ?? 0;
-      scene.handleNearMiss?.('looter_warn');
+      scene.triggerNearMiss?.('looter_warn');
       const xpAfter = window.game.registry.get('xp') ?? 0;
       return { gained: xpAfter - xpBefore };
     });
@@ -186,9 +186,9 @@ test.describe('Near-miss feedback system (#93)', () => {
       const scene = window.game.scene.getScene('game');
       const xpBefore = window.game.registry.get('xp') ?? 0;
       // Trigger 3 times rapidly — should only award once
-      scene.handleNearMiss?.('rattlesnake_warn');
-      scene.handleNearMiss?.('rattlesnake_warn');
-      scene.handleNearMiss?.('rattlesnake_warn');
+      scene.triggerNearMiss?.('rattlesnake_warn');
+      scene.triggerNearMiss?.('rattlesnake_warn');
+      scene.triggerNearMiss?.('rattlesnake_warn');
       const xpAfter = window.game.registry.get('xp') ?? 0;
       return xpAfter - xpBefore;
     });

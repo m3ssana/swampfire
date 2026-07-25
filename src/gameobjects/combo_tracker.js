@@ -91,6 +91,29 @@ export default class ComboTracker {
   }
 
   /**
+   * Register a near-miss event. Advances the combo streak and its window
+   * exactly like a loot event (so FRENZY can still build from hazard dodges),
+   * but does NOT increment _peakCombo — the loot-specific high-water stat
+   * shown on the end-of-run share card.
+   *
+   * @param {number} x - World X of the hazard (reserved for future FX).
+   * @param {number} y - World Y of the hazard.
+   */
+  onNearMiss(x, y) {
+    this._count++;
+    this._restartWindowTimer();
+
+    const level = LEVELS[Math.min(this._count, LEVELS.length - 1)];
+    if (!level) return;   // count < 2, nothing to display yet
+
+    this._showComboText(level);
+
+    if (this._count >= 5 && !this._frenzyActive) {
+      this._triggerFrenzy();
+    }
+  }
+
+  /**
    * Returns the active XP multiplier (1.5 during FRENZY, 1.0 otherwise).
    * Read this BEFORE awarding XP and BEFORE calling onLoot().
    */

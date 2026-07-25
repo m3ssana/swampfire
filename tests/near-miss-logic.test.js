@@ -27,10 +27,13 @@ import {
   DEBOUNCE_WINDOW_MS,
   HAZARD_LABELS,
   COMBO_FEED_ENABLED,
+  NEAR_MISS_SHAKE_INTENSITY,
+  NEAR_MISS_SHAKE_DURATION_MS,
   // ── Functions ─────────────────────────────────────────────────────────────
   isNearMissHazard,
   shouldAwardXP,
   getNearMissEffects,
+  computeNearMissXp,
 } from '../src/gameobjects/near_miss_logic.js';
 
 // ── Slow-motion constants ─────────────────────────────────────────────────────
@@ -43,16 +46,6 @@ describe('Slow-motion on near-miss', () => {
   it('slow-motion timescale is 0.5x (half speed)', () => {
     expect(SLOW_MO_TIMESCALE).toBe(0.5);
   });
-
-  it('timescale is between 0 (frozen) and 1 (normal)', () => {
-    expect(SLOW_MO_TIMESCALE).toBeGreaterThan(0);
-    expect(SLOW_MO_TIMESCALE).toBeLessThan(1);
-  });
-
-  it('duration is a positive integer in ms', () => {
-    expect(SLOW_MO_DURATION_MS).toBeGreaterThan(0);
-    expect(Number.isInteger(SLOW_MO_DURATION_MS)).toBe(true);
-  });
 });
 
 // ── XP award ──────────────────────────────────────────────────────────────────
@@ -60,11 +53,6 @@ describe('Slow-motion on near-miss', () => {
 describe('Near-miss XP award', () => {
   it('awards exactly 15 XP per near-miss event', () => {
     expect(NEAR_MISS_XP).toBe(15);
-  });
-
-  it('XP value is a positive integer', () => {
-    expect(NEAR_MISS_XP).toBeGreaterThan(0);
-    expect(Number.isInteger(NEAR_MISS_XP)).toBe(true);
   });
 
   it('shouldAwardXP returns true when debounce is not active', () => {
@@ -109,16 +97,6 @@ describe('Near-miss SFX keys', () => {
     expect(SFX_HEARTBEAT_KEY).toBe('nearmiss_heartbeat');
   });
 
-  it('whoosh key is a non-empty string', () => {
-    expect(typeof SFX_WHOOSH_KEY).toBe('string');
-    expect(SFX_WHOOSH_KEY.length).toBeGreaterThan(0);
-  });
-
-  it('heartbeat key is a non-empty string', () => {
-    expect(typeof SFX_HEARTBEAT_KEY).toBe('string');
-    expect(SFX_HEARTBEAT_KEY.length).toBeGreaterThan(0);
-  });
-
   it('whoosh and heartbeat are distinct SFX keys', () => {
     expect(SFX_WHOOSH_KEY).not.toBe(SFX_HEARTBEAT_KEY);
   });
@@ -129,10 +107,6 @@ describe('Near-miss SFX keys', () => {
 describe('Near-miss feeds into combo system', () => {
   it('COMBO_FEED_ENABLED is true — near-miss counts as a pickup for combo chain', () => {
     expect(COMBO_FEED_ENABLED).toBe(true);
-  });
-
-  it('COMBO_FEED_ENABLED is a boolean', () => {
-    expect(typeof COMBO_FEED_ENABLED).toBe('boolean');
   });
 });
 
@@ -265,5 +239,50 @@ describe('getNearMissEffects()', () => {
   it('feedsCombo matches COMBO_FEED_ENABLED (true)', () => {
     const effects = getNearMissEffects();
     expect(effects.feedsCombo).toBe(true);
+  });
+});
+
+// ── computeNearMissXp() — combo-aware XP calculation ──────────────────────────
+
+describe('computeNearMissXp(multiplier)', () => {
+  it('returns 15 XP at 1.0× multiplier (no combo)', () => {
+    expect(computeNearMissXp(1.0)).toBe(15);
+  });
+
+  it('returns 23 XP at 1.5× multiplier (FRENZY) via Math.round', () => {
+    // 15 * 1.5 = 22.5 → Math.round → 23
+    expect(computeNearMissXp(1.5)).toBe(23);
+  });
+
+  it('returns 30 XP at 2.0× multiplier', () => {
+    expect(computeNearMissXp(2.0)).toBe(30);
+  });
+
+  it('guards undefined multiplier — falls back to 15', () => {
+    expect(computeNearMissXp(undefined)).toBe(15);
+  });
+
+  it('guards 0 multiplier — falls back to 15 (never award 0 XP)', () => {
+    expect(computeNearMissXp(0)).toBe(15);
+  });
+
+  it('guards null multiplier — falls back to 15', () => {
+    expect(computeNearMissXp(null)).toBe(15);
+  });
+
+  it('guards negative multiplier — falls back to 15', () => {
+    expect(computeNearMissXp(-1)).toBe(15);
+  });
+});
+
+// ── Near-miss camera shake constants (SPEC §6.4) ─────────────────────────────
+
+describe('Near-miss camera shake (SPEC §6.4)', () => {
+  it('shake intensity is 0.002', () => {
+    expect(NEAR_MISS_SHAKE_INTENSITY).toBe(0.002);
+  });
+
+  it('shake duration is 100ms', () => {
+    expect(NEAR_MISS_SHAKE_DURATION_MS).toBe(100);
   });
 });

@@ -44,6 +44,12 @@ export const HAZARD_LABELS = new Set([
 /** Whether a near-miss event feeds into the combo streak system. */
 export const COMBO_FEED_ENABLED = true;
 
+/** Camera shake intensity for a near-miss event (SPEC §6.4). */
+export const NEAR_MISS_SHAKE_INTENSITY = 0.002;
+
+/** Camera shake duration in ms for a near-miss event (SPEC §6.4). */
+export const NEAR_MISS_SHAKE_DURATION_MS = 100;
+
 // ── Functions ─────────────────────────────────────────────────────────────────
 
 /**
@@ -94,4 +100,17 @@ export function getNearMissEffects() {
     sfxHeartbeat: SFX_HEARTBEAT_KEY,
     feedsCombo: COMBO_FEED_ENABLED,
   };
+}
+
+/**
+ * Computes the XP to award for a near-miss, applying the combo multiplier.
+ * Guards against invalid multiplier values (undefined, null, 0, negative)
+ * by falling back to the base NEAR_MISS_XP (i.e. multiplier=1).
+ *
+ * @param {number|null|undefined} multiplier - The current combo multiplier.
+ * @returns {number} The XP to award (always a positive integer).
+ */
+export function computeNearMissXp(multiplier) {
+  const safeMultiplier = (multiplier && multiplier > 0) ? multiplier : 1;
+  return Math.round(NEAR_MISS_XP * safeMultiplier);
 }

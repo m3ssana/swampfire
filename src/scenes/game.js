@@ -14,6 +14,9 @@ import {
   SFX_HEARTBEAT_KEY,
   DEBOUNCE_WINDOW_MS,
   COMBO_FEED_ENABLED,
+  NEAR_MISS_SHAKE_INTENSITY,
+  NEAR_MISS_SHAKE_DURATION_MS,
+  computeNearMissXp,
 } from "../gameobjects/near_miss_logic";
 
 // ── Camera tuning ─────────────────────────────────────────────────────────────
@@ -513,9 +516,14 @@ export default class Game extends Phaser.Scene {
     });
 
     // ── 3. XP award ──────────────────────────────────────────────────────────
+    const mult = this.comboTracker?.getMultiplier() ?? 1.0;
+    const earned = computeNearMissXp(mult);
     const xp = this.registry.get('xp') ?? 0;
-    this.registry.set('xp', xp + NEAR_MISS_XP);
-    this.showXPGain(x, y - 48, NEAR_MISS_XP, 'nearmiss');
+    this.registry.set('xp', xp + earned);
+    this.showXPGain(x, y - 48, earned, 'nearmiss');
+
+    // ── 3b. Camera shake (SPEC §6.4) ────────────────────────────────────────
+    this.cameras.main.shake(NEAR_MISS_SHAKE_DURATION_MS, NEAR_MISS_SHAKE_INTENSITY);
 
     // ── 4. SFX (defensive — no-op if audio keys not loaded) ──────────────────
     try { this.sound.play(SFX_WHOOSH_KEY); } catch (e) { /* graceful no-op */ }
@@ -523,7 +531,7 @@ export default class Game extends Phaser.Scene {
 
     // ── 5. Combo feed ────────────────────────────────────────────────────────
     if (COMBO_FEED_ENABLED && this.comboTracker) {
-      this.comboTracker.onLoot(x, y);
+      this.comboTracker.onNearMiss(x, y);
     }
 
     // ── Debounce reset ───────────────────────────────────────────────────────
