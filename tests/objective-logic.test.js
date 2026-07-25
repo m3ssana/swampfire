@@ -83,6 +83,11 @@ describe('objective_logic — constant sync', () => {
     });
   });
 
+  it('SYSTEM_ZONE_HINTS["Fuel Injector"] is literally zone 1 (US-41 Corridor)', () => {
+    // Literal assertion guards against mapping drift between objective_logic.js and zone_manager.js
+    expect(SYSTEM_ZONE_HINTS['Fuel Injector']).toBe(1);
+  });
+
   it('PULSE_DURATION_MS is a positive number', () => {
     expect(PULSE_DURATION_MS).toBeGreaterThan(0);
     expect(typeof PULSE_DURATION_MS).toBe('number');
@@ -195,6 +200,21 @@ describe('objective_logic — inventory awareness', () => {
     // Rocket is in Zone 0 — Cypress Creek Preserve
     expect(result.location).toBe('Cypress Creek Preserve');
     expect(result.zoneId).toBe(0);
+  });
+
+  it('with systemsInstalled=4 and crafted component, returns install (not find)', () => {
+    // 4 of 5 installed; player holds the 5th component (Pressure Regulator).
+    // The "component in inventory" branch must fire BEFORE the "Find X" branch.
+    // If branch order were reversed, result.text would match /^Find .+ — check .+$/.
+    const inventory = [{ label: 'Pressure Regulator', type: 'component' }];
+    const result = getNextObjective({ systemsInstalled: 4, inventory });
+    expect(result.text).toBe('Install Pressure Regulator at the rocket');
+    expect(result.item).toBe('Pressure Regulator');
+    expect(result.location).toBe('Cypress Creek Preserve');
+    expect(result.zoneId).toBe(0);
+    expect(result.isComplete).toBe(false);
+    // Ensures this is NOT the find/scavenge path
+    expect(result.text).not.toMatch(/^Find .+ — check .+$/);
   });
 
   it('with 2+ ingredients in inventory, hints to craft at workbench', () => {

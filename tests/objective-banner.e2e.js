@@ -27,14 +27,14 @@ async function waitForGameReady(page) {
 async function getObjectiveBannerText(page) {
   return page.evaluate(() => {
     const hud = window.game.scene.getScene('hud');
-    return hud?.objectiveBanner?.text ?? null;
+    return hud?.objectiveText?.text ?? null;
   });
 }
 
 async function getObjectiveBannerAlpha(page) {
   return page.evaluate(() => {
     const hud = window.game.scene.getScene('hud');
-    return hud?.objectiveBanner?.alpha ?? null;
+    return hud?.objectiveText?.alpha ?? null;
   });
 }
 
@@ -59,7 +59,7 @@ test.describe('Objective Banner — HUD integration', () => {
     // Verify Y position is below timer (timer is at y=18, size 30 → bottom ~48)
     const bannerY = await page.evaluate(() => {
       const hud = window.game.scene.getScene('hud');
-      return hud?.objectiveBanner?.y ?? 0;
+      return hud?.objectiveText?.y ?? 0;
     });
     expect(bannerY).toBeGreaterThan(48);
   });
@@ -168,7 +168,7 @@ test.describe('Objective Banner — HUD integration', () => {
 
     const pos = await page.evaluate(() => {
       const hud = window.game.scene.getScene('hud');
-      const banner = hud?.objectiveBanner;
+      const banner = hud?.objectiveText;
       if (!banner) return null;
       return { x: banner.x, y: banner.y, originX: banner.originX };
     });
