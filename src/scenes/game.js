@@ -4,6 +4,7 @@ import StormManager                   from "../gameobjects/storm_manager";
 import HazardManager                  from "../gameobjects/hazard_manager";
 import ComboTracker                   from "../gameobjects/combo_tracker";
 import AchievementManager             from "../gameobjects/achievement_manager";
+import SaveManager                    from "../gameobjects/save_manager";
 import {
   NEAR_MISS_XP,
   SLOW_MO_DURATION_MS,
@@ -88,6 +89,7 @@ export default class Game extends Phaser.Scene {
     this.hazardManager  = new HazardManager(this);
     this.comboTracker        = new ComboTracker(this);
     this.achievementManager  = new AchievementManager(this);
+    this.saveManager         = new SaveManager(this);
     // Wire hazard collision handlers now that both player and hazardManager exist
     this.hazardManager.addCollisions(this);
   }
