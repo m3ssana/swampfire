@@ -120,6 +120,18 @@ export default class SearchableContainer {
   /** Returns the prompt text shown when the player is in range. */
   promptText() { return '[E] Search'; }
 
+  // ── Restore searched state (Fix 1) ──────────────────────────────────────────
+
+  /**
+   * Mark this container as already searched without running search effects.
+   * Used when restoring from a save or re-entering a zone.
+   */
+  markAsSearched() {
+    if (this.searched) return;
+    this.searched = true;
+    this.sprite.setFrame(1);
+  }
+
   // ── Search action ───────────────────────────────────────────────────────────
 
   /**

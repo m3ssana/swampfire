@@ -25,6 +25,7 @@ import Workbench           from './workbench';
 import Rocket              from './rocket';
 import NPC                 from './npc';
 import StashBox            from './stash_box';
+import { resolveInitialZone, isSearched } from './save_logic';
 
 // ── Zone catalogue ─────────────────────────────────────────────────────────────
 //
@@ -106,7 +107,7 @@ export function isZoneDefined(zoneId) {
 // ── ZoneManager ────────────────────────────────────────────────────────────────
 
 export default class ZoneManager {
-  constructor(scene) {
+  constructor(scene, initialZone) {
     this.scene = scene;
 
     // Exposed world objects (populated/cleared on each loadZone call)
@@ -125,7 +126,11 @@ export default class ZoneManager {
     this.map           = null;
     this.currentZoneId = null;
 
-    this.loadZone(0);
+    // Resolve initialZone through the pure helper: undefined/NaN/out-of-range → 0.
+    // Then guard against zones that aren't defined in this build (isZoneDefined).
+    const resolved = resolveInitialZone(initialZone);
+    const startZone = isZoneDefined(resolved) ? resolved : 0;
+    this.loadZone(startZone);
   }
 
   // ── Public API ──────────────────────────────────────────────────────────────
@@ -244,6 +249,7 @@ export default class ZoneManager {
     this.exits       = [];
     this._spawnPoint = null;
 
+    let containerIndex = 0;
     for (const obj of objectLayer.objects) {
       // Tiled objects store top-left corner; game objects expect centre coords.
       const cx = obj.x + (obj.width  ?? 48) / 2;
@@ -252,7 +258,18 @@ export default class ZoneManager {
       switch (obj.type) {
         case 'container': {
           const table = this._getProp(obj, 'table') ?? 'default';
-          this.containers.push(new SearchableContainer(this.scene, cx, cy, table));
+          const container = new SearchableContainer(this.scene, cx, cy, table);
+          // Assign a stable ID: prefer the Tiled object's own id, fall back to index
+          container.containerId = (typeof obj.id === 'number' && obj.id > 0) ? obj.id : containerIndex;
+          containerIndex++;
+
+          // Restore searched state from registry (Fix 1: searched-container persistence)
+          const searchedMap = this.scene.registry.get('searchedContainers');
+          if (searchedMap && isSearched(searchedMap, this.currentZoneId, container.containerId)) {
+            container.markAsSearched();
+          }
+
+          this.containers.push(container);
           break;
         }
         case 'workbench':

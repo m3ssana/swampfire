@@ -117,16 +117,14 @@ If the human requests changes, address the feedback, push new commits, and updat
 Ready for re-review.
 ```
 
-### 5. **Update TODO.md + Close the Issue (FINAL STEP — after human merges)**
+### 5. **Update TODO.md (in the feature PR) + Close the Issue (after human merges)**
 
-**ONLY after the change is merged to main:**
-
-First, update `TODO.md` — find the task, change `⏳` to `✅`, and append the commit hash:
+Update `TODO.md` **before opening the PR** — find the task, change `⏳` to `✅`, and append the commit hash. Stage it alongside your feature files:
 ```markdown
 - ✅ **3.X Task name** [#N](url) _(abc1234)_
 ```
 
-Then close the GitHub issue:
+Then, **only after the human merges the PR to main**, close the GitHub issue:
 ```bash
 gh issue close ISSUE_NUMBER --comment "✅ Completed and merged to main (commit: [SHA])
 
@@ -148,13 +146,13 @@ A work item is **ONLY complete** when:
 2. ✅ Tests verified to fail before implementation
 3. ✅ Code written and all tests pass
 4. ✅ All acceptance criteria are met
-5. ✅ PR is created with a clear description
-6. ✅ **Human has reviewed and approved the PR**
-7. ✅ **Human has merged PR to main** ← CRITICAL (agents do not self-merge)
-8. ✅ **TODO.md updated** — task marked ✅ with commit hash
+5. ✅ **TODO.md updated** — task marked ✅ with commit hash, committed in the feature PR
+6. ✅ PR is created with a clear description
+7. ✅ **Human has reviewed and approved the PR**
+8. ✅ **Human has merged PR to main** ← CRITICAL (agents do not self-merge)
 9. ✅ Issue is closed with final comment linking the merged commit
 
-**⚠️ CRITICAL: Agents must not merge their own PRs. Do NOT close the issue until step 7 is complete.**
+**⚠️ CRITICAL: Agents must not merge their own PRs. Do NOT close the issue until step 8 is complete.**
 
 If the PR is closed/abandoned before merging, **reopen** the issue and update its status.
 
