@@ -5,6 +5,7 @@ import HazardManager                  from "../gameobjects/hazard_manager";
 import ComboTracker                   from "../gameobjects/combo_tracker";
 import AchievementManager             from "../gameobjects/achievement_manager";
 import SaveManager                    from "../gameobjects/save_manager";
+import { resolveSpawnPosition }       from "../gameobjects/save_logic";
 
 // ── Camera tuning ─────────────────────────────────────────────────────────────
 const CAMERA_LERP  = 0.15;
@@ -31,6 +32,11 @@ export default class Game extends Phaser.Scene {
   init(data) {
     this.name   = data.name;
     this.number = data.number;
+    // Set when the run is resumed from a save (see MenuScene CONTINUE -> #98
+    // SaveManager.loadInto). Consumed once by addPlayer() so the player
+    // materialises where they saved instead of at the zone's default spawn.
+    this._loadedFromSave = data.loadedFromSave === true;
+    this._savedPosition  = data.savedPosition ?? null;
   }
 
   create() {
@@ -93,7 +99,17 @@ export default class Game extends Phaser.Scene {
 
   addPlayer() {
     const spawn = this.zone.getSpawnPoint();
-    this.player = new Player(this, spawn.x, spawn.y, 100);
+
+    // A resumed run restores the exact saved position; anything missing or
+    // non-finite falls back to the zone spawn. Rule lives in save_logic.js so
+    // it is unit-testable without Phaser.
+    const pos = resolveSpawnPosition(spawn, this._savedPosition, this._loadedFromSave);
+
+    // Consume it: a death/restart within this run must use the zone spawn.
+    this._loadedFromSave = false;
+    this._savedPosition  = null;
+
+    this.player = new Player(this, pos.x, pos.y, 100);
   }
 
   // ─── Interact prompt ───────────────────────────────────────────────────────

@@ -144,3 +144,29 @@ export function clearSave(storage) {
     // graceful no-op (private browsing, etc.)
   }
 }
+
+/**
+ * Decides where the player materialises when a zone is created.
+ *
+ * A resumed run must place the player exactly where they saved; a fresh run
+ * (or a death/restart mid-run) uses the zone's own spawn point. Any missing or
+ * non-finite coordinate falls back to the zone spawn so a corrupt or truncated
+ * save can never drop the player outside the world.
+ *
+ * Pure: never mutates either argument.
+ *
+ * @param {{x: number, y: number}} zoneSpawn — the zone's default spawn point
+ * @param {{x: *, y: *}|null} savedPosition — position from the save file
+ * @param {boolean} loadedFromSave — true only when resuming via CONTINUE
+ * @returns {{x: number, y: number}} the position to spawn at
+ */
+export function resolveSpawnPosition(zoneSpawn, savedPosition, loadedFromSave) {
+  if (loadedFromSave === true && savedPosition) {
+    const x = Number(savedPosition.x);
+    const y = Number(savedPosition.y);
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      return { x, y };
+    }
+  }
+  return { x: zoneSpawn.x, y: zoneSpawn.y };
+}

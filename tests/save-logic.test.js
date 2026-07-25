@@ -26,6 +26,7 @@ import {
   isValidSave,
   hasSave,
   clearSave,
+  resolveSpawnPosition,
   AUTOSAVE_INTERVAL_MS,
   AUTOSAVE_TRIGGERS,
   SAVE_KEY,
@@ -556,5 +557,57 @@ describe('Save system edge cases', () => {
     const storage2 = makeFakeStorage();
     storage2.setItem('wrong_key', serialize(makeFullState()));
     expect(hasSave(storage2)).toBe(false);
+  });
+});
+
+/**
+ * resolveSpawnPosition — where the player materialises on scene create.
+ *
+ * Regression guard for the CONTINUE flow (#115 -> #98): MenuScene passed
+ * savedPosition into GameScene but nothing consumed it, so a resumed run
+ * dropped the player at the zone's default spawn instead of where they saved.
+ */
+describe('resolveSpawnPosition', () => {
+  const zoneSpawn = { x: 1920, y: 1440 };
+
+  it('returns the saved position when resuming from a save', () => {
+    const result = resolveSpawnPosition(zoneSpawn, { x: 640, y: 512 }, true);
+    expect(result).toEqual({ x: 640, y: 512 });
+  });
+
+  it('returns the zone spawn on a fresh run even if a position is supplied', () => {
+    const result = resolveSpawnPosition(zoneSpawn, { x: 640, y: 512 }, false);
+    expect(result).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('falls back to the zone spawn when savedPosition is null', () => {
+    expect(resolveSpawnPosition(zoneSpawn, null, true)).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('falls back to the zone spawn when a coordinate is missing', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: 640 }, true)).toEqual({ x: 1920, y: 1440 });
+    expect(resolveSpawnPosition(zoneSpawn, { y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('falls back to the zone spawn on non-finite coordinates from a corrupt save', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: NaN, y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+    expect(resolveSpawnPosition(zoneSpawn, { x: Infinity, y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+    expect(resolveSpawnPosition(zoneSpawn, { x: 'abc', y: 512 }, true)).toEqual({ x: 1920, y: 1440 });
+  });
+
+  it('accepts a legitimate origin position of 0,0 rather than treating it as falsy', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: 0, y: 0 }, true)).toEqual({ x: 0, y: 0 });
+  });
+
+  it('coerces numeric strings from a JSON round-trip', () => {
+    expect(resolveSpawnPosition(zoneSpawn, { x: '640', y: '512' }, true)).toEqual({ x: 640, y: 512 });
+  });
+
+  it('does not mutate the inputs', () => {
+    const saved = { x: 640, y: 512 };
+    const zone  = { x: 1920, y: 1440 };
+    resolveSpawnPosition(zone, saved, true);
+    expect(saved).toEqual({ x: 640, y: 512 });
+    expect(zone).toEqual({ x: 1920, y: 1440 });
   });
 });
