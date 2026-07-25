@@ -91,6 +91,24 @@ the wrong branch.
 **Fix**: always isolate subagents that will use git in their own worktree/checkout
 (a temp directory), so each agent has a fully isolated working copy.
 
+**Kiro's `subagent` tool has NO `isolation` parameter** — you must build the isolation
+yourself. Confirmed working 2026-07-24 across 7 features built in parallel:
+
+1. Orchestrator creates one worktree per feature, each on its own branch:
+   `git worktree add -b feature/issue-N-slug ../swampfire-wt/wtN main`
+2. Junction `node_modules` into each worktree so Vitest/Vite run without reinstalling:
+   `New-Item -ItemType Junction -Path <wt>\node_modules -Target <repo>\node_modules`
+3. Every subagent prompt names the absolute worktree path and says
+   **"RUN NO GIT COMMANDS AT ALL"**. The orchestrator alone runs add/commit/push/PR.
+4. For dependent features, branch off the prerequisite (not main) and open a
+   **stacked PR**: `gh pr create --base <prereq-branch>`. Keeps the diff reviewable.
+
+Result: zero cross-branch contamination. Verify with `git worktree list` and
+`git log --oneline --all --graph` before trusting any parallel run.
+
+Also learned: CI security scans only trigger on PRs targeting `main`, so stacked PRs
+show no checks until their base merges — cite local `npm test` + `npm run build` instead.
+
 If worktree isolation isn't used and branches get cross-contaminated, check
 `git branch --show-current` before every commit, and `git log --oneline --all --graph`
 to see where commits actually landed.
@@ -118,10 +136,10 @@ Branch protection on main requires 1 approving review — GitHub blocks self-mer
 Always comment on the issue at the START of work, not just at the end.
 
 ### TODO.md update rule (MANDATORY — learned 2026-03-08)
-**TODO.md must be committed inside the feature PR — not as a separate step after merge.**
+**TODO.md must be committed inside the feature PR.**
 - Stage `TODO.md` alongside the feature files before `git commit`
 - Mark the task ✅ with the commit hash in the same commit
-- Never leave TODO.md as an unstaged local edit after a merge — it will drift from reality
+- Never leave TODO.md as an unstaged local edit — it will drift from reality
 - Direct pushes to main bypass branch protection and generate a GitHub warning; avoid them
 
 ### Definition of Done checklist (per task)
