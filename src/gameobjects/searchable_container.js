@@ -46,9 +46,9 @@ const LOOT_TABLES = {
    * Low ingredient chance; decent XP for morale.
    */
   cooler: [
-    { label: "Energy Drink",     xp:  4, tint: 0x76ff03, weight: 30, type: "junk" },
-    { label: "Water Bottle",     xp:  2, tint: 0x40c4ff, weight: 25, type: "junk" },
-    { label: "Beef Jerky",       xp:  3, tint: 0xa1887f, weight: 20, type: "junk" },
+    { label: "Energy Drink",     xp:  4, tint: 0x76ff03, weight: 30, type: "consumable" },
+    { label: "Water Bottle",     xp:  2, tint: 0x40c4ff, weight: 25, type: "consumable" },
+    { label: "Beef Jerky",       xp:  3, tint: 0xa1887f, weight: 20, type: "consumable" },
     { label: "Hydraulic Seal",   xp:  5, tint: 0x4fc3f7, weight: 15, type: "ingredient" },
     { label: "PVC Coupler",      xp:  3, tint: 0xffffff, weight:  8, type: "ingredient" },
     { label: "Empty",            xp:  0, tint: 0x666666, weight:  2, type: "junk" },

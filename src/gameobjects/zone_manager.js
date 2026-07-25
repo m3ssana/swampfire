@@ -24,6 +24,7 @@ import SearchableContainer from './searchable_container';
 import Workbench           from './workbench';
 import Rocket              from './rocket';
 import NPC                 from './npc';
+import StashBox            from './stash_box';
 
 // ── Zone catalogue ─────────────────────────────────────────────────────────────
 //
@@ -112,6 +113,7 @@ export default class ZoneManager {
     this.containers    = [];
     this.workbench     = null;
     this.rocket        = null;
+    this.stashBox      = null;
 
     /**
      * Exit descriptors parsed from the Tiled object layer.
@@ -167,6 +169,7 @@ export default class ZoneManager {
     this.containers.forEach(c => c.destroy());
     this.workbench?.destroy();
     this.rocket?.destroy();
+    this.stashBox?.destroy();
     for (const npc of this.npcs ?? []) npc.destroy?.();
     this.npcs = [];
 
@@ -182,6 +185,7 @@ export default class ZoneManager {
     this.containers = [];
     this.workbench  = null;
     this.rocket     = null;
+    this.stashBox   = null;
     this.npcs       = [];
     this.exits      = [];
     this.map        = null;
@@ -235,6 +239,7 @@ export default class ZoneManager {
     this.containers  = [];
     this.workbench   = null;
     this.rocket      = null;
+    this.stashBox    = null;
     this.npcs        = [];
     this.exits       = [];
     this._spawnPoint = null;
@@ -289,6 +294,14 @@ export default class ZoneManager {
         default:
           console.warn(`ZoneManager: unknown object type "${obj.type}" (id ${obj.id})`);
       }
+    }
+
+    // Zone 0 gets a stash box near the rocket for depositing/withdrawing items.
+    // Placed 80px to the left of the rocket (or at a fixed position if no rocket).
+    if (this.currentZoneId === 0) {
+      const stashX = this.rocket ? this.rocket.sprite.x - 80 : 38 * 48;
+      const stashY = this.rocket ? this.rocket.sprite.y : 30 * 48;
+      this.stashBox = new StashBox(this.scene, stashX, stashY);
     }
   }
 

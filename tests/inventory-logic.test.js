@@ -29,8 +29,11 @@ import {
   canAdd,
   addItem,
   isAutoPickup,
+  occupiesSlot,
+  discardLast,
   toStash,
   fromStash,
+  FULL_POPUP_COOLDOWN_MS,
 } from '../src/gameobjects/inventory_logic.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -360,5 +363,158 @@ describe('Inventory Logic — Integration scenarios', () => {
     const fullResult = addItem(fullInv, consumable);
     expect(fullResult.success).toBe(false);
     expect(fullResult.reason).toBe('inventory_full');
+  });
+});
+
+// ─── occupiesSlot (Fix 1) ─────────────────────────────────────────────────────
+
+describe('Inventory Logic — occupiesSlot', () => {
+  it('returns true for type "ingredient"', () => {
+    expect(occupiesSlot({ label: 'Copper Wiring', type: 'ingredient' })).toBe(true);
+  });
+
+  it('returns true for type "component"', () => {
+    expect(occupiesSlot({ label: 'Fuel Injector', type: 'component' })).toBe(true);
+  });
+
+  it('returns true for type "consumable"', () => {
+    expect(occupiesSlot({ label: 'Energy Drink', type: 'consumable' })).toBe(true);
+  });
+
+  it('returns false for type "junk"', () => {
+    expect(occupiesSlot({ label: 'Wire Stripper', type: 'junk' })).toBe(false);
+  });
+
+  it('returns false for undefined type', () => {
+    expect(occupiesSlot({ label: 'Mystery' })).toBe(false);
+  });
+
+  it('returns false for null type', () => {
+    expect(occupiesSlot({ label: 'Null', type: null })).toBe(false);
+  });
+
+  it('returns false for "Empty" junk items', () => {
+    expect(occupiesSlot({ label: 'Empty', type: 'junk' })).toBe(false);
+  });
+});
+
+// ─── discardLast (Fix 2) ──────────────────────────────────────────────────────
+
+describe('Inventory Logic — discardLast', () => {
+  it('removes the last item from inventory and returns it', () => {
+    const inv = [
+      { label: 'Copper Wiring', type: 'ingredient' },
+      { label: 'Steel Bracket', type: 'ingredient' },
+    ];
+    const result = discardLast(inv);
+
+    expect(result.inventory).toHaveLength(1);
+    expect(result.inventory[0]).toEqual({ label: 'Copper Wiring', type: 'ingredient' });
+    expect(result.discarded).toEqual({ label: 'Steel Bracket', type: 'ingredient' });
+  });
+
+  it('returns null discarded and unchanged inventory when empty', () => {
+    const result = discardLast([]);
+
+    expect(result.inventory).toHaveLength(0);
+    expect(result.discarded).toBeNull();
+  });
+
+  it('does NOT mutate the original inventory array', () => {
+    const inv = [{ label: 'A', type: 'junk' }, { label: 'B', type: 'ingredient' }];
+    const original = [...inv];
+    discardLast(inv);
+
+    expect(inv).toEqual(original);
+  });
+
+  it('returns a NEW array reference (not the same object)', () => {
+    const inv = [{ label: 'A', type: 'ingredient' }];
+    const result = discardLast(inv);
+
+    expect(result.inventory).not.toBe(inv);
+  });
+
+  it('works correctly with a single item', () => {
+    const inv = [{ label: 'Only', type: 'component' }];
+    const result = discardLast(inv);
+
+    expect(result.inventory).toHaveLength(0);
+    expect(result.discarded).toEqual({ label: 'Only', type: 'component' });
+  });
+});
+
+// ─── FULL_POPUP_COOLDOWN_MS (Fix 5) ──────────────────────────────────────────
+
+describe('Inventory Logic — FULL_POPUP_COOLDOWN_MS', () => {
+  it('is exported as a positive number', () => {
+    expect(FULL_POPUP_COOLDOWN_MS).toBeGreaterThan(0);
+  });
+
+  it('is at least 1000ms to prevent spam', () => {
+    expect(FULL_POPUP_COOLDOWN_MS).toBeGreaterThanOrEqual(1000);
+  });
+});
+
+// ─── Stash defensive reads (Fix 6) ───────────────────────────────────────────
+
+describe('Inventory Logic — stash defensive behavior', () => {
+  it('toStash handles undefined stash by treating it as empty', () => {
+    const inv = [{ label: 'Item', type: 'ingredient' }];
+    // Simulate undefined stash with null/undefined
+    const result = toStash(inv, undefined, 0, 0);
+
+    expect(result.success).toBe(true);
+    expect(result.stash).toHaveLength(1);
+  });
+
+  it('fromStash handles undefined stash gracefully', () => {
+    const inv = [{ label: 'Item', type: 'ingredient' }];
+    const result = fromStash(inv, undefined, 0, 0);
+
+    expect(result.success).toBe(false);
+    // Should not throw — just return a failure
+  });
+
+  it('toStash handles null stash by treating it as empty', () => {
+    const inv = [{ label: 'Item', type: 'ingredient' }];
+    const result = toStash(inv, null, 0, 0);
+
+    expect(result.success).toBe(true);
+    expect(result.stash).toHaveLength(1);
+  });
+
+  it('fromStash handles null stash gracefully', () => {
+    const inv = [{ label: 'Item', type: 'ingredient' }];
+    const result = fromStash(inv, null, 0, 0);
+
+    expect(result.success).toBe(false);
+  });
+});
+
+// ─── Integration: junk does not fill slots (Fix 1 + existing addItem) ─────────
+
+describe('Inventory Logic — junk bypass integration', () => {
+  it('a player cannot softlock by filling all 8 slots with junk', () => {
+    // Only items where occupiesSlot() is true should count toward the 8-slot limit.
+    // Junk never occupies a slot, so even with 100 junk pickups, addItem() for
+    // ingredients/components should still succeed.
+    const junkItem = { label: 'Duct Tape', type: 'junk' };
+    const ingredientItem = { label: 'Copper Wiring', type: 'ingredient' };
+
+    // occupiesSlot is the gatekeeper — junk is excluded before addItem is called
+    expect(occupiesSlot(junkItem)).toBe(false);
+    expect(occupiesSlot(ingredientItem)).toBe(true);
+
+    // If the game correctly skips addItem for junk, an inventory can always accept ingredients
+    let inv = [];
+    for (let i = 0; i < 7; i++) {
+      const result = addItem(inv, ingredientItem);
+      inv = result.inventory;
+    }
+    // 7/8 used — still room for one more
+    expect(canAdd(inv)).toBe(true);
+    const finalAdd = addItem(inv, ingredientItem);
+    expect(finalAdd.success).toBe(true);
   });
 });
