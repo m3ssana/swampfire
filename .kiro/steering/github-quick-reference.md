@@ -67,10 +67,7 @@ gh pr create --title "feat: [description] (#ISSUE_NUMBER)" \
 
 ## 🎯 After Human Merges
 
-### 1. Update TODO.md
-Change `⏳` → `✅` and add commit hash.
-
-### 2. Close Issue
+### 1. Close Issue
 ```bash
 gh issue close ISSUE_NUMBER --comment "✅ Merged to main (commit: SHA)
 
@@ -78,6 +75,8 @@ All acceptance criteria met:
 - [x] Criterion 1
 - [x] Criterion 2"
 ```
+
+> **Note:** TODO.md should already be updated (✅ + commit hash) inside the feature PR — not after merge.
 
 ---
 

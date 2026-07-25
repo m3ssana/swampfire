@@ -27,10 +27,10 @@ When a new feature is requested:
 
 ## Project Hygiene Checklist
 
-After completing any feature or bug fix, run through this checklist:
+After completing any feature or bug fix, run through this checklist **before opening the PR**:
 
-1. **Update TODO.md** — mark completed items, add any follow-up tasks discovered during the work
-2. **Update/close related GitHub issues** — comment with what was done and close if fully resolved
+1. **Update TODO.md** — mark completed items ✅ with commit hash, add any follow-up tasks discovered during the work. Stage it with the feature files — it ships in the same PR.
+2. **Update/close related GitHub issues** — comment with what was done; close only after a human merges the PR
 3. **Verify the build runs without errors** — `npm run build` and check for errors
 4. **Commit all changed files** — don't leave uncommitted work; use a clear commit message referencing the issue number
 

@@ -25,6 +25,8 @@ Make progress
   ↓
 Post updates: "✅ Completed X, working on Y..."
   ↓
+Update TODO.md: change ⏳ → ✅, add commit hash _(abc1234)_ — commit with the feature
+  ↓
 Push to feature branch & create PR
   ↓
 Post comment: "📋 PR #123 ready for human review — waiting for approval"
@@ -32,8 +34,6 @@ Post comment: "📋 PR #123 ready for human review — waiting for approval"
 ⏸️  STOP — do not merge. A human reviews and approves the PR.
   ↓
 Human merges PR to main
-  ↓
-Update TODO.md: change ⏳ → ✅, add commit hash _(abc1234)_
   ↓
 Close issue: "✅ Merged to main (commit: SHA)"
 ```
@@ -43,13 +43,13 @@ Close issue: "✅ Merged to main (commit: SHA)"
 - ✅ Tests fail before implementation (verified)
 - ✅ Code written & all tests pass
 - ✅ All acceptance criteria met
+- ✅ **TODO.md updated** — task marked ✅ with commit hash, committed in the feature PR
 - ✅ PR created with clear description
 - ✅ **Human reviewed and approved** ← REQUIRED
 - ✅ **PR merged to main by human** ← CRITICAL
-- ✅ **TODO.md updated** — task marked ✅ with commit hash ← REQUIRED
 - ✅ **GitHub issue closed** with commit/PR link ← REQUIRED
 
-**Do not merge your own PRs. Do not close issues or update TODO.md until a human has merged the PR.**
+**Do not merge your own PRs. Do not close issues until a human has merged the PR.**
 
 ### Example Issue Comment After PR Creation
 
@@ -129,7 +129,7 @@ GitHub will block self-merges. This is enforced at the repository level — not 
 
 - **Never merge your own PR** — human approval is required
 - **Create a PR, then stop** — leave merging to the human
-- **Update TODO.md when done** — mark ✅, add commit hash, after merge
+- **Update TODO.md when done** — mark ✅, add commit hash, commit inside the feature PR
 - **Update issues regularly** — don't go silent for hours
 - **Link PRs to issues** — "Closes #XX" in PR description
 - **Close with evidence** — include commit/PR link in closure comment, AFTER merge
@@ -242,9 +242,9 @@ Post on the issue: `"📋 PR #N ready for human review — waiting for approval"
 
 ⏸️ **STOP** — do not merge. Wait for human approval.
 
-### Step 4 — After human merges: mark done in both places
-- TODO.md `## Bugs` section: `⏳` → `✅` with commit hash
-- GitHub issue: close with evidence comment
+### Step 4 — After human merges: close the issue
+- TODO.md `## Bugs` section: `⏳` → `✅` with commit hash — **committed inside the fix PR**
+- GitHub issue: close with evidence comment (only after human merges)
 
 ### What makes a good bug issue
 - **Root cause** — not just symptoms. Identify the exact line(s) responsible.

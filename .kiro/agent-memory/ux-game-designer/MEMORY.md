@@ -136,10 +136,10 @@ Branch protection on main requires 1 approving review — GitHub blocks self-mer
 Always comment on the issue at the START of work, not just at the end.
 
 ### TODO.md update rule (MANDATORY — learned 2026-03-08)
-**TODO.md must be committed inside the feature PR — not as a separate step after merge.**
+**TODO.md must be committed inside the feature PR.**
 - Stage `TODO.md` alongside the feature files before `git commit`
 - Mark the task ✅ with the commit hash in the same commit
-- Never leave TODO.md as an unstaged local edit after a merge — it will drift from reality
+- Never leave TODO.md as an unstaged local edit — it will drift from reality
 - Direct pushes to main bypass branch protection and generate a GitHub warning; avoid them
 
 ### Definition of Done checklist (per task)
