@@ -4,6 +4,7 @@ import StormManager                   from "../gameobjects/storm_manager";
 import HazardManager                  from "../gameobjects/hazard_manager";
 import ComboTracker                   from "../gameobjects/combo_tracker";
 import AchievementManager             from "../gameobjects/achievement_manager";
+import { canAdd, isAutoPickup }       from "../gameobjects/inventory_logic";
 
 // ── Camera tuning ─────────────────────────────────────────────────────────────
 const CAMERA_LERP  = 0.15;
@@ -285,8 +286,14 @@ export default class Game extends Phaser.Scene {
     const { itemDef } = itemSprite;
     if (!itemDef) return;
 
-    // Append to persistent inventory registry (feed for Phase 2.3 crafting)
+    // Enforce 8-slot inventory cap — leave item in world if full
     const inv = this.registry.get('inventory') ?? [];
+    if (!canAdd(inv)) {
+      this.showPoints(itemSprite.x, itemSprite.y, 'Inventory full', 0xff4444);
+      return;
+    }
+
+    // Append to persistent inventory registry (feed for Phase 2.3 crafting)
     this.registry.set('inventory', [
       ...inv,
       { label: itemDef.label, type: itemDef.type },

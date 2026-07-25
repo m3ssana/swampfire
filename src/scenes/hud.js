@@ -9,12 +9,15 @@
  *   timeLeft  — seconds remaining (3600 = 60:00)
  *   hp        — player health (0–3)
  *   xp        — experience points
+ *   inventory — player inventory array (renders 8-slot grid)
  *
  * Layout:
  *   Top bar     — timer (centre), XP (left)
  *   Bottom-left — 3 HP hearts
+ *   Bottom-right — 8-slot inventory grid with colour-coded borders
  *   Top-right   — minimap placeholder
  */
+import { MAX_SLOTS, getBorderColour } from '../gameobjects/inventory_logic.js';
 
 const MAX_HP = 3;
 const HEART_W = 16;
@@ -38,6 +41,7 @@ export default class HUD extends Phaser.Scene {
     this.buildXP();
     this.buildHearts();
     this.buildMinimap();
+    this.buildInventoryGrid();
 
     // Sync to whatever is already in the registry
     this.updateTimerDisplay(this.registry.get("timeLeft") ?? 3600);
@@ -137,6 +141,62 @@ export default class HUD extends Phaser.Scene {
       .setOrigin(0.5).setTint(0x888888);
   }
 
+  // ─── Inventory Grid ─────────────────────────────────────────────────────────
+
+  buildInventoryGrid() {
+    const SLOT_SIZE = 28;
+    const SLOT_GAP  = 4;
+    const COLS      = 4;
+    const ROWS      = 2;
+
+    // Bottom-right corner, inside the safe edge padding
+    const gridW = COLS * SLOT_SIZE + (COLS - 1) * SLOT_GAP;
+    const gridH = ROWS * SLOT_SIZE + (ROWS - 1) * SLOT_GAP;
+    const startX = this.w - EDGE_PAD - gridW;
+    const startY = this.h - EDGE_PAD - gridH;
+
+    this._invSlots = [];
+
+    for (let i = 0; i < MAX_SLOTS; i++) {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      const x = startX + col * (SLOT_SIZE + SLOT_GAP) + SLOT_SIZE / 2;
+      const y = startY + row * (SLOT_SIZE + SLOT_GAP) + SLOT_SIZE / 2;
+
+      // Slot background (dark)
+      const bg = this.add.rectangle(x, y, SLOT_SIZE, SLOT_SIZE, 0x1a1a1a)
+        .setAlpha(0.8)
+        .setStrokeStyle(2, 0x444444);
+
+      this._invSlots.push({ bg, x, y });
+    }
+
+    // Initial render from registry
+    this.updateInventoryGrid(this.registry.get('inventory') ?? []);
+  }
+
+  updateInventoryGrid(inventory) {
+    if (!this._invSlots?.length) return;
+
+    for (let i = 0; i < MAX_SLOTS; i++) {
+      const slot = this._invSlots[i];
+      if (!slot?.bg?.active) continue;
+
+      const item = inventory[i];
+      if (item) {
+        // Colour-coded border based on item type
+        const colourHex = getBorderColour(item.type);
+        const numericColour = parseInt(colourHex.replace('#', ''), 16);
+        slot.bg.setStrokeStyle(2, numericColour);
+        slot.bg.setFillStyle(0x2a2a2a, 0.9);
+      } else {
+        // Empty slot — dim border
+        slot.bg.setStrokeStyle(2, 0x444444);
+        slot.bg.setFillStyle(0x1a1a1a, 0.8);
+      }
+    }
+  }
+
   // ─── Countdown ─────────────────────────────────────────────────────────────
 
   tick() {
@@ -163,6 +223,7 @@ export default class HUD extends Phaser.Scene {
       case "xp":              this.updateXP(value);           break;
       case "systemsInstalled": this.updateSystems(value);     break;
       case "stormPhase":      this.updatePhase(value);        break;
+      case "inventory":       this.updateInventoryGrid(value); break;
       case "hudToast":         this.showStormToast(value);       break;
       case "achievementToast": this.showAchievementToast(value); break;
     }
