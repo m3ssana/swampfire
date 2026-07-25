@@ -27,6 +27,7 @@ import {
   hasSave,
   clearSave,
   resolveSpawnPosition,
+  resolveInitialZone,
   AUTOSAVE_INTERVAL_MS,
   AUTOSAVE_TRIGGERS,
   SAVE_KEY,
@@ -557,6 +558,88 @@ describe('Save system edge cases', () => {
     const storage2 = makeFakeStorage();
     storage2.setItem('wrong_key', serialize(makeFullState()));
     expect(hasSave(storage2)).toBe(false);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Group 11 — resolveInitialZone (zone-routing fix for CONTINUE)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('resolveInitialZone', () => {
+  it('passes through valid zone 0', () => {
+    expect(resolveInitialZone(0)).toBe(0);
+  });
+
+  it('passes through valid zone 1', () => {
+    expect(resolveInitialZone(1)).toBe(1);
+  });
+
+  it('passes through valid zone 2', () => {
+    expect(resolveInitialZone(2)).toBe(2);
+  });
+
+  it('passes through valid zone 3', () => {
+    expect(resolveInitialZone(3)).toBe(3);
+  });
+
+  it('passes through valid zone 4', () => {
+    expect(resolveInitialZone(4)).toBe(4);
+  });
+
+  it('falls back to 0 for negative zone id (-1)', () => {
+    expect(resolveInitialZone(-1)).toBe(0);
+  });
+
+  it('falls back to 0 for out-of-range zone id (42)', () => {
+    expect(resolveInitialZone(42)).toBe(0);
+  });
+
+  it('falls back to 0 for null', () => {
+    expect(resolveInitialZone(null)).toBe(0);
+  });
+
+  it('falls back to 0 for undefined', () => {
+    expect(resolveInitialZone(undefined)).toBe(0);
+  });
+
+  it('coerces numeric string "2" to zone 2', () => {
+    expect(resolveInitialZone("2")).toBe(2);
+  });
+
+  it('coerces numeric string "0" to zone 0', () => {
+    expect(resolveInitialZone("0")).toBe(0);
+  });
+
+  it('coerces numeric string "4" to zone 4', () => {
+    expect(resolveInitialZone("4")).toBe(4);
+  });
+
+  it('falls back to 0 for NaN', () => {
+    expect(resolveInitialZone(NaN)).toBe(0);
+  });
+
+  it('falls back to 0 for Infinity', () => {
+    expect(resolveInitialZone(Infinity)).toBe(0);
+  });
+
+  it('falls back to 0 for non-numeric string "abc"', () => {
+    expect(resolveInitialZone("abc")).toBe(0);
+  });
+
+  it('falls back to 0 for floating point 2.5 (not an integer zone id)', () => {
+    expect(resolveInitialZone(2.5)).toBe(0);
+  });
+
+  it('falls back to 0 for empty string ""', () => {
+    expect(resolveInitialZone("")).toBe(0);
+  });
+
+  it('coerces boolean true to zone 1 (Number(true) = 1, which is valid)', () => {
+    expect(resolveInitialZone(true)).toBe(1);
+  });
+
+  it('falls back to 0 for zone id 5 (one beyond max)', () => {
+    expect(resolveInitialZone(5)).toBe(0);
   });
 });
 

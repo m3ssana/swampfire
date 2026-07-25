@@ -92,7 +92,7 @@ export default class Game extends Phaser.Scene {
     object layer. Exposes them as zone.containers, zone.workbench, zone.rocket.
   */
   addMap() {
-    this.zone = new ZoneManager(this);
+    this.zone = new ZoneManager(this, this.number ?? 0);
   }
 
   // ─── Player ────────────────────────────────────────────────────────────────

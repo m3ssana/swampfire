@@ -146,6 +146,27 @@ export function clearSave(storage) {
 }
 
 /**
+ * Resolves an initial zone ID from potentially untrusted input (e.g., a save
+ * file). Coerces numeric strings, rejects non-integer / out-of-range values,
+ * and falls back to zone 0 (Cypress Creek Preserve — the starting zone) when
+ * the input is invalid.
+ *
+ * Valid zone IDs are integers 0–4 matching the ZONES catalogue in zone_manager.js.
+ * This function mirrors the isZoneDefined() check but lives here so it is
+ * unit-testable without Phaser.
+ *
+ * @param {*} zone — raw zone value from save data or scene init
+ * @returns {number} a valid zone ID (0–4), defaulting to 0
+ */
+export function resolveInitialZone(zone) {
+  const num = Number(zone);
+  if (!Number.isFinite(num)) return 0;
+  if (!Number.isInteger(num)) return 0;
+  if (num < 0 || num > 4) return 0;
+  return num;
+}
+
+/**
  * Decides where the player materialises when a zone is created.
  *
  * A resumed run must place the player exactly where they saved; a fresh run
