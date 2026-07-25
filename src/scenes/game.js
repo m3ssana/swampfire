@@ -5,6 +5,20 @@ import HazardManager                  from "../gameobjects/hazard_manager";
 import ComboTracker                   from "../gameobjects/combo_tracker";
 import AchievementManager             from "../gameobjects/achievement_manager";
 import SaveManager                    from "../gameobjects/save_manager";
+import {
+  NEAR_MISS_XP,
+  SLOW_MO_DURATION_MS,
+  SLOW_MO_TIMESCALE,
+  PULSE_COLOR,
+  PULSE_DURATION_MS,
+  SFX_WHOOSH_KEY,
+  SFX_HEARTBEAT_KEY,
+  DEBOUNCE_WINDOW_MS,
+  COMBO_FEED_ENABLED,
+  NEAR_MISS_SHAKE_INTENSITY,
+  NEAR_MISS_SHAKE_DURATION_MS,
+  computeNearMissXp,
+} from "../gameobjects/near_miss_logic";
 
 // ── Camera tuning ─────────────────────────────────────────────────────────────
 const CAMERA_LERP  = 0.15;
@@ -54,6 +68,9 @@ export default class Game extends Phaser.Scene {
     // Pending XP popup map — keyed by context ('loot'|'craft'|'install')
     // Used by showXPGain() to merge rapid same-context grants into one popup
     this._xpPending = {};
+
+    // Near-miss debounce flag — prevents rapid re-triggering
+    this._nearMissDebounce = false;
 
     // Zone visit tracking — persists across mid-run deaths via registry
     const seededZones = this.registry.get('visitedZones') ?? [0];
@@ -138,14 +155,21 @@ export default class Game extends Phaser.Scene {
   addInputHandlers() {
     this.input.keyboard.on("keydown-E", this.onEKey, this);
 
+    // ESC — pause menu (Issue #99)
+    this._pausing = false;  // guard against rapid ESC double-trigger
+    this.input.keyboard.on("keydown-ESC", this.onEscKey, this);
+
     // Both proximity checks run every frame via the scene's update event
     this.events.on("update", this.checkInteractableProximity, this);
     this.events.on("update", this.checkExitZones, this);
 
     this.events.once("shutdown", () => {
       this.input.keyboard.off("keydown-E", this.onEKey, this);
+      this.input.keyboard.off("keydown-ESC", this.onEscKey, this);
       this.events.off("update", this.checkInteractableProximity, this);
       this.events.off("update", this.checkExitZones, this);
+      // Never leave a near-miss slow-motion window active across scenes.
+      this.restoreTimeScale();
     });
   }
 
@@ -155,6 +179,42 @@ export default class Game extends Phaser.Scene {
   */
   onEKey() {
     this.nearbyInteractable?.interact();
+  }
+
+  /*
+    Called on ESC keydown. Pauses the game and HUD scenes, launches
+    the PauseScene overlay. Guarded against rapid double-trigger and
+    blocked during launch cinematic or zone transitions.
+  */
+  onEscKey() {
+    // Guards: don't pause during transitions, launch cinematic, or if already pausing
+    if (this._pausing || this._launching || this._transitioning) return;
+    if (this.scene.isActive('pause')) return;
+
+    this._pausing = true;
+
+    // Close the TAB checklist overlay if it was open (it lives on the HUD scene)
+    const hud = this.scene.get('hud');
+    if (hud?._checklistOpen) {
+      hud._hideChecklist();
+    }
+
+    // Pause game scene (freezes update loop, physics, tweens)
+    this.scene.pause('game');
+    // Pause HUD scene (freezes the countdown timer)
+    this.scene.pause('hud');
+    // Launch pause overlay on top
+    this.scene.launch('pause');
+
+    // Reset guard when pause scene shuts down (i.e. player resumes or quits)
+    const pauseScene = this.scene.get('pause');
+    if (pauseScene) {
+      pauseScene.events.once('shutdown', () => {
+        this._pausing = false;
+      });
+    } else {
+      this._pausing = false;
+    }
   }
 
   /*
@@ -426,6 +486,100 @@ export default class Game extends Phaser.Scene {
     this.player.sprite.setTint(0xffffff);
     this.time.delayedCall(80, () => {
       if (this.player?.sprite?.active) this.player.sprite.clearTint();
+    });
+  }
+
+  // ─── Near-miss feedback ─────────────────────────────────────────────────────
+
+  /**
+   * Triggers the full near-miss feedback package:
+   *   1. 200ms slow-motion at 0.5× timescale
+   *   2. Green screen-edge pulse (rectangle stroke, fades out)
+   *   3. +15 XP via existing XP path + green popup
+   *   4. Whoosh + heartbeat SFX (defensive — graceful no-op if missing)
+   *   5. Feeds into combo system (counts as a pickup for combo chain)
+   *
+   * Debounced: won't re-trigger within DEBOUNCE_WINDOW_MS.
+   *
+   * @param {number} x - World X of the hazard that triggered the near-miss
+   * @param {number} y - World Y of the hazard that triggered the near-miss
+   */
+  /**
+   * Restores normal time flow after a near-miss slow-motion window.
+   *
+   * Also called on scene shutdown: Phaser destroys pending timer events when a
+   * scene stops, so if the scene ends mid-slow-motion the restore callback
+   * would never fire and the 0.5x timescale would leak into the next run.
+   */
+  restoreTimeScale() {
+    this._slowMoTimer?.remove(false);
+    this._slowMoTimer = null;
+    this.time.timeScale = 1;
+    if (this.matter?.world) {
+      this.matter.world.engine.timing.timeScale = 1;
+    }
+  }
+
+  triggerNearMiss(x, y) {
+    if (this._nearMissDebounce) return;
+    this._nearMissDebounce = true;
+
+    // ── 1. Slow-motion ───────────────────────────────────────────────────────
+    // Clock.timeScale scales the clock itself, so a delayedCall of N ms fires
+    // after N / timeScale ms of REAL time. Compensate so the slow-mo window is
+    // SLOW_MO_DURATION_MS of wall-clock time, matching the spec.
+    this.time.timeScale = SLOW_MO_TIMESCALE;
+    if (this.matter?.world) {
+      this.matter.world.engine.timing.timeScale = SLOW_MO_TIMESCALE;
+    }
+    this._slowMoTimer = this.time.delayedCall(
+      SLOW_MO_DURATION_MS * SLOW_MO_TIMESCALE,
+      this.restoreTimeScale,
+      undefined,
+      this
+    );
+
+    // ── 2. Green screen-edge pulse ───────────────────────────────────────────
+    const cam = this.cameras.main;
+    const pulseGraphics = this.add.graphics()
+      .setScrollFactor(0)
+      .setDepth(100)
+      .setAlpha(0.6);
+
+    // Draw a rectangle stroke around the viewport edges
+    pulseGraphics.lineStyle(6, PULSE_COLOR, 1);
+    pulseGraphics.strokeRect(3, 3, cam.width - 6, cam.height - 6);
+
+    this.tweens.add({
+      targets: pulseGraphics,
+      alpha: 0,
+      duration: PULSE_DURATION_MS,
+      ease: 'Quad.Out',
+      onComplete: () => { if (pulseGraphics?.active) pulseGraphics.destroy(); },
+    });
+
+    // ── 3. XP award ──────────────────────────────────────────────────────────
+    const mult = this.comboTracker?.getMultiplier() ?? 1.0;
+    const earned = computeNearMissXp(mult);
+    const xp = this.registry.get('xp') ?? 0;
+    this.registry.set('xp', xp + earned);
+    this.showXPGain(x, y - 48, earned, 'nearmiss');
+
+    // ── 3b. Camera shake (SPEC §6.4) ────────────────────────────────────────
+    this.cameras.main.shake(NEAR_MISS_SHAKE_DURATION_MS, NEAR_MISS_SHAKE_INTENSITY);
+
+    // ── 4. SFX (defensive — no-op if audio keys not loaded) ──────────────────
+    try { this.sound.play(SFX_WHOOSH_KEY); } catch (e) { /* graceful no-op */ }
+    try { this.sound.play(SFX_HEARTBEAT_KEY); } catch (e) { /* graceful no-op */ }
+
+    // ── 5. Combo feed ────────────────────────────────────────────────────────
+    if (COMBO_FEED_ENABLED && this.comboTracker) {
+      this.comboTracker.onNearMiss(x, y);
+    }
+
+    // ── Debounce reset ───────────────────────────────────────────────────────
+    this.time.delayedCall(DEBOUNCE_WINDOW_MS, () => {
+      this._nearMissDebounce = false;
     });
   }
 
