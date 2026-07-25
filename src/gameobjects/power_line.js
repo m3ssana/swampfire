@@ -234,7 +234,8 @@ export default class PowerLine {
 
   /**
    * Called from game.js when the near-miss sensor overlaps the player.
-   * Gives an audio-visual warning without dealing damage.
+   * Gives an audio-visual warning without dealing damage. Routes through
+   * scene.triggerNearMiss() for unified slow-mo, pulse, XP, SFX, and combo.
    */
   onNearMiss() {
     if (this._nearPlayer) return;
@@ -242,9 +243,9 @@ export default class PowerLine {
 
     this.scene.showPoints(this._x, this._y - 32, '! live wire !', 0xffee00);
     this.scene.cameras.main.flash(80, 0xff, 0xee, 0x00, true);
-    const xp = this.scene.registry.get('xp') ?? 0;
-    this.scene.registry.set('xp', xp + 15);
-    this.scene.showXPGain(this._x, this._y - 56, 15, 'nearmiss');
+
+    // Delegate XP + slow-mo + pulse + SFX + combo to the unified near-miss system
+    this.scene.triggerNearMiss(this._x, this._y);
 
     this.scene.time.delayedCall(2000, () => { this._nearPlayer = false; });
   }
