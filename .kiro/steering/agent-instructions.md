@@ -96,7 +96,10 @@ GitHub will block self-merges. This is enforced at the repository level — not 
 | Need | Location |
 |------|----------|
 | **Issue workflow details** | `.kiro/steering/github-issues-workflow.md` |
-| **GitHub CLI commands** | `.kiro/steering/github-issues-workflow.md` → "Tools & Commands" |
+| **GitHub CLI commands** | `.kiro/steering/github-quick-reference.md` |
+| **Project board usage** | `.kiro/steering/project-board-setup.md` |
+| **Milestones & phases** | `.kiro/steering/milestones.md` |
+| **Architecture & commands** | `.kiro/steering/project-reference.md` |
 | **Phase descriptions** | `TODO.md` (links to all issues) |
 | **DevOps practices** | `.kiro/agent-memory/devops/MEMORY.md` |
 | **Game design specs** | `SPEC.md` |
