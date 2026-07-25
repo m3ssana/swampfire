@@ -136,12 +136,17 @@ export default class Game extends Phaser.Scene {
   addInputHandlers() {
     this.input.keyboard.on("keydown-E", this.onEKey, this);
 
+    // ESC — pause menu (Issue #99)
+    this._pausing = false;  // guard against rapid ESC double-trigger
+    this.input.keyboard.on("keydown-ESC", this.onEscKey, this);
+
     // Both proximity checks run every frame via the scene's update event
     this.events.on("update", this.checkInteractableProximity, this);
     this.events.on("update", this.checkExitZones, this);
 
     this.events.once("shutdown", () => {
       this.input.keyboard.off("keydown-E", this.onEKey, this);
+      this.input.keyboard.off("keydown-ESC", this.onEscKey, this);
       this.events.off("update", this.checkInteractableProximity, this);
       this.events.off("update", this.checkExitZones, this);
     });
@@ -153,6 +158,36 @@ export default class Game extends Phaser.Scene {
   */
   onEKey() {
     this.nearbyInteractable?.interact();
+  }
+
+  /*
+    Called on ESC keydown. Pauses the game and HUD scenes, launches
+    the PauseScene overlay. Guarded against rapid double-trigger and
+    blocked during launch cinematic or zone transitions.
+  */
+  onEscKey() {
+    // Guards: don't pause during transitions, launch cinematic, or if already pausing
+    if (this._pausing || this._launching || this._transitioning) return;
+    if (this.scene.isActive('pause')) return;
+
+    this._pausing = true;
+
+    // Pause game scene (freezes update loop, physics, tweens)
+    this.scene.pause('game');
+    // Pause HUD scene (freezes the countdown timer)
+    this.scene.pause('hud');
+    // Launch pause overlay on top
+    this.scene.launch('pause');
+
+    // Reset guard when pause scene shuts down (i.e. player resumes or quits)
+    const pauseScene = this.scene.get('pause');
+    if (pauseScene) {
+      pauseScene.events.once('shutdown', () => {
+        this._pausing = false;
+      });
+    } else {
+      this._pausing = false;
+    }
   }
 
   /*
