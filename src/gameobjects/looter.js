@@ -216,7 +216,8 @@ export default class Looter {
 
   /**
    * Called from game.js when the near-miss sensor overlaps the player.
-   * Delivers a warning without dealing damage.
+   * Delivers a warning without dealing damage. Routes through
+   * scene.triggerNearMiss() for unified slow-mo, pulse, XP, SFX, and combo.
    */
   onNearMiss() {
     if (this._nearPlayer) return;
@@ -225,9 +226,9 @@ export default class Looter {
     const { x, y } = this._body.position;
     this.scene.showPoints(x, y - 28, '! looter !', 0xff4444);
     this.scene.cameras.main.flash(50, 0xff, 0x44, 0x44, true);
-    const xp = this.scene.registry.get('xp') ?? 0;
-    this.scene.registry.set('xp', xp + 15);
-    this.scene.showXPGain(x, y - 52, 15, 'nearmiss');
+
+    // Delegate XP + slow-mo + pulse + SFX + combo to the unified near-miss system
+    this.scene.triggerNearMiss(x, y);
 
     this.scene.time.delayedCall(2000, () => { this._nearPlayer = false; });
   }
