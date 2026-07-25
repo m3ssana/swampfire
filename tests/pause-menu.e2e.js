@@ -73,6 +73,12 @@ async function isSceneActive(page, sceneKey) {
 
 test.describe('Pause Menu (ESC key) — Issue #99', () => {
 
+  // Run serially. Each test drives a real Phaser instance through scene
+  // pause/resume, and two of these racing in parallel workers against the same
+  // dev server produced intermittent beforeEach timeouts. Verified: the full
+  // suite is green single-worker, and flaky at the default 2 local workers.
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await waitForGameReady(page);
