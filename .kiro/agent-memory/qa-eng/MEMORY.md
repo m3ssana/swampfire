@@ -14,6 +14,32 @@
 - **E2E tests are NOT wired into CI/CD** — `deploy.yml` only runs `npm test` (unit tests)
 - Vitest excludes `src/scenes/*.js` from coverage tracking
 
+## ⚠️ `npm run build` prints "Done" even when it FAILS
+Confirmed 2026-07-24. The build script is `vite build --config vite/config.prod.mjs`, and
+`✨ Done ✨` is emitted before rollup reports a parse error. Grepping output for "Done" will
+report a green build on genuinely broken source.
+
+**Always check the exit code, never the output text.** In PowerShell a pipeline clobbers
+`$LASTEXITCODE`, so redirect instead of piping:
+```powershell
+npm run build *> build.log
+if ($LASTEXITCODE -ne 0) { "BUILD FAILED" }
+```
+Verified: exit 1 on a syntax error, exit 0 when clean.
+
+## ⚠️ A syntactically broken scene file passes `npm test`
+Because Vitest never imports `src/scenes/*.js` or Phaser-extending game objects, a missing
+brace in `hud.js` or `game.js` is invisible to the entire 700+ test unit suite. Unit tests
+are NOT a syntax gate for scene files. Use `npm run build` (exit code) or
+`npx esbuild <file> --outfile=<tmp>` to parse-check scene files directly.
+
+## ⚠️ Merge-marker stripping drops factored-out closing braces
+When two branches insert new methods at the same location in a class, git factors the
+trailing `}` of the preceding method out of the conflict region as a common suffix.
+Resolving by deleting only the `<<<<<<<` / `=======` / `>>>>>>>` lines then leaves the file
+one `}` short and silently merges two method bodies. After any keep-both resolution inside
+a class body, parse-check the file and compare `{` / `}` counts.
+
 ## ⚠️ Stale Inlined Constants Risk
 - `npc-logic.test.js` inlines `NPC_CONFIGS` but was not updated when PR #133 changed quest reward XP from 30/40/35 → 200 for all NPCs. Tests still passed because assertions use `NPC_CONFIGS.harvey.quest.reward.xp` (self-referential), not the literal source value.
 - The `// inlined from X.js — keep in sync` comment is the only enforcement — it is **not machine-checked**.

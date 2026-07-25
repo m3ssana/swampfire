@@ -12,11 +12,13 @@
  *
  * Layout:
  *   Top bar     — timer (centre), XP (left)
+ *   Objective   — single-line banner below timer
  *   Bottom-left — 3 HP hearts
  *   Top-right   — minimap placeholder
  */
 
 import { buildChecklist, formatProgress, STATUS_SYMBOLS, STATUS_COLORS } from '../gameobjects/checklist_logic.js';
+import { getNextObjective, hasObjectiveChanged, PULSE_DURATION_MS } from '../gameobjects/objective_logic.js';
 
 const MAX_HP = 3;
 const HEART_W = 16;
@@ -42,12 +44,15 @@ export default class HUD extends Phaser.Scene {
     this.buildMinimap();
     this.buildChecklist();
 
+    this.buildObjectiveBanner();
+
     // Sync to whatever is already in the registry
     this.updateTimerDisplay(this.registry.get("timeLeft") ?? 3600);
     this.updateHearts(this.registry.get("hp") ?? MAX_HP);
     this.updateXP(this.registry.get("xp") ?? 0);
     this.updateSystems(this.registry.get("systemsInstalled") ?? 0);
     this.updatePhase(this.registry.get('stormPhase') ?? 1);
+    this.refreshObjective();
 
     // Tick every real second — HUDScene owns the countdown
     this.countdown = this.time.addEvent({
@@ -66,8 +71,18 @@ export default class HUD extends Phaser.Scene {
     );
     this._tabKey.on('down', this._toggleChecklist, this);
 
-    // Clean up on shutdown
-    this.events.once('shutdown', this._cleanupChecklist, this);
+    // Key-specific listeners for objective banner recomputation
+    this._onSystemsChanged = () => this.refreshObjective();
+    this._onInventoryChanged = () => this.refreshObjective();
+    this.registry.events.on("changedata-systemsInstalled", this._onSystemsChanged, this);
+    this.registry.events.on("changedata-inventory", this._onInventoryChanged, this);
+
+    // Cleanup all listeners on shutdown
+    this.events.once('shutdown', () => {
+      this._cleanupChecklist();
+      this.registry.events.off("changedata-systemsInstalled", this._onSystemsChanged, this);
+      this.registry.events.off("changedata-inventory", this._onInventoryChanged, this);
+    });
   }
 
   // ─── Layout builders ────────────────────────────────────────────────────────
@@ -147,6 +162,68 @@ export default class HUD extends Phaser.Scene {
     this.add
       .bitmapText(mx, my + 20, 'default', 'SYSTEMS', 10)
       .setOrigin(0.5).setTint(0x888888);
+  }
+
+  buildObjectiveBanner() {
+    // Single line directly below the timer (timer bottom ≈ y 33 + some pad)
+    const bannerY = 52;
+    this.objectiveText = this.add
+      .bitmapText(this.w / 2, bannerY, 'default', '', 12)
+      .setOrigin(0.5)
+      .setTint(0xcccccc)
+      .setMaxWidth(this.w - EDGE_PAD * 2);
+
+    // Track previous objective for pulse-on-change detection
+    this._prevObjective = null;
+  }
+
+  /**
+   * Recompute the current objective from registry state.
+   * Only pulses the banner when the resolved text actually changes.
+   */
+  refreshObjective() {
+    if (!this.sys.isActive()) return;
+    if (!this.objectiveText?.active) return;
+
+    const systemsInstalled = this.registry.get('systemsInstalled') ?? 0;
+    const inventory = this.registry.get('inventory') ?? [];
+
+    const objective = getNextObjective({ systemsInstalled, inventory });
+
+    // Update text
+    this.objectiveText.setText(objective.text);
+
+    // Tint: cyan for completion, grey-white otherwise
+    this.objectiveText.setTint(objective.isComplete ? 0x4fffaa : 0xcccccc);
+
+    // Pulse only when objective text actually changed
+    if (hasObjectiveChanged(this._prevObjective, objective)) {
+      // Kill any existing pulse tween before creating a new one
+      if (this._objectivePulse) {
+        this._objectivePulse.stop();
+        this._objectivePulse = null;
+      }
+      this.objectiveText.setScale(1);
+      this.objectiveText.setAlpha(1);
+
+      this._objectivePulse = this.tweens.add({
+        targets: this.objectiveText,
+        scaleX: { from: 1.15, to: 1.0 },
+        scaleY: { from: 1.15, to: 1.0 },
+        alpha: { from: 0.6, to: 1.0 },
+        duration: PULSE_DURATION_MS,
+        ease: 'Back.Out',
+        onComplete: () => {
+          if (this.objectiveText?.active) {
+            this.objectiveText.setScale(1);
+            this.objectiveText.setAlpha(1);
+          }
+          this._objectivePulse = null;
+        },
+      });
+    }
+
+    this._prevObjective = objective;
   }
 
   // ─── Countdown ─────────────────────────────────────────────────────────────
@@ -459,5 +536,10 @@ export default class HUD extends Phaser.Scene {
     this._toastText = null;
     this._achievementToast?.destroy();
     this._achievementToast = null;
+    if (this._objectivePulse) {
+      this._objectivePulse.stop();
+      this._objectivePulse = null;
+    }
+    this._prevObjective = null;
   }
 }
