@@ -378,7 +378,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ⏳ **9.1.3 Save System (localStorage)** [#98](https://github.com/m3ssana/swampfire/issues/98)
   - Auto-save on Zone 0 return, install, phase transition, every 5 min
 
-- ⏳ **9.1.4 Pause menu (ESC)** [#99](https://github.com/m3ssana/swampfire/issues/99)
+- ✅ **9.1.4 Pause menu (ESC)** [#99](https://github.com/m3ssana/swampfire/issues/99) _(deddf1e)_
   - ESC pauses game + timer, overlay with RESUME / SETTINGS / QUIT
 
 - ✅ **9.1.5 Objective Banner** [#97](https://github.com/m3ssana/swampfire/issues/97) _(97304e7)_
