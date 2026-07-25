@@ -374,7 +374,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ⏳ **9.1.2 Near-miss feedback** [#93](https://github.com/m3ssana/swampfire/issues/93)
   - 200ms slow-motion (0.5x), green screen-edge pulse, +15 XP, whoosh SFX
 
-- ⏳ **9.1.3 Save System (localStorage)** [#98](https://github.com/m3ssana/swampfire/issues/98)
+- ✅ **9.1.3 Save System (localStorage)** [#98](https://github.com/m3ssana/swampfire/issues/98) _(617aeb5)_
   - Auto-save on Zone 0 return, install, phase transition, every 5 min
 
 - ⏳ **9.1.4 Pause menu (ESC)** [#99](https://github.com/m3ssana/swampfire/issues/99)
