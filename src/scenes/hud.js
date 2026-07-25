@@ -16,7 +16,7 @@
  *   Top-right   — minimap placeholder
  */
 
-import { buildChecklist, formatProgress, STATUS_SYMBOLS, STATUS_COLORS, RECIPES } from '../gameobjects/checklist_logic.js';
+import { buildChecklist, formatProgress, STATUS_SYMBOLS, STATUS_COLORS } from '../gameobjects/checklist_logic.js';
 
 const MAX_HP = 3;
 const HEART_W = 16;

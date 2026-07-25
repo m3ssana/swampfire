@@ -27,6 +27,7 @@ import {
   STATUS_COLORS,
   RECIPES,
   getIngredientZones,
+  LOOT_TABLE_INGREDIENTS,
 } from '../src/gameobjects/checklist_logic.js';
 
 // ─── Inlined constants from src/gameobjects/workbench.js — keep in sync ───────
@@ -134,6 +135,10 @@ describe('formatProgress', () => {
     // Edge case: custom total (for reuse in other contexts)
     expect(formatProgress(1, 3)).toBe('1/3 systems (33%)');
     expect(formatProgress(2, 3)).toBe('2/3 systems (67%)');
+  });
+
+  it('returns "0/0 systems (0%)" when total is 0 (divide-by-zero guard)', () => {
+    expect(formatProgress(0, 0)).toBe('0/0 systems (0%)');
   });
 });
 
@@ -383,5 +388,57 @@ describe('buildChecklist', () => {
     // Status should still be just 'in_inventory' for that ingredient, not something else
     expect(result[0].ingredients[0].status).toBe('in_inventory');
     expect(result[0].status).toBe('needed'); // still needs Copper Wiring
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DRIFT GUARD — LOOT_TABLE_INGREDIENTS vs searchable_container.js source
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+describe('LOOT_TABLE_INGREDIENTS drift guard (sync with searchable_container.js)', () => {
+  // Read the source file as text — cannot import it (Phaser dependency)
+  const sourcePath = resolve(__dirname, '../src/gameobjects/searchable_container.js');
+  const sourceText = readFileSync(sourcePath, 'utf-8');
+
+  // Extract all ingredient labels from source: entries with type: "ingredient"
+  // Pattern matches lines like: { label: "Copper Wiring", ..., type: "ingredient" ... }
+  const sourceIngredientLabels = new Set();
+  const ingredientRegex = /\{\s*label:\s*"([^"]+)"[^}]*type:\s*"ingredient"/g;
+  let match;
+  while ((match = ingredientRegex.exec(sourceText)) !== null) {
+    sourceIngredientLabels.add(match[1]);
+  }
+
+  // Flatten all labels from LOOT_TABLE_INGREDIENTS (checklist_logic.js)
+  const checklistLabels = new Set();
+  for (const [, labels] of Object.entries(LOOT_TABLE_INGREDIENTS)) {
+    for (const label of labels) {
+      checklistLabels.add(label);
+    }
+  }
+
+  it('source file contains at least one ingredient (sanity check for regex)', () => {
+    expect(sourceIngredientLabels.size).toBeGreaterThan(0);
+  });
+
+  it('every label in LOOT_TABLE_INGREDIENTS exists in searchable_container.js', () => {
+    for (const label of checklistLabels) {
+      expect(
+        sourceIngredientLabels.has(label),
+        `LOOT_TABLE_INGREDIENTS contains "${label}" but searchable_container.js does not — checklist_logic.js is out of sync`
+      ).toBe(true);
+    }
+  });
+
+  it('every ingredient in searchable_container.js exists in LOOT_TABLE_INGREDIENTS', () => {
+    for (const label of sourceIngredientLabels) {
+      expect(
+        checklistLabels.has(label),
+        `searchable_container.js contains ingredient "${label}" but LOOT_TABLE_INGREDIENTS does not — checklist_logic.js is out of sync`
+      ).toBe(true);
+    }
   });
 });

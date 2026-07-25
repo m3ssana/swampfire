@@ -76,7 +76,7 @@ const ZONE_NAMES = {
 // ── Loot tables (ingredient entries only, mirroring searchable_container.js) ───
 // We only need the labels from each table — no XP/weight/tint needed here.
 
-const LOOT_TABLE_INGREDIENTS = {
+export const LOOT_TABLE_INGREDIENTS = {
   default:  ['Copper Wiring', 'Solenoid Valve', 'Hydraulic Seal', 'PVC Coupler'],
   toolbox:  ['Copper Wiring', 'Solenoid Valve', 'Steel Bracket'],
   cooler:   ['Hydraulic Seal', 'PVC Coupler'],
