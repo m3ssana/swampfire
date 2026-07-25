@@ -4,6 +4,7 @@ import StormManager                   from "../gameobjects/storm_manager";
 import HazardManager                  from "../gameobjects/hazard_manager";
 import ComboTracker                   from "../gameobjects/combo_tracker";
 import AchievementManager             from "../gameobjects/achievement_manager";
+import { canAdd, isAutoPickup, occupiesSlot, discardLast, FULL_POPUP_COOLDOWN_MS } from "../gameobjects/inventory_logic";
 import SaveManager                    from "../gameobjects/save_manager";
 import { resolveSpawnPosition }       from "../gameobjects/save_logic";
 import {
@@ -74,6 +75,9 @@ export default class Game extends Phaser.Scene {
     // Pending XP popup map — keyed by context ('loot'|'craft'|'install')
     // Used by showXPGain() to merge rapid same-context grants into one popup
     this._xpPending = {};
+
+    // Cooldown timestamp for "Inventory full" popup debounce (Fix 5)
+    this._lastFullPopupTime = 0;
 
     // Near-miss debounce flag — prevents rapid re-triggering
     this._nearMissDebounce = false;
@@ -170,6 +174,7 @@ export default class Game extends Phaser.Scene {
   */
   addInputHandlers() {
     this.input.keyboard.on("keydown-E", this.onEKey, this);
+    this.input.keyboard.on("keydown-Q", this.onQKey, this);
 
     // ESC — pause menu (Issue #99)
     this._pausing = false;  // guard against rapid ESC double-trigger
@@ -181,6 +186,7 @@ export default class Game extends Phaser.Scene {
 
     this.events.once("shutdown", () => {
       this.input.keyboard.off("keydown-E", this.onEKey, this);
+      this.input.keyboard.off("keydown-Q", this.onQKey, this);
       this.input.keyboard.off("keydown-ESC", this.onEscKey, this);
       this.events.off("update", this.checkInteractableProximity, this);
       this.events.off("update", this.checkExitZones, this);
@@ -195,6 +201,20 @@ export default class Game extends Phaser.Scene {
   */
   onEKey() {
     this.nearbyInteractable?.interact();
+  }
+
+  /*
+    Called on every Q keydown. Discards the last inventory item, dropping
+    it back into the world at the player's feet. No-ops when inventory is empty.
+  */
+  onQKey() {
+    const inv = this.registry.get('inventory') ?? [];
+    const result = discardLast(inv);
+    if (!result.discarded) return;
+
+    this.registry.set('inventory', result.inventory);
+    const { x, y } = this.player.sprite;
+    this.showPoints(x, y, `Dropped: ${result.discarded.label}`, 0xff8800);
   }
 
   /*
@@ -255,6 +275,7 @@ export default class Game extends Phaser.Scene {
       ...(this.zone.containers ?? []).filter(c => !c.searched),
       this.zone.workbench,
       this.zone.rocket,
+      this.zone.stashBox,
       ...activeNpcs,
     ].filter(Boolean);
 
@@ -363,8 +384,38 @@ export default class Game extends Phaser.Scene {
     const { itemDef } = itemSprite;
     if (!itemDef) return;
 
-    // Append to persistent inventory registry (feed for Phase 2.3 crafting)
+    // Fix 1 & 3: Junk items never occupy a slot — award XP and vanish.
+    // Consumables auto-pickup but still occupy a slot (isAutoPickup just
+    // means no E-key needed — the collision triggers pickup directly).
+    if (!occupiesSlot(itemDef)) {
+      // Junk: award XP + popup feedback, then destroy — no slot consumed
+      if (itemDef.xp > 0) {
+        const mult    = this.comboTracker?.getMultiplier() ?? 1.0;
+        const earned  = Math.round(itemDef.xp * mult);
+        const current = this.registry.get("xp") ?? 0;
+        this.registry.set("xp", current + earned);
+        this.showXPGain(itemSprite.x, itemSprite.y, earned, 'loot');
+        this.comboTracker?.onLoot(itemSprite.x, itemSprite.y);
+      }
+      this.showPoints(itemSprite.x, itemSprite.y, `+ ${itemDef.label}`, itemDef.tint);
+      this.playAudio('loot');
+      itemSprite.destroy();
+      return;
+    }
+
+    // Enforce 8-slot inventory cap — leave item in world if full
     const inv = this.registry.get('inventory') ?? [];
+    if (!canAdd(inv)) {
+      // Fix 5: debounce "Inventory full" popup to prevent spam stacking
+      const now = Date.now();
+      if (now - (this._lastFullPopupTime ?? 0) >= FULL_POPUP_COOLDOWN_MS) {
+        this.showPoints(itemSprite.x, itemSprite.y, 'Inventory full', 0xff4444);
+        this._lastFullPopupTime = now;
+      }
+      return;
+    }
+
+    // Append to persistent inventory registry (feed for Phase 2.3 crafting)
     this.registry.set('inventory', [
       ...inv,
       { label: itemDef.label, type: itemDef.type },
@@ -372,6 +423,16 @@ export default class Game extends Phaser.Scene {
 
     this.showPoints(itemSprite.x, itemSprite.y, `+ ${itemDef.label}`, itemDef.tint);
     this.playAudio('loot');
+
+    // XP for slot-occupying items on pickup
+    if (itemDef.xp > 0) {
+      const mult    = this.comboTracker?.getMultiplier() ?? 1.0;
+      const earned  = Math.round(itemDef.xp * mult);
+      const current = this.registry.get("xp") ?? 0;
+      this.registry.set("xp", current + earned);
+      this.showXPGain(itemSprite.x, itemSprite.y, earned, 'loot');
+      this.comboTracker?.onLoot(itemSprite.x, itemSprite.y);
+    }
 
     // Zoom bump when a rocket component lands in inventory (type: 'component')
     if (itemDef.type === 'component') {

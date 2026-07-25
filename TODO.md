@@ -390,7 +390,7 @@ Pure HTML/CSS arcade cabinet frame around the game canvas with ad slots. No JS c
 - ✅ **9.1.7 MenuScene options** [#115](https://github.com/m3ssana/swampfire/issues/115) _(e74a341)_
   - NEW GAME / CONTINUE / LEADERBOARD / SETTINGS; animated background; amber title
 
-- ⏳ **9.1.8 Inventory UI (8-slot + stash)** [#100](https://github.com/m3ssana/swampfire/issues/100)
+- ✅ **9.1.8 Inventory UI (8-slot + stash)** [#100](https://github.com/m3ssana/swampfire/issues/100) _(8ed62e2)_
   - 8-slot grid, color-coded borders, base camp stash, auto-pickup for consumables
 
 ### 9.2 Medium Priority (P2) — Experience Depth
